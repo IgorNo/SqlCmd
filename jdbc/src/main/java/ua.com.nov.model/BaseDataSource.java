@@ -24,7 +24,7 @@ public abstract class BaseDataSource implements DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(getUrl() + dbName, userName, password);
+        return DriverManager.getConnection(getUrl() + dbName , userName, password);
     }
 
     @Override
