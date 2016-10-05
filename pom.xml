@@ -16,7 +16,8 @@
     </properties>
 
     <modules>
-        <module>jdbc</module>
+        <module>sqlcmd-jdbc</module>
+        <module>sqlcmd-model</module>
     </modules>
 
     <dependencies>

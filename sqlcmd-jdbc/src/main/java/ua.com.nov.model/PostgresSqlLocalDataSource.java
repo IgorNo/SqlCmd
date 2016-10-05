@@ -1,10 +1,10 @@
 package ua.com.nov.model;
 
-public class PostgreSqlLocalDataSource extends BaseDataSource {
+public class PostgresSqlLocalDataSource extends BaseDataSource {
 
     public static String DB_URL = "jdbc:postgresql://localhost:5432/";
 
-    public PostgreSqlLocalDataSource(String dbName, String userName, String password) {
+    public PostgresSqlLocalDataSource(String dbName, String userName, String password) {
         super(dbName, userName, password);
     }
 

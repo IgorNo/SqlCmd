@@ -1,5 +1,7 @@
 package ua.com.nov.model;
 
+import ua.com.nov.model.entity.DataBase;
+
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -10,26 +12,22 @@ import java.util.logging.Logger;
 
 public abstract class BaseDataSource implements DataSource {
 
-    private String dbName;
-    private String userName;
-    private String password;
+    DataBase db;
 
     protected abstract String getUrl();
 
-    public BaseDataSource(String dbName, String userName, String password) {
-        this.dbName = dbName;
-        this.userName = userName;
-        this.password = password;
+    public BaseDataSource(DataBase db) {
+        this.db = db;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(getUrl() + dbName , userName, password);
+        return DriverManager.getConnection(getUrl() + db.getDbName() , db.getUserName(), db.getPassword());
     }
 
     @Override
     public Connection getConnection(String userName, String password) throws SQLException {
-        return DriverManager.getConnection(getUrl() + dbName, userName, password);
+        return DriverManager.getConnection(getUrl() + db.getDbName(), userName, password);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class GetConnectionTest {
 
     @Test
     public void testGetPostgreSqlLocalConnection() throws SQLException{
-        DataSource dataSource = new PostgreSqlLocalDataSource("test", "postgres", "postgre");
+        DataSource dataSource = new PostgresSqlLocalDataSource("test", "postgres", "postgre");
         Connection connection = dataSource.getConnection();
         assertTrue(connection != null);
     }

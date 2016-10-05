@@ -46,5 +46,11 @@
             <version>2.3.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>ua.com.nov</groupId>
+            <artifactId>sqlcmd-model</artifactId>
+            <version>0.1</version>
+        </dependency>
+
     </dependencies>
 </project>
