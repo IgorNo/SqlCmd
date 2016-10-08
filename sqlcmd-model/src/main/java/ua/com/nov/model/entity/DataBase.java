@@ -7,6 +7,7 @@ public class DataBase {
     private String dbName;
     private String userName;
     private String password;
+    private String properties = "";
 
     public DataBase(String dbName, String userName, String password) {
         this.dbName = dbName;
@@ -26,4 +27,11 @@ public class DataBase {
         return password;
     }
 
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
+    }
 }
