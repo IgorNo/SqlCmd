@@ -1,11 +1,13 @@
 package ua.com.nov.model;
 
+import ua.com.nov.model.entity.DataBase;
+
 public class HyperSqlDataSource extends BaseDataSource {
 
     public static String DB_URL = "jdbc:hsqldb:file:lightdb/";
 
-    public HyperSqlDataSource(String dbName, String userName, String password) {
-        super(dbName, userName, password);
+    public HyperSqlDataSource(DataBase dataBase) {
+        super(dataBase);
     }
 
     @Override

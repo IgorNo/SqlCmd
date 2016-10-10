@@ -1,11 +1,13 @@
 package ua.com.nov.model;
 
+import ua.com.nov.model.entity.DataBase;
+
 public class MySqlLocalDataSource extends BaseDataSource {
 
     public static String DB_URL = "jdbc:mysql://localhost:3306/";
 
-    public MySqlLocalDataSource(String dbName, String userName, String password) {
-       super(dbName, userName, password);
+    public MySqlLocalDataSource(DataBase dataBase) {
+       super(dataBase);
     }
 
     @Override

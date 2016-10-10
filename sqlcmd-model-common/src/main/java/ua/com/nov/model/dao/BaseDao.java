@@ -1,6 +1,7 @@
 package ua.com.nov.model.dao;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 
 public abstract class BaseDao<K, V> implements Dao<K, V> {
@@ -12,31 +13,38 @@ public abstract class BaseDao<K, V> implements Dao<K, V> {
     }
 
 
-    public void create(V value) {
+    @Override
+    public void create(V value) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public V readByPK(K id) {
+    @Override
+    public V readByPK(K id) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public List<V> readAll() {
+    @Override
+    public List<V> readAll() throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public void update(V value) {
+    @Override
+    public void update(V value) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public void delete(V value) {
+    @Override
+    public void delete(V value) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public void deleteAll() {
+    @Override
+    public void deleteAll() throws SQLException {
         throw new UnsupportedOperationException();
     }
 
-    public int count() {
+    @Override
+    public int count() throws SQLException {
         throw new UnsupportedOperationException();
     }
 }
