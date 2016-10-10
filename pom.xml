@@ -8,7 +8,6 @@
     <artifactId>SqlCmd-parent</artifactId>
     <packaging>pom</packaging>
     <version>0.1</version>
-    <name>SqlCmd</name>
 
     <properties>
         <version>0.1</version>
@@ -16,8 +15,8 @@
     </properties>
 
     <modules>
-        <module>sqlcmd-jdbc</module>
-        <module>sqlcmd-model</module>
+        <module>sqlcmd-model-plain-jdbc</module>
+        <module>sqlcmd-model-common</module>
     </modules>
 
     <dependencies>
