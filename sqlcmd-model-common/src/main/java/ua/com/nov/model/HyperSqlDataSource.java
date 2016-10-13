@@ -2,7 +2,7 @@ package ua.com.nov.model;
 
 import ua.com.nov.model.entity.DataBase;
 
-public class HyperSqlDataSource extends BaseDataSource {
+public class HyperSqlDataSource extends AbstractDataSource {
 
     public static String DB_URL = "jdbc:hsqldb:file:lightdb/";
 

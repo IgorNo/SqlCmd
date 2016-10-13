@@ -2,7 +2,7 @@ package ua.com.nov.model;
 
 import ua.com.nov.model.entity.DataBase;
 
-public class MySqlLocalDataSource extends BaseDataSource {
+public class MySqlLocalDataSource extends AbstractDataSource {
 
     public static String DB_URL = "jdbc:mysql://localhost:3306/";
 

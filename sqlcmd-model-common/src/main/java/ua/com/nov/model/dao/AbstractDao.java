@@ -4,7 +4,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class BaseDao<K, V> implements Dao<K, V> {
+public abstract class AbstractDao<K, V> implements Dao<K, V> {
 
     protected DataSource dataSource;
 

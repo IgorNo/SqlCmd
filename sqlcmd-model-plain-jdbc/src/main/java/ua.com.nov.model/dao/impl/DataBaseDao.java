@@ -1,12 +1,12 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.dao.BaseDao;
+import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.DataBase;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DataBaseDao extends BaseDao<String, DataBase> {
+public class DataBaseDao extends AbstractDao<String, DataBase> {
 
     public static final String CREATE_DB_SQL = "CREATE DATABASE ";
     public static final String DROP_DB_SQL = "DROP DATABASE IF EXISTS ";

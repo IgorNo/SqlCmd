@@ -2,7 +2,7 @@ package ua.com.nov.model;
 
 import ua.com.nov.model.entity.DataBase;
 
-public class PostgreSqlLocalDataSource extends BaseDataSource {
+public class PostgreSqlLocalDataSource extends AbstractDataSource {
 
     public static String DB_URL = "jdbc:postgresql://localhost:5432/";
 

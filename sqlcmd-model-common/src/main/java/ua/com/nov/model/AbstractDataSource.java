@@ -10,13 +10,13 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-public abstract class BaseDataSource implements DataSource {
+public abstract class AbstractDataSource implements DataSource {
 
     DataBase db;
 
     protected abstract String getUrl();
 
-    public BaseDataSource(DataBase db) {
+    public AbstractDataSource(DataBase db) {
         this.db = db;
     }
 
