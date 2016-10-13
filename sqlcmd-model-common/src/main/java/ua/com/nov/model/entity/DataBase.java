@@ -1,13 +1,15 @@
 package ua.com.nov.model.entity;
 
-import javax.sql.DataSource;
-
 public class DataBase {
 
     private String dbName;
     private String userName;
     private String password;
     private String properties = "";
+
+    public DataBase(String dbName) {
+        this(dbName, null, null);
+    }
 
     public DataBase(String dbName, String userName, String password) {
         this.dbName = dbName;
@@ -29,6 +31,14 @@ public class DataBase {
 
     public String getProperties() {
         return properties;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setProperties(String properties) {
