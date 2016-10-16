@@ -3,7 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.PostgreSqlLocalDataSource;
+import ua.com.nov.model.HyperSqlDataSource;
+import ua.com.nov.model.MySqlLocalDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.DataBase;
 
@@ -11,17 +12,15 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public class PostgreSqlDataBaseDaoTest {
-
+public class HyperSqlDataBaseDaoTest {
     private static final String DROP_DB_SQL = "DROP DATABASE IF EXISTS ";
 
-    private static DataSource dataSource = new PostgreSqlLocalDataSource(new DataBase("postgres", "postgres", "postgres"));
-    private static AbstractDao dao = new PostgreSqlDataBaseDao();
-    private static DataBase tmpDataBase = new DataBase("tmp", "postgres", "postgres");
+    private static DataSource dataSource = new MySqlLocalDataSource(new DataBase("sys", "root", "root"));
+    private static AbstractDao dao = new HyperSqlDataBaseDao();
+    private static DataBase tmpDataBase = new DataBase("tmp", "root", "root");
 
     @Before
     public void setUp() throws SQLException {
@@ -31,31 +30,19 @@ public class PostgreSqlDataBaseDaoTest {
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(tmpDataBase);
+        DataSource tmpDataSource = new HyperSqlDataSource(tmpDataBase);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn != null);
         conn.close();
     }
 
-    @Test(expected = SQLException.class)
+    @Test(expected = AssertionError.class)
     public void testDeleteDataBase() throws SQLException {
         dao.delete(tmpDataBase);
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(tmpDataBase);
+        DataSource tmpDataSource = new HyperSqlDataSource(tmpDataBase);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn == null);
         conn.close();
-    }
-
-    @Test
-    public void testReadAll() throws SQLException{
-        List<DataBase> dataBaseList = dao.readAll();
-        assertTrue(dataBaseList.contains(new DataBase("postgres", "postgres", "postgres")));
-        assertTrue(dataBaseList.contains(tmpDataBase));
-    }
-
-    @Test
-    public void testCount() throws SQLException {
-        assertTrue(dao.count() > 0);
     }
 
     @After

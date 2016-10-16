@@ -12,5 +12,4 @@ public class RowData {
     public Object getColumnValue(String columnName) {
         return values[table.getColumnIndex(columnName)];
     }
-
 }

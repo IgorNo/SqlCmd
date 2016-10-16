@@ -5,7 +5,6 @@ import ua.com.nov.model.entity.DataBase;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 public class DataBaseDao extends AbstractDao<String, DataBase> {
 
