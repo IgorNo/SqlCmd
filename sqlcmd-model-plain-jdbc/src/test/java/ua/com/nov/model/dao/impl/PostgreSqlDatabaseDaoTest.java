@@ -19,19 +19,19 @@ public class PostgreSqlDatabaseDaoTest {
 
     private static final String DROP_DB_SQL = "DROP DATABASE IF EXISTS ";
 
-    private static DataSource dataSource = new PostgreSqlLocalDataSource(new Database("postgres", "postgres", "postgres"));
-    private static AbstractDao dao = new PostgreSqlDatabaseDao();
-    private static Database tmpDatabase = new Database("tmp", "postgres", "postgres");
+    public static final DataSource DATA_SOURCE = new PostgreSqlLocalDataSource(new Database("postgres", "postgres", "postgres"));
+    public static final AbstractDao DAO = new PostgreSqlDatabaseDao();
+    public static final Database TEST_DATABASE = new Database("tmp", "postgres", "postgres");
 
     @Before
     public void setUp() throws SQLException {
-        dao.setDataSource(dataSource);
-        dao.create(tmpDatabase);
+        DAO.setDataSource(DATA_SOURCE);
+        DAO.create(TEST_DATABASE);
     }
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(tmpDatabase);
+        DataSource tmpDataSource = new PostgreSqlLocalDataSource(TEST_DATABASE);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn != null);
         conn.close();
@@ -39,8 +39,8 @@ public class PostgreSqlDatabaseDaoTest {
 
     @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException {
-        dao.delete(tmpDatabase);
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(tmpDatabase);
+        DAO.delete(TEST_DATABASE);
+        DataSource tmpDataSource = new PostgreSqlLocalDataSource(TEST_DATABASE);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn == null);
         conn.close();
@@ -48,20 +48,20 @@ public class PostgreSqlDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException{
-        List<Database> databaseList = dao.readAll();
+        List<Database> databaseList = DAO.readAll();
         assertTrue(databaseList.contains(new Database("postgres", "postgres", "postgres")));
-        assertTrue(databaseList.contains(tmpDatabase));
+        assertTrue(databaseList.contains(TEST_DATABASE));
     }
 
     @Test
     public void testCount() throws SQLException {
-        assertTrue(dao.count() > 0);
+        assertTrue(DAO.count() > 0);
     }
 
     @After
     public void tearDown() throws SQLException{
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + tmpDatabase.getDbName());
+        Statement statement = DATA_SOURCE.getConnection().createStatement();
+        statement.executeUpdate(DROP_DB_SQL + TEST_DATABASE.getDbName());
         statement.close();
     }
 }

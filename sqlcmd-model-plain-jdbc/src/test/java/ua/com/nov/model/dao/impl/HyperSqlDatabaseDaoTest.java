@@ -18,19 +18,19 @@ import static org.junit.Assert.assertTrue;
 public class HyperSqlDatabaseDaoTest {
     private static final String DROP_DB_SQL = "DROP DATABASE IF EXISTS ";
 
-    private static DataSource dataSource = new MySqlLocalDataSource(new Database("sys", "root", "root"));
-    private static AbstractDao dao = new HyperSqlDatabaseDao();
-    private static Database tmpDatabase = new Database("tmp", "root", "root");
+    public static final DataSource DATA_SOURCE = new MySqlLocalDataSource(new Database("sys", "root", "root"));
+    public static final AbstractDao DAO = new HyperSqlDatabaseDao();
+    public static final Database TEST_DATABASE = new Database("tmp", "root", "root");
 
     @Before
     public void setUp() throws SQLException {
-        dao.setDataSource(dataSource);
-        dao.create(tmpDatabase);
+        DAO.setDataSource(DATA_SOURCE);
+        DAO.create(TEST_DATABASE);
     }
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new HyperSqlDataSource(tmpDatabase);
+        DataSource tmpDataSource = new HyperSqlDataSource(TEST_DATABASE);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn != null);
         conn.close();
@@ -38,8 +38,8 @@ public class HyperSqlDatabaseDaoTest {
 
     @Test(expected = AssertionError.class)
     public void testDeleteDataBase() throws SQLException {
-        dao.delete(tmpDatabase);
-        DataSource tmpDataSource = new HyperSqlDataSource(tmpDatabase);
+        DAO.delete(TEST_DATABASE);
+        DataSource tmpDataSource = new HyperSqlDataSource(TEST_DATABASE);
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn == null);
         conn.close();
@@ -47,8 +47,8 @@ public class HyperSqlDatabaseDaoTest {
 
     @After
     public void tearDown() throws SQLException{
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + tmpDatabase.getDbName());
+        Statement statement = DATA_SOURCE.getConnection().createStatement();
+        statement.executeUpdate(DROP_DB_SQL + TEST_DATABASE.getDbName());
         statement.close();
     }
 }
