@@ -1,6 +1,6 @@
 package ua.com.nov.model;
 
-import ua.com.nov.model.entity.DataBase;
+import ua.com.nov.model.entity.Database;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -12,17 +12,17 @@ import java.util.logging.Logger;
 
 public abstract class AbstractDataSource implements DataSource {
 
-    DataBase db;
+    private Database db;
 
-    protected abstract String getUrl();
-
-    public AbstractDataSource(DataBase db) {
+    public AbstractDataSource(Database db) {
         this.db = db;
     }
 
+    protected abstract String getUrl();
+
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(getUrl() + db.getDbName() , db.getUserName(), db.getPassword());
+        return DriverManager.getConnection(getUrl() + db.getDbName(), db.getUserName(), db.getPassword());
     }
 
     @Override

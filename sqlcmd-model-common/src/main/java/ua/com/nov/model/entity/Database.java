@@ -1,16 +1,16 @@
 package ua.com.nov.model.entity;
 
-public class DataBase {
+public class Database {
     private String dbName;
     private String userName;
     private String password;
     private String properties = "";
 
-    public DataBase(String dbName) {
+    public Database(String dbName) {
         this(dbName, null, null);
     }
 
-    public DataBase(String dbName, String userName, String password) {
+    public Database(String dbName, String userName, String password) {
         if (dbName == null || "".equals(dbName)) throw new IllegalArgumentException();
         this.dbName = dbName;
         this.userName = userName;
@@ -50,9 +50,9 @@ public class DataBase {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DataBase dataBase = (DataBase) o;
+        Database database = (Database) o;
 
-        return dbName.equals(dataBase.dbName);
+        return dbName.equals(database.dbName);
     }
 
     @Override

@@ -1,13 +1,13 @@
 package ua.com.nov.model;
 
-import ua.com.nov.model.entity.DataBase;
+import ua.com.nov.model.entity.Database;
 
 public class MySqlLocalDataSource extends AbstractDataSource {
 
     public static String DB_URL = "jdbc:mysql://localhost:3306/";
 
-    public MySqlLocalDataSource(DataBase dataBase) {
-       super(dataBase);
+    public MySqlLocalDataSource(Database database) {
+       super(database);
     }
 
     @Override

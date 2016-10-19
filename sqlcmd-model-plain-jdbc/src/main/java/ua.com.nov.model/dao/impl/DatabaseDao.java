@@ -1,30 +1,30 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.DataBase;
+import ua.com.nov.model.entity.Database;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DataBaseDao extends AbstractDao<String, DataBase> {
+public class DatabaseDao extends AbstractDao<String, Database> {
 
     public static final String CREATE_DB_SQL = "CREATE DATABASE ";
     public static final String DROP_DB_SQL = "DROP DATABASE ";
 
-    protected DataBaseDao() {
+    protected DatabaseDao() {
     }
 
     @Override
-    public void create(DataBase dataBase) throws SQLException {
+    public void create(Database database) throws SQLException {
         Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(CREATE_DB_SQL + dataBase.getDbName() + " " + dataBase.getProperties());
+        statement.executeUpdate(CREATE_DB_SQL + database.getDbName() + " " + database.getProperties());
         statement.close();
     }
 
     @Override
-    public void delete(DataBase dataBase) throws SQLException {
+    public void delete(Database database) throws SQLException {
         Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + dataBase.getDbName());
+        statement.executeUpdate(DROP_DB_SQL + database.getDbName());
         statement.close();
     }
 
