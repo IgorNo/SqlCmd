@@ -1,67 +1,44 @@
 package ua.com.nov.model.dao.impl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import ua.com.nov.model.PostgreSqlLocalDataSource;
+import org.junit.AfterClass;
+import ua.com.nov.model.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.util.DataSourceUrl;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
-import static org.junit.Assert.assertTrue;
-
-public class PostgreSqlDatabaseDaoTest {
-
-    private static final String DROP_DB_SQL = "DROP DATABASE IF EXISTS ";
-
-    public static final DataSource DATA_SOURCE = new PostgreSqlLocalDataSource(new Database("postgres", "postgres", "postgres"));
-    public static final AbstractDao DAO = new PostgreSqlDatabaseDao();
+public class PostgreSqlDatabaseDaoTest extends AbstractDataBaseDaoTest{
+    public static final DataSource DATA_SOURCE =
+            new SingleConnectionDataSource(DataSourceUrl.POSTGRE_SQL_LOCAL,
+                                           new Database("postgres", "postgres", "postgres")
+            );
+    public static final AbstractDao<String, Database> DAO = new PostgreSqlDatabaseDao();
     public static final Database TEST_DATABASE = new Database("tmp", "postgres", "postgres");
 
-    @Before
-    public void setUp() throws SQLException {
-        DAO.setDataSource(DATA_SOURCE);
-        DAO.create(TEST_DATABASE);
+    @Override
+    public Database getTestDatabase() {
+        return TEST_DATABASE;
     }
 
-    @Test
-    public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(TEST_DATABASE);
-        Connection conn = tmpDataSource.getConnection();
-        assertTrue(conn != null);
-        conn.close();
+    @Override
+    public DataSource getDataSource() throws SQLException {
+        return DATA_SOURCE;
     }
 
-    @Test(expected = SQLException.class)
-    public void testDeleteDataBase() throws SQLException {
-        DAO.delete(TEST_DATABASE);
-        DataSource tmpDataSource = new PostgreSqlLocalDataSource(TEST_DATABASE);
-        Connection conn = tmpDataSource.getConnection();
-        assertTrue(conn == null);
-        conn.close();
+    @Override
+    public AbstractDao<String, Database> getDao() {
+        return DAO;
     }
 
-    @Test
-    public void testReadAll() throws SQLException{
-        List<Database> databaseList = DAO.readAll();
-        assertTrue(databaseList.contains(new Database("postgres", "postgres", "postgres")));
-        assertTrue(databaseList.contains(TEST_DATABASE));
+    @Override
+    public String getDbUrl() {
+        return DataSourceUrl.POSTGRE_SQL_LOCAL;
     }
 
-    @Test
-    public void testCount() throws SQLException {
-        assertTrue(DAO.count() > 0);
-    }
-
-    @After
-    public void tearDown() throws SQLException{
-        Statement statement = DATA_SOURCE.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + TEST_DATABASE.getDbName());
-        statement.close();
+    @AfterClass
+    public static void tearDownClass() throws SQLException{
+        DATA_SOURCE.getConnection().close();
     }
 }

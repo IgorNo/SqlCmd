@@ -9,12 +9,7 @@ import java.sql.SQLException;
 public class SingleThreadConnectionDataSource extends AbstractDataSource {
     private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
 
-    private Database db;
-    private String url;
-
     public SingleThreadConnectionDataSource(String url, Database db) throws SQLException{
-        this.db = db;
-        this.url = url;
         connectionHolder.set(DriverManager.getConnection(url + db.getDbName(), db.getUserName(), db.getPassword()));
     }
 
@@ -22,5 +17,4 @@ public class SingleThreadConnectionDataSource extends AbstractDataSource {
     public Connection getConnection() throws SQLException {
         return connectionHolder.get();
     }
-
 }
