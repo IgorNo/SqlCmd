@@ -13,14 +13,12 @@ import java.sql.Statement;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class AbstractDataBaseDaoTest {
+public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
     protected abstract DataSource getDataSource() throws SQLException;
 
     protected abstract AbstractDao<String, Database> getDao();
-
-    protected abstract String getDbUrl();
 
     public abstract Database getTestDatabase();
 
@@ -33,7 +31,7 @@ public abstract class AbstractDataBaseDaoTest {
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new MultiConnectionDataSource(getDbUrl(), getTestDatabase());
+        DataSource tmpDataSource = new MultiConnectionDataSource(getTestDatabase());
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn != null);
         conn.close();
@@ -42,7 +40,7 @@ public abstract class AbstractDataBaseDaoTest {
     @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException {
         getDao().delete(getTestDatabase());
-        DataSource tmpDataSource = new SingleConnectionDataSource(getDbUrl(), getTestDatabase());
+        DataSource tmpDataSource = new SingleConnectionDataSource(getTestDatabase());
         Connection conn = tmpDataSource.getConnection();
         assertTrue(conn == null);
         conn.close();
@@ -51,7 +49,7 @@ public abstract class AbstractDataBaseDaoTest {
     @After
     public void tearDown() throws SQLException{
         Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_IF_EXISTS_SQL + getTestDatabase().getDbName());
+        statement.executeUpdate(DROP_DB_IF_EXISTS_SQL + getTestDatabase().getName());
         statement.close();
     }
 }

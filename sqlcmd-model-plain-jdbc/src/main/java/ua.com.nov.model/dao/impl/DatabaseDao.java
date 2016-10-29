@@ -16,15 +16,15 @@ public class DatabaseDao extends AbstractDao<String, Database> {
 
     @Override
     public void create(Database database) throws SQLException {
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(CREATE_DB_SQL + database.getDbName() + " " + database.getProperties());
+        Statement statement = getDataSource().getConnection().createStatement();
+        statement.executeUpdate(CREATE_DB_SQL + database.getName() + " " + database.getProperties());
         statement.close();
     }
 
     @Override
     public void delete(Database database) throws SQLException {
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + database.getDbName());
+        Statement statement = getDataSource().getConnection().createStatement();
+        statement.executeUpdate(DROP_DB_SQL + database.getName());
         statement.close();
     }
 

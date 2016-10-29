@@ -6,19 +6,20 @@ import org.junit.Test;
 import ua.com.nov.model.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.util.DataSourceUrl;
+import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-public class HyperSqlDatabaseDaoTest extends AbstractDataBaseDaoTest {
-    public static final Database TEST_DATABASE = new Database("tmp", "root", "root");
-
-    public static final AbstractDao<String, Database> DAO = new HyperSqlDatabaseDao();
+public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
+    public static final String URL = DataSourceUtil.HYPER_SQL_MEMORY_URL;
 
     public static final DataSource DATA_SOURCE =
-            new SingleConnectionDataSource(DataSourceUrl.HYPER_SQL, new Database("sys", "root", "root"));
+            new SingleConnectionDataSource(new Database(URL + "sys", "root", "root"));
+
+    public static final Database TEST_DATABASE = new Database(URL + "tmp", "root", "root");
+
+    public static final AbstractDao<String, Database> DAO = new HyperSqlDatabaseDao();
 
     @Override
     public Database getTestDatabase() {
@@ -36,25 +37,16 @@ public class HyperSqlDatabaseDaoTest extends AbstractDataBaseDaoTest {
     }
 
     @Override
-    public String getDbUrl() {
-        return DataSourceUrl.HYPER_SQL;
-    }
-
-    @Override
     @Test(expected = AssertionError.class)
     public void testDeleteDataBase() throws SQLException {
         super.testDeleteDataBase();
     }
 
     @After
-    public void tearDown() throws SQLException{
-
-    }
+    public void tearDown() throws SQLException{ /*NOP*/ }
 
     @AfterClass
     public static void tearDownClass() throws SQLException{
         DATA_SOURCE.getConnection().close();
     }
-
-
 }
