@@ -17,6 +17,6 @@ public class DataSourceUtilTest {
 
     @Test
     public void testGetDbName() throws SQLException{
-        assertTrue(DataSourceUtil.getDatabase(dataSource).getDbUrl().equals("postgres"));
+        assertTrue(DataSourceUtil.getDatabase(dataSource.getConnection()).getDbUrl().equals("postgres"));
     }
 }

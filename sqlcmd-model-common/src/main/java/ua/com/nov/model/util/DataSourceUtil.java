@@ -3,6 +3,8 @@ package ua.com.nov.model.util;
 import ua.com.nov.model.entity.Database;
 
 import javax.sql.DataSource;
+import java.net.URL;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DataSourceUtil {
@@ -14,8 +16,8 @@ public class DataSourceUtil {
 
     public static final String POSTGRE_SQL_LOCAL_URL = "jdbc:postgresql://localhost:5432/";
 
-    public static Database getDatabase(DataSource dataSource) throws SQLException {
-        String url = dataSource.getConnection().getMetaData().getURL();
+    public static Database getDatabase(Connection conn) throws SQLException {
+        String url = conn.getMetaData().getURL();
         return new Database(getDatabaseName(url));
     }
 
@@ -23,5 +25,16 @@ public class DataSourceUtil {
         int beginIndex = url.lastIndexOf('/') + 1;
         if (beginIndex < 0) throw new IllegalArgumentException(url);
         return url.substring(beginIndex);
+    }
+
+    public static String getDatabaseUrl(Connection conn) throws SQLException {
+        String url = conn.getMetaData().getURL();
+        return getDatabaseUrl(url);
+    }
+
+    public static String getDatabaseUrl(String url) {
+        int endIndex = url.lastIndexOf('/') + 1;
+        if (endIndex < 0) throw new IllegalArgumentException(url);
+        return url.substring(0, endIndex);
     }
 }
