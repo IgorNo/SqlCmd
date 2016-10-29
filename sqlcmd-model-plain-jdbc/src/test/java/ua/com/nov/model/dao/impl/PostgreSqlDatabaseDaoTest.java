@@ -1,6 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
+import org.junit.Test;
 import ua.com.nov.model.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
@@ -8,6 +9,9 @@ import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
 
 public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final String URL = DataSourceUtil.POSTGRE_SQL_LOCAL_URL;
@@ -32,6 +36,12 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     @Override
     public AbstractDao<String, Database> getDao() {
         return DAO;
+    }
+
+    @Test
+    public void testReadAll() throws SQLException {
+        Map<String, Database> databases = DAO.readAll();
+        assertTrue(databases.containsKey(URL + "tmp"));
     }
 
     @AfterClass
