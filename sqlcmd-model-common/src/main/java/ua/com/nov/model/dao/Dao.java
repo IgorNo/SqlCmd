@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Map;
 
 public interface Dao<K, V> {
 
@@ -12,7 +12,7 @@ public interface Dao<K, V> {
     V readByPK(K id) throws SQLException;
 
     //Read All
-    List<V> readAll() throws SQLException;
+    Map<K, V> readAll() throws SQLException;
 
     //Update
     void update(V value) throws SQLException;

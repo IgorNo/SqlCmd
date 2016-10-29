@@ -9,8 +9,8 @@ import java.sql.SQLException;
 public class SingleThreadConnectionDataSource extends AbstractDataSource {
     private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
 
-    public SingleThreadConnectionDataSource(String url, Database db) throws SQLException{
-        connectionHolder.set(DriverManager.getConnection(url + db.getDbName(), db.getUserName(), db.getPassword()));
+    public SingleThreadConnectionDataSource(Database db) throws SQLException{
+        connectionHolder.set(DriverManager.getConnection(db.getDbUrl(), db.getUserName(), db.getPassword()));
     }
 
     @Override

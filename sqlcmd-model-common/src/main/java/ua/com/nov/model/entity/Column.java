@@ -1,20 +1,24 @@
 package ua.com.nov.model.entity;
 
 public class Column {
-    private String columnName;
+    private ColumnPK pk;
     private String columnTypeName;
     private int scale;
     private int precision;
     private boolean isAutoIncrement;
     private int isNullable = 2; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
 
-    public Column(String columnName) {
-        this.columnName = columnName;
+    public Column(ColumnPK pk) {
+        this.pk = pk;
     }
 
-    public String getColumnName() {
-            return columnName;
+    public ColumnPK getPk() {
+            return pk;
         }
+
+    public String getName() {
+        return pk.getName();
+    }
 
     public String getColumnTypeName() {
             return columnTypeName;
@@ -36,8 +40,8 @@ public class Column {
         return isNullable;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    public void setName(String name) {
+        pk.setName(name);
     }
 
     public void setColumnTypeName(String columnTypeName) {

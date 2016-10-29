@@ -1,24 +1,30 @@
 package ua.com.nov.model.entity;
 
+import ua.com.nov.model.util.DataSourceUtil;
+
 public class Database {
-    private String dbName;
+    private final String dbUrl;
     private String userName;
     private String password;
     private String properties = "";
 
-    public Database(String dbName) {
-        this(dbName, null, null);
+    public Database(String dbUrl) {
+        this(dbUrl, null, null);
     }
 
-    public Database(String dbName, String userName, String password) {
-        if (dbName == null || "".equals(dbName)) throw new IllegalArgumentException();
-        this.dbName = dbName;
+    public Database(String dbUrl, String userName, String password) {
+        if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
+        this.dbUrl = dbUrl;
         this.userName = userName;
         this.password = password;
     }
 
-    public String getDbName() {
-        return dbName;
+    public String getDbUrl() {
+        return dbUrl;
+    }
+
+    public String getName() {
+        return DataSourceUtil.getDatabaseName(dbUrl);
     }
 
     public String getUserName() {
@@ -52,11 +58,11 @@ public class Database {
 
         Database database = (Database) o;
 
-        return dbName.equals(database.dbName);
+        return dbUrl.equals(database.dbUrl);
     }
 
     @Override
     public int hashCode() {
-        return dbName.hashCode();
+        return dbUrl.hashCode();
     }
 }

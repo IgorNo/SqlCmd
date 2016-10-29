@@ -3,10 +3,15 @@ package ua.com.nov.model.dao;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractDao<K, V> implements Dao<K, V> {
 
-    protected DataSource dataSource;
+    private DataSource dataSource;
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -24,7 +29,7 @@ public abstract class AbstractDao<K, V> implements Dao<K, V> {
     }
 
     @Override
-    public List<V> readAll() throws SQLException {
+    public Map<K, V> readAll() throws SQLException {
         throw new UnsupportedOperationException();
     }
 

@@ -4,30 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
-    private DataBase db;
-    private String tableName;
-    private String schemaName;
-    private List<Column> columns = new ArrayList<Column>();
-    private int indexPrimaryKey; // index of primary key in 'columns'
-    private List<RowData> rows = new ArrayList<RowData>();
+    private TablePK pk;
+    private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
+                            //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+
+    private List<Column> columns = new ArrayList<>(); // table columns
+    private int indexPrimaryKey;                      // index of primary key in 'columns'
+    private List<RowData> rows = new ArrayList<>();   // table data
 
 
-    public Table(DataBase db, String schemaName, String tableName) {
-        this.db = db;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+    public Table(TablePK pk, String type) {
+        this.pk = pk;
+        this.type = type;
     }
 
-    public DataBase getDb() {
-        return db;
+    public TablePK getPk() {
+        return pk;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getType() {
+        return type;
     }
 
-    public String getSchemaName() {
-        return schemaName;
+    public String getName() {
+        return pk.getName();
     }
 
     public boolean addColumn(Column column) {
@@ -39,15 +39,15 @@ public class Table {
     }
     
     public String getColumnName(int index) {
-        return columns.get(index).getColumnName();
+        return columns.get(index).getPk().getName();
     }
 
     public int getColumnIndex(String columnName) {
         for (int i = 0; i < columns.size(); i++) {
-            if (columns.get(i).getColumnName().equals(columnName))
+            if (columns.get(i).getPk().equals(columnName))
                 return i;
         }
-        throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, tableName));
+        throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, pk.getName()));
     }
 
     public class RowData {

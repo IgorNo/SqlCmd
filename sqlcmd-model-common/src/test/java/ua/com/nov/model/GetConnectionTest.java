@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.util.DataSourceUrl;
+import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -14,22 +14,34 @@ public class GetConnectionTest {
 
     @Test
     public void testGetMySqlLocalConnection() throws SQLException{
-        DataSource dataSource = new SingleConnectionDataSource(DataSourceUrl.MY_SQL_LOCAL, new Database("sys", "root", "root"));
+        String dbUrl = DataSourceUtil.MY_SQL_LOCAL_URL + "sys";
+        DataSource dataSource = new SingleConnectionDataSource(new Database(dbUrl,"root", "root"));
         Connection connection = dataSource.getConnection();
         assertTrue(connection != null);
     }
 
     @Test
     public void testGetPostgreSqlLocalConnection() throws SQLException{
-        DataSource dataSource = new SingleThreadConnectionDataSource(DataSourceUrl.POSTGRE_SQL_LOCAL, new Database("postgres", "postgres", "postgres"));
+        String dbUrl = DataSourceUtil.POSTGRE_SQL_LOCAL_URL + "postgres";
+        DataSource dataSource = new SingleThreadConnectionDataSource(new Database(dbUrl, "postgres", "postgres"));
         Connection connection = dataSource.getConnection();
         assertTrue(connection != null);
     }
 
     @Test
-    public void testGetHyperSqlLocalConnection() throws SQLException{
-        DataSource dataSource = new MultiConnectionDataSource(DataSourceUrl.HYPER_SQL, new Database("sys", "root", "root"));
+    public void testGetHyperSqlFileConnection() throws SQLException{
+        String dbUrl = DataSourceUtil.HYPER_SQL_FILE_URL + "sys";
+        DataSource dataSource = new MultiConnectionDataSource(new Database(dbUrl, "root", "root"));
         Connection connection = dataSource.getConnection();
         assertTrue(connection != null);
     }
+
+    @Test
+    public void testGetHyperSqlMemoryConnection() throws SQLException{
+        String dbUrl = DataSourceUtil.HYPER_SQL_MEMORY_URL + "sys";
+        DataSource dataSource = new MultiConnectionDataSource(new Database(dbUrl, "root", "root"));
+        Connection connection = dataSource.getConnection();
+        assertTrue(connection != null);
+    }
+
 }
