@@ -19,7 +19,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final DataSource DATA_SOURCE =
             new SingleConnectionDataSource(new Database(URL + "postgres", "postgres", "postgres"));
 
-    public static final AbstractDao<String, Database> DAO = new PostgreSqlDatabaseDao();
+    public static final AbstractDao<String, Database, Object> DAO = new PostgreSqlDatabaseDao();
 
     public static final Database TEST_DATABASE = new Database(URL + "tmp", "postgres", "postgres");
 
@@ -34,13 +34,13 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public AbstractDao<String, Database> getDao() {
+    public AbstractDao<String, Database, Object> getDao() {
         return DAO;
     }
 
     @Test
     public void testReadAll() throws SQLException {
-        Map<String, Database> databases = DAO.readAll();
+        Map<String, Database> databases = DAO.readAllFrom(null);
         assertTrue(databases.containsKey(URL + "tmp"));
     }
 

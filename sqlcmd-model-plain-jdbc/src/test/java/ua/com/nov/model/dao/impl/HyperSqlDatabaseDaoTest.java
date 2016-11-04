@@ -19,7 +19,7 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     public static final Database TEST_DATABASE = new Database(URL + "tmp", "root", "root");
 
-    public static final AbstractDao<String, Database> DAO = new HyperSqlDatabaseDao();
+    public static final AbstractDao<String, Database, Object> DAO = new HyperSqlDatabaseDao();
 
     @Override
     public Database getTestDatabase() {
@@ -32,7 +32,7 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public AbstractDao<String, Database> getDao() {
+    public AbstractDao<String, Database, Object> getDao() {
         return DAO;
     }
 

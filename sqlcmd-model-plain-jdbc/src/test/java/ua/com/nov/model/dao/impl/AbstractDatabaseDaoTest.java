@@ -1,6 +1,8 @@
 package ua.com.nov.model.dao.impl;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import ua.com.nov.model.MultiConnectionDataSource;
 import ua.com.nov.model.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
@@ -18,7 +20,7 @@ public abstract class AbstractDatabaseDaoTest {
 
     protected abstract DataSource getDataSource() throws SQLException;
 
-    protected abstract AbstractDao<String, Database> getDao();
+    protected abstract AbstractDao<String, Database, Object> getDao();
 
     public abstract Database getTestDatabase();
 

@@ -5,8 +5,9 @@ import ua.com.nov.model.entity.Database;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
-public class DatabaseDao extends AbstractDao<String, Database> {
+public class DatabaseDao extends AbstractDao<String, Database, Object> {
 
     public static final String CREATE_DB_SQL = "CREATE DATABASE ";
     public static final String DROP_DB_SQL = "DROP DATABASE ";
@@ -29,7 +30,12 @@ public class DatabaseDao extends AbstractDao<String, Database> {
     }
 
     @Override
-    public int count() throws SQLException {
-        return readAll().size();
+    public Map<String, Database> readAllFrom(Object ambient) throws SQLException {
+        return readAll();
+    }
+
+    @Override
+    public int count(Object ambient) throws SQLException {
+        return readAllFrom(ambient).size();
     }
 }

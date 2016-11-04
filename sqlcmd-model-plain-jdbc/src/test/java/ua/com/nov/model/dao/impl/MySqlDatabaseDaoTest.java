@@ -9,15 +9,13 @@ import ua.com.nov.model.util.DataSourceUtil;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertTrue;
-
 public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final String URL = DataSourceUtil.MY_SQL_LOCAL_URL;
 
     public static final DataSource DATA_SOURCE =
             new SingleConnectionDataSource(new Database(URL + "sys", "root", "root"));
 
-    public static final AbstractDao<String, Database> DAO = new MySqlDatabaseDao();
+    public static final AbstractDao<String, Database, Object> DAO = new MySqlDatabaseDao();
 
     public static final Database TEST_DATABASE = new Database(URL + "tmp", "root", "root");
 
@@ -32,7 +30,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public AbstractDao<String, Database> getDao() {
+    public AbstractDao<String, Database, Object> getDao() {
         return DAO;
     }
 

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractDao<K, V> implements Dao<K, V> {
+public abstract class AbstractDao<K, V, A> implements Dao<K, V, A> {
 
     private DataSource dataSource;
 
@@ -29,6 +29,11 @@ public abstract class AbstractDao<K, V> implements Dao<K, V> {
     }
 
     @Override
+    public Map<K, V> readAllFrom(A ambient) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<K, V> readAll() throws SQLException {
         throw new UnsupportedOperationException();
     }
@@ -44,12 +49,12 @@ public abstract class AbstractDao<K, V> implements Dao<K, V> {
     }
 
     @Override
-    public void deleteAll() throws SQLException {
+    public void deleteAllFrom(A ambient) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int count() throws SQLException {
+    public int count(A ambient) throws SQLException {
         throw new UnsupportedOperationException();
     }
 }
