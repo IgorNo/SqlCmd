@@ -4,17 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
-    private TablePK pk;
+    private TablePK pk;     // table primary key
+    private String name;    // table name
     private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+    private String remark;  // explanatory comment on the table
 
     private List<Column> columns = new ArrayList<>(); // table columns
     private int indexPrimaryKey;                      // index of primary key in 'columns'
     private List<RowData> rows = new ArrayList<>();   // table data
 
+    public Table(TablePK pk) {
+        this(pk, "TABLE");
+    }
 
     public Table(TablePK pk, String type) {
         this.pk = pk;
+        this.name = pk.getName();
         this.type = type;
     }
 
@@ -27,7 +33,11 @@ public class Table {
     }
 
     public String getName() {
-        return pk.getName();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean addColumn(Column column) {
@@ -48,18 +58,5 @@ public class Table {
                 return i;
         }
         throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, pk.getName()));
-    }
-
-    public class RowData {
-        private Object[] values;
-
-        public RowData(Table table, Object[] values) {
-            this.values = new Object[getNumberColumns()];
-        }
-
-        public Object getColumnValue(String columnName) {
-            return values[getColumnIndex(columnName)];
-        }
-
     }
 }

@@ -29,8 +29,14 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
     @Override
     public Table readByPK(TablePK tablePK) throws SQLException {
         DatabaseMetaData databaseMetaData = getDataSource().getConnection().getMetaData();
-        ResultSet rs = databaseMetaData.getTables(tablePK.getSchema(), tablePK.getSchema(), tablePK.getName(), null);
-        return null;
+        ResultSet rs = databaseMetaData.getTables(tablePK.getCatalog(), tablePK.getSchema(), tablePK.getName(), null);
+        rs.next();
+        Connection conn = getDataSource().getConnection();
+            TablePK pk = new TablePK(DataSourceUtil.getDatabase(conn),
+                    rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
+            Table table = new Table(pk, rs.getString("TABLE_TYPE"));
+
+        return table;
     }
 
     @Override
@@ -45,7 +51,6 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
                     rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
             Table table = new Table(pk, rs.getString("TABLE_TYPE"));
             tables.put(pk, table);
-
         }
 
         ResultSetMetaData rsMetaData = rs.getMetaData();
@@ -58,7 +63,7 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
 
         }
 
-        return null;
+        return tables;
     }
 
     @Override
@@ -83,8 +88,11 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
      */
     @Override
     public void deleteAllFrom(Database nullObject) throws SQLException {
+        Map<TablePK, Table> tables = readAll();
         Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(DROP_TABLE_SQL + "*");
+        for (Table table : tables.values()) {
+            statement.executeUpdate(DROP_TABLE_SQL + table.getName());
+        }
         statement.close();
     }
 }
