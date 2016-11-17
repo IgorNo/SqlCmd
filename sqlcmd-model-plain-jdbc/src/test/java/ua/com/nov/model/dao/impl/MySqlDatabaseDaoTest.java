@@ -1,9 +1,10 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
-import ua.com.nov.model.SingleConnectionDataSource;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.DatabasePK;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
@@ -15,7 +16,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final DataSource DATA_SOURCE =
             new SingleConnectionDataSource(new Database(URL + "sys", "root", "root"));
 
-    public static final AbstractDao<String, Database, Object> DAO = new MySqlDatabaseDao();
+    public static final AbstractDao<DatabasePK, Database, Object> DAO = new MySqlDatabaseDao();
 
     public static final Database TEST_DATABASE = new Database(URL + "tmp", "root", "root");
 
@@ -30,7 +31,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public AbstractDao<String, Database, Object> getDao() {
+    public AbstractDao<DatabasePK, Database, Object> getDao() {
         return DAO;
     }
 

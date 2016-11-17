@@ -1,6 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.DatabasePK;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import java.sql.Connection;
@@ -13,14 +14,15 @@ public class PostgreSqlDatabaseDao extends DatabaseDao {
     public static final String SELECT_ALL_AVAILABLE_DB = "SELECT datname FROM pg_database WHERE datistemplate = false";
 
     @Override
-    public Map<String, Database> readAll() throws SQLException {
-        Map<String, Database> result = new HashMap<>();
+    public Map<DatabasePK, Database> readAll() throws SQLException {
+        Map<DatabasePK, Database> result = new HashMap<>();
         Connection conn = getDataSource().getConnection();
         Statement statement = conn.createStatement();
         ResultSet databases = statement.executeQuery(SELECT_ALL_AVAILABLE_DB);
 
         while (databases.next()) {
-            String databasePK = DataSourceUtil.getDatabaseUrl(conn) + databases.getString(1);
+            String url = DataSourceUtil.getDatabaseUrl(conn) + databases.getString(1);
+            DatabasePK databasePK = new DatabasePK(url, conn.getMetaData().getUserName());
             result.put(databasePK, new Database(databasePK));
         }
         databases.close();

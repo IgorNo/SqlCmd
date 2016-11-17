@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
 import org.junit.Test;
-import ua.com.nov.model.SingleConnectionDataSource;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
 import ua.com.nov.model.entity.Table;

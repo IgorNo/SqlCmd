@@ -1,4 +1,7 @@
-package ua.com.nov.model;
+package ua.com.nov.model.datasource;
+
+import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.repository.DatabaseRepository;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -8,6 +11,10 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 public abstract class AbstractDataSource implements DataSource {
+
+    public AbstractDataSource(Database db) {
+        DatabaseRepository.getInstance().addDb(db);
+    }
 
     @Override
     public Connection getConnection() throws SQLException {

@@ -2,12 +2,13 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.DatabasePK;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-public class DatabaseDao extends AbstractDao<String, Database, Object> {
+public class DatabaseDao extends AbstractDao<DatabasePK, Database, Object> {
 
     public static final String CREATE_DB_SQL = "CREATE DATABASE ";
     public static final String DROP_DB_SQL = "DROP DATABASE ";
@@ -30,7 +31,7 @@ public class DatabaseDao extends AbstractDao<String, Database, Object> {
     }
 
     @Override
-    public Map<String, Database> readAllFrom(Object ambient) throws SQLException {
+    public Map<DatabasePK, Database> readAllFrom(Object ambient) throws SQLException {
         return readAll();
     }
 

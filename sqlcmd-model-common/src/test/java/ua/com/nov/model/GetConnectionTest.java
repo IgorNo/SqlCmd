@@ -3,6 +3,9 @@ package ua.com.nov.model;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import ua.com.nov.model.datasource.MultiConnectionDataSource;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
+import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
 import ua.com.nov.model.entity.Database;
 import ua.com.nov.model.util.DataSourceUtil;
 
@@ -17,6 +20,7 @@ public class GetConnectionTest {
         String dbUrl = DataSourceUtil.MY_SQL_LOCAL_URL + "sys";
         DataSource dataSource = new SingleConnectionDataSource(new Database(dbUrl,"root", "root"));
         Connection connection = dataSource.getConnection();
+        System.out.println(connection.getMetaData().getDatabaseProductName());
         assertTrue(connection != null);
     }
 
@@ -25,6 +29,7 @@ public class GetConnectionTest {
         String dbUrl = DataSourceUtil.POSTGRE_SQL_LOCAL_URL + "postgres";
         DataSource dataSource = new SingleThreadConnectionDataSource(new Database(dbUrl, "postgres", "postgres"));
         Connection connection = dataSource.getConnection();
+        System.out.println(connection.getMetaData().getDatabaseProductName());
         assertTrue(connection != null);
     }
 
@@ -33,6 +38,7 @@ public class GetConnectionTest {
         String dbUrl = DataSourceUtil.HYPER_SQL_FILE_URL + "sys";
         DataSource dataSource = new MultiConnectionDataSource(new Database(dbUrl, "root", "root"));
         Connection connection = dataSource.getConnection();
+        System.out.println(connection.getMetaData().getDatabaseProductName());
         assertTrue(connection != null);
     }
 
@@ -41,6 +47,7 @@ public class GetConnectionTest {
         String dbUrl = DataSourceUtil.HYPER_SQL_MEMORY_URL + "sys";
         DataSource dataSource = new MultiConnectionDataSource(new Database(dbUrl, "root", "root"));
         Connection connection = dataSource.getConnection();
+        System.out.println(connection.getMetaData().getDatabaseProductName());
         assertTrue(connection != null);
     }
 

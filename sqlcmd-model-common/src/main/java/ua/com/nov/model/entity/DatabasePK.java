@@ -5,6 +5,8 @@ public class DatabasePK {
     private String userName;
 
     public DatabasePK(String dbUrl, String userName) {
+        if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
+        if (userName == null || "".equals(userName)) throw new IllegalArgumentException();
         this.dbUrl = dbUrl;
         this.userName = userName;
     }

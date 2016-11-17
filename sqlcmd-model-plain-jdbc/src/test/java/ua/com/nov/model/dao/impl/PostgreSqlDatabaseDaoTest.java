@@ -2,9 +2,10 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
 import org.junit.Test;
-import ua.com.nov.model.SingleConnectionDataSource;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.DatabasePK;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
@@ -19,7 +20,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final DataSource DATA_SOURCE =
             new SingleConnectionDataSource(new Database(URL + "postgres", "postgres", "postgres"));
 
-    public static final AbstractDao<String, Database, Object> DAO = new PostgreSqlDatabaseDao();
+    public static final AbstractDao<DatabasePK, Database, Object> DAO = new PostgreSqlDatabaseDao();
 
     public static final Database TEST_DATABASE = new Database(URL + "tmp", "postgres", "postgres");
 
@@ -34,14 +35,15 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public AbstractDao<String, Database, Object> getDao() {
+    public AbstractDao<DatabasePK, Database, Object> getDao() {
         return DAO;
     }
 
     @Test
     public void testReadAll() throws SQLException {
-        Map<String, Database> databases = DAO.readAllFrom(null);
-        assertTrue(databases.containsKey(URL + "tmp"));
+        Map<DatabasePK, Database> databases = DAO.readAll();
+        DatabasePK databasePK = new DatabasePK(URL + "tmp", "postgres");
+        assertTrue(databases.containsKey(databasePK));
     }
 
     @AfterClass

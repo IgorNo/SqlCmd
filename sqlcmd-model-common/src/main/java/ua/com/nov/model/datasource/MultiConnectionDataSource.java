@@ -1,4 +1,4 @@
-package ua.com.nov.model;
+package ua.com.nov.model.datasource;
 
 import ua.com.nov.model.entity.Database;
 
@@ -10,6 +10,7 @@ public class MultiConnectionDataSource extends AbstractDataSource{
     private Database db;
 
     public MultiConnectionDataSource(Database db) {
+        super(db);
         this.db = db;
     }
 

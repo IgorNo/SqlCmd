@@ -1,4 +1,4 @@
-package ua.com.nov.model;
+package ua.com.nov.model.datasource;
 
 import ua.com.nov.model.entity.Database;
 
@@ -11,6 +11,7 @@ public class SingleConnectionDataSource extends AbstractDataSource {
     private Connection conn;
 
     public SingleConnectionDataSource(Database db) {
+        super(db);
         this.db = db;
     }
 
