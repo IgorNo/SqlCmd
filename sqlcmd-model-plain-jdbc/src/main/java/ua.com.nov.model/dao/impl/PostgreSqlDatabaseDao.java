@@ -1,7 +1,8 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.entity.DatabasePK;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.PostgreSqlDb;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import java.sql.Connection;
@@ -23,7 +24,7 @@ public class PostgreSqlDatabaseDao extends DatabaseDao {
         while (databases.next()) {
             String url = DataSourceUtil.getDatabaseUrl(conn) + databases.getString(1);
             DatabasePK databasePK = new DatabasePK(url, conn.getMetaData().getUserName());
-            result.put(databasePK, new Database(databasePK));
+            result.put(databasePK, new PostgreSqlDb(databasePK));
         }
         databases.close();
         statement.close();

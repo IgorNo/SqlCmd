@@ -4,8 +4,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.entity.DatabasePK;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.PostgreSqlDb;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import javax.sql.DataSource;
@@ -18,11 +19,11 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final String URL = DataSourceUtil.POSTGRE_SQL_LOCAL_URL;
 
     public static final DataSource DATA_SOURCE =
-            new SingleConnectionDataSource(new Database(URL + "postgres", "postgres", "postgres"));
+            new SingleConnectionDataSource(new PostgreSqlDb(URL + "postgres", "postgres", "postgres"));
 
     public static final AbstractDao<DatabasePK, Database, Object> DAO = new PostgreSqlDatabaseDao();
 
-    public static final Database TEST_DATABASE = new Database(URL + "tmp", "postgres", "postgres");
+    public static final Database TEST_DATABASE = new PostgreSqlDb(URL + "tmp", "postgres", "postgres");
 
     @Override
     public Database getTestDatabase() {

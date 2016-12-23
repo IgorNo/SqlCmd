@@ -3,10 +3,11 @@ package ua.com.nov.model.dao.impl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.MultiConnectionDataSource;
-import ua.com.nov.model.SingleConnectionDataSource;
+import ua.com.nov.model.datasource.MultiConnectionDataSource;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.database.DatabasePK;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -20,7 +21,7 @@ public abstract class AbstractDatabaseDaoTest {
 
     protected abstract DataSource getDataSource() throws SQLException;
 
-    protected abstract AbstractDao<String, Database, Object> getDao();
+    protected abstract AbstractDao<DatabasePK, Database, Object> getDao();
 
     public abstract Database getTestDatabase();
 

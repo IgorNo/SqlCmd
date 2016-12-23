@@ -1,33 +1,32 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.entity.DatabasePK;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.database.DatabasePK;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
 public class DatabaseDao extends AbstractDao<DatabasePK, Database, Object> {
 
-    public static final String CREATE_DB_SQL = "CREATE DATABASE ";
-    public static final String DROP_DB_SQL = "DROP DATABASE ";
-
     protected DatabaseDao() {
     }
 
     @Override
-    public void create(Database database) throws SQLException {
-        Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(CREATE_DB_SQL + database.getName() + " " + database.getProperties());
-        statement.close();
+    public void create(Database db) throws SQLException {
+        Statement stmt = getDataSource().getConnection().createStatement();
+        stmt.executeUpdate(String.format(db.getExecutor().getCreateDbStmt(), db.getName(), db.getProperties()));
+        stmt.close();
     }
 
     @Override
-    public void delete(Database database) throws SQLException {
-        Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_SQL + database.getName());
-        statement.close();
+    public void delete(Database db) throws SQLException {
+        Statement stmt = getDataSource().getConnection().createStatement();
+        stmt.executeUpdate(String.format(db.getExecutor().getDropDbStmt(), db.getName()));
+        stmt.close();
     }
 
     @Override
