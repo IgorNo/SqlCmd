@@ -1,4 +1,6 @@
-package ua.com.nov.model.entity;
+package ua.com.nov.model.entity.table;
+
+import ua.com.nov.model.entity.database.Database;
 
 public class TablePK {
     private Database db;

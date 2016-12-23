@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity;
+package ua.com.nov.model.entity.database;
 
 public class DatabasePK {
     private String dbUrl;

@@ -1,6 +1,6 @@
 package ua.com.nov.model.datasource;
 
-import ua.com.nov.model.entity.Database;
+import ua.com.nov.model.entity.database.Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

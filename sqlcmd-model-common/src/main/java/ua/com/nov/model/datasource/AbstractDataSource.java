@@ -1,7 +1,7 @@
 package ua.com.nov.model.datasource;
 
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.repository.DatabaseRepository;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.repository.DbRepository;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public abstract class AbstractDataSource implements DataSource {
 
     public AbstractDataSource(Database db) {
-        DatabaseRepository.getInstance().addDb(db);
+        DbRepository.getInstance().addDb(db);
     }
 
     @Override

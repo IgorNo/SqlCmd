@@ -1,11 +1,11 @@
-package ua.com.nov.model.entity;
+package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.statement.Executable;
 import ua.com.nov.model.util.DataSourceUtil;
 
-public class Database {
+public abstract class Database {
     private DatabasePK pk;
     private String password;
-    private String properties = "";
 
     public Database(DatabasePK pk) {
         this(pk, null);
@@ -23,6 +23,10 @@ public class Database {
         this.pk = pk;
         this.password = password;
     }
+
+    public abstract String getProperties();
+
+    public abstract Executable getExecutor();
 
     public DatabasePK getPk() {
         return pk;
@@ -44,12 +48,5 @@ public class Database {
         return password;
     }
 
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
-    }
 
 }
