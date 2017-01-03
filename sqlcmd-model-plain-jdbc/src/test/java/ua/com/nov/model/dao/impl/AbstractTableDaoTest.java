@@ -4,9 +4,9 @@ import org.junit.After;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.entity.Table;
-import ua.com.nov.model.entity.TablePK;
+import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TablePK;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -69,7 +69,7 @@ public abstract class AbstractTableDaoTest {
         assertTrue(DAO.readByPK(tablePK1).getPk().equals(tablePK1));
     }
 
-    @Test(expected = SQLException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void  testDeleteTable() throws SQLException {
         DAO.delete(table2);
         DAO.readByPK(tablePK2);

@@ -3,9 +3,7 @@ package ua.com.nov.model.dao.impl;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import ua.com.nov.model.entity.Database;
-import ua.com.nov.model.entity.Table;
-import ua.com.nov.model.entity.TablePK;
+import ua.com.nov.model.entity.database.Database;
 
 import java.sql.SQLException;
 

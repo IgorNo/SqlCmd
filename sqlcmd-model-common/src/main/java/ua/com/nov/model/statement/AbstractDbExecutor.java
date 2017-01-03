@@ -2,14 +2,22 @@ package ua.com.nov.model.statement;
 
 public abstract class AbstractDbExecutor implements Executable {
 
+    public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
+    public static final String DROP_DB_SQL = "DROP DATABASE %s";
+
+    public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s)";
+    public static final String DROP_TABLE_SQL = "DROP TABLE %s";
+    public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
+
+
     @Override
     public String getCreateDbStmt() {
-        return "CREATE DATABASE %1 ";
+        return CREATE_DB_SQL;
     }
 
     @Override
     public String getDropDbStmt() {
-        return "DROP DATABASE %1";
+        return DROP_DB_SQL;
     }
 
     @Override
@@ -24,16 +32,16 @@ public abstract class AbstractDbExecutor implements Executable {
 
     @Override
     public String getCreateTableStmt() {
-        return null;
+        return CREATE_TABLE_SQL;
     }
 
     @Override
     public String getDropTableStmt() {
-        return null;
+        return DROP_TABLE_SQL;
     }
 
     @Override
     public String getUpdateTableStmt() {
-        return null;
+        return RENAME_TABLE_SQL;
     }
 }
