@@ -1,7 +1,7 @@
 package ua.com.nov.model.util;
 
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.repository.DbRepository;
 
 import java.sql.Connection;
@@ -19,7 +19,7 @@ public class DataSourceUtil {
 
     public static Database getDatabase(Connection conn) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
-        return DbRepository.getInstance().getDb(new DatabasePK(metaData.getURL(), metaData.getUserName()));
+        return DbRepository.getInstance().getDb(new DatabaseID(metaData.getURL(), metaData.getUserName()));
     }
 
     public static String getDatabaseName(String url) {

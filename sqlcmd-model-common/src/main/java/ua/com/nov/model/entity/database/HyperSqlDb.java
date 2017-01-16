@@ -1,12 +1,8 @@
 package ua.com.nov.model.entity.database;
 
-import ua.com.nov.model.statement.Executable;
-import ua.com.nov.model.statement.HyperSqlExecutor;
-
 public class HyperSqlDb extends Database {
-    private static final Executable EXECUTOR = new HyperSqlExecutor();
 
-    public HyperSqlDb(DatabasePK pk) {
+    public HyperSqlDb(DatabaseID pk) {
         super(pk);
     }
 
@@ -18,18 +14,21 @@ public class HyperSqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public HyperSqlDb(DatabasePK pk, String password) {
+    public HyperSqlDb(DatabaseID pk, String password) {
         super(pk, password);
     }
 
     @Override
     public Executable getExecutor() {
-        return EXECUTOR;
+        return new HyperSqlExecutor();
     }
 
     @Override
     public String getProperties() {
         return "";
+    }
+
+    public class HyperSqlExecutor extends Executor {
     }
 
 }

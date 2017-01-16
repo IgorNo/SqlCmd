@@ -2,15 +2,13 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.DatabaseID;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-public class DatabaseDao extends AbstractDao<DatabasePK, Database, Object> {
+public class DatabaseDao extends AbstractDao<DatabaseID, Database, Object> {
 
     protected DatabaseDao() {
     }
@@ -18,19 +16,19 @@ public class DatabaseDao extends AbstractDao<DatabasePK, Database, Object> {
     @Override
     public void create(Database db) throws SQLException {
         Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(String.format(db.getExecutor().getCreateDbStmt(), db.getName(), db.getProperties()));
+        stmt.executeUpdate(db.getExecutor().getCreateDbStmt());
         stmt.close();
     }
 
     @Override
     public void delete(Database db) throws SQLException {
         Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(String.format(db.getExecutor().getDropDbStmt(), db.getName()));
+        stmt.executeUpdate(db.getExecutor().getDropDbStmt());
         stmt.close();
     }
 
     @Override
-    public Map<DatabasePK, Database> readAllFrom(Object ambient) throws SQLException {
+    public Map<DatabaseID, Database> readAllFrom(Object ambient) throws SQLException {
         return readAll();
     }
 

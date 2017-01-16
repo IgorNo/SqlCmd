@@ -3,7 +3,7 @@ package ua.com.nov.model;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.entity.database.PostgreSqlDb;
 import ua.com.nov.model.util.DataSourceUtil;
 
@@ -16,7 +16,7 @@ public class DataSourceUtilTest {
 
     public static final DataSource dataSource =
             new SingleConnectionDataSource(new PostgreSqlDb(
-                    new DatabasePK(DataSourceUtil.POSTGRE_SQL_LOCAL_URL + "postgres", "postgres"),
+                    new DatabaseID(DataSourceUtil.POSTGRE_SQL_LOCAL_URL + "postgres", "postgres"),
                     "postgres"));
 
     @Test

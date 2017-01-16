@@ -1,12 +1,8 @@
 package ua.com.nov.model.entity.database;
 
-import ua.com.nov.model.statement.Executable;
-import ua.com.nov.model.statement.MySqlExecutor;
-
 public class MySqlDb extends Database {
-    private static final Executable EXECUTOR = new MySqlExecutor();
 
-    public MySqlDb(DatabasePK pk) {
+    public MySqlDb(DatabaseID pk) {
         super(pk);
     }
 
@@ -18,18 +14,21 @@ public class MySqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public MySqlDb(DatabasePK pk, String password) {
+    public MySqlDb(DatabaseID pk, String password) {
         super(pk, password);
     }
 
     @Override
     public Executable getExecutor() {
-        return EXECUTOR;
+        return new MySqlExecutor();
     }
 
     @Override
     public String getProperties() {
         return "";
+    }
+
+    private class MySqlExecutor extends Executor {
     }
 }
 

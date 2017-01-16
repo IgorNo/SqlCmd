@@ -1,41 +1,39 @@
 package ua.com.nov.model.entity.table;
 
+import ua.com.nov.model.entity.key.PrimaryKey;
 import ua.com.nov.model.entity.row.RowData;
 import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.column.ColumnPK;
+import ua.com.nov.model.entity.column.ColumnID;
 import ua.com.nov.model.entity.database.Database;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Table {
-    private TablePK pk;     // table primary key
+    private TableID pk;     // table primary key
     private String name;    // table name
     private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private String remarks;  // explanatory comment on the table
 
-    private Map<ColumnPK, Column> columns = new HashMap<>(); // table columns
-    private int indexPrimaryKey;                      // index of primary key in 'columns'
+    private Map<ColumnID, Column> columns = new HashMap<>(); // all table columns
+    private Map<Short, PrimaryKey> primaryKey = new TreeMap<>(); // table primary key columns
     private List<RowData> rows = new ArrayList<>();   // table data
 
-    public Table(TablePK pk) {
+    public Table(TableID pk) {
         this(pk, "TABLE");
     }
 
     public Table(Database db, String catalog, String schema, String name) {
-        this(new TablePK(db, catalog, schema, name));
+        this(new TableID(db, catalog, schema, name));
     }
 
-    public Table(TablePK pk, String type) {
+    public Table(TableID pk, String type) {
         this.pk = pk;
         this.name = pk.getName();
         this.type = type;
     }
 
-    public TablePK getPk() {
+    public TableID getPk() {
         return pk;
     }
 
@@ -70,12 +68,16 @@ public class Table {
         return true;
     }
 
-    public void addAllColums(Map<ColumnPK, Column> columnMap) {
+    public void addAllColums(Map<ColumnID, Column> columnMap) {
         columns.putAll(columnMap);
     }
 
-    public int getNumberColumns() {
+    public int getNumberOfColumns() {
         return columns.size();
+    }
+
+    public Column getColumn(int index) {
+        return columns.get(index);
     }
 
     public String getColumnName(int index) {
@@ -89,4 +91,13 @@ public class Table {
         }
         throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, pk.getName()));
     }
+
+    public int getNumberOfPrimaryKeyColumns() {
+        return primaryKey.size();
+    }
+
+    public String getPrimaryKeyColumnName(int index) {
+        return primaryKey.get(index).getPkName();
+    }
+
 }

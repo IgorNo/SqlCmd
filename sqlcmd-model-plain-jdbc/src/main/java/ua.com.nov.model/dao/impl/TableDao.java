@@ -1,59 +1,54 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.entity.column.ColumnPK;
+import ua.com.nov.model.entity.column.ColumnID;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TablePK;
+import ua.com.nov.model.entity.table.TableID;
 import ua.com.nov.model.util.DataSourceUtil;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TableDao extends AbstractDao<TablePK, Table, Database> {
+public class TableDao extends AbstractDao<TableID, Table, Database> {
 
     @Override
     public void create(Table table) throws SQLException {
         Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(String.format(table.getPk().getDb().getExecutor().getCreateTableStmt(),
-                table.getName(), getCreateDefinition(table)));
+        stmt.executeUpdate(table.getPk().getDb().getExecutor().getCreateTableStmt(table));
         stmt.close();
     }
 
-    private String getCreateDefinition(Table table) {
-        String result = "";
-        return result;
-    }
 
     @Override
-    public Table readByPK(TablePK tablePK) throws SQLException {
+    public Table readByPK(TableID tableID) throws SQLException {
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getTables(tablePK.getCatalog(), tablePK.getSchema(), tablePK.getName(), null);
+        ResultSet rs = dbMetaData.getTables(tableID.getCatalog(), tableID.getSchema(), tableID.getName(), null);
 
         if (!rs.next())
             throw new IllegalArgumentException(String.format("Table '%s.%s' doesn't exist",
-                    tablePK.getSchema(), tablePK.getName()));
+                    tableID.getSchema(), tableID.getName()));
 
         return new Table(readTablePK(conn, rs), rs.getString("TABLE_TYPE"));
     }
 
-    public static TablePK readTablePK(Connection conn, ResultSet rs) throws SQLException {
-        TablePK pk = new TablePK(DataSourceUtil.getDatabase(conn),
+    public static TableID readTablePK(Connection conn, ResultSet rs) throws SQLException {
+        TableID pk = new TableID(DataSourceUtil.getDatabase(conn),
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
         return pk;
     }
 
     @Override
-    public Map<TablePK, Table> readAll() throws SQLException {
-        Map<TablePK, Table> tables = new HashMap<>();
+    public Map<TableID, Table> readAll() throws SQLException {
+        Map<TableID, Table> tables = new HashMap<>();
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
 
         ResultSet rs = dbMetaData.getTables(null, null, null, new String[] {"TABLE"});
         while (rs.next()) {
-            TablePK pk = readTablePK(conn, rs);
+            TableID pk = readTablePK(conn, rs);
             Table table = new Table(pk, rs.getString("TABLE_TYPE"));
             tables.put(pk, table);
         }
@@ -61,10 +56,10 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
         ResultSetMetaData rsMetaData = rs.getMetaData();
         int columnCount = rsMetaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
-            TablePK tablePK = new TablePK(DataSourceUtil.getDatabase(conn),
+            TableID tableID = new TableID(DataSourceUtil.getDatabase(conn),
                     rsMetaData.getCatalogName(i), rsMetaData.getSchemaName(i), rsMetaData.getTableName(i));
-            ColumnPK columnPK = new ColumnPK(tablePK, rsMetaData.getColumnName(i));
-//            Column column = new Column(columnPK);
+            ColumnID columnID = new ColumnID(tableID, rsMetaData.getColumnName(i));
+//            Column column = new Column(columnID);
 
         }
 
@@ -74,7 +69,7 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
     @Override
     public void update(Table table) throws SQLException {
         Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getUpdateTableStmt(),
+        statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getUpdateTableStmt(table),
                 table.getPk().getName(), table.getName()));
         statement.close();
 
@@ -83,7 +78,7 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
     @Override
     public void delete(Table table) throws SQLException {
         Statement statement = getDataSource().getConnection().createStatement();
-        statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getDropTableStmt(),
+        statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getDropTableStmt(table),
                 table.getPk().getName()));
         statement.close();
     }
@@ -95,10 +90,10 @@ public class TableDao extends AbstractDao<TablePK, Table, Database> {
      */
     @Override
     public void deleteAllFrom(Database nullObject) throws SQLException {
-        Map<TablePK, Table> tables = readAll();
+        Map<TableID, Table> tables = readAll();
         Statement statement = getDataSource().getConnection().createStatement();
         for (Table table : tables.values()) {
-            statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getDropTableStmt(),
+            statement.executeUpdate(String.format(table.getPk().getDb().getExecutor().getDropTableStmt(table),
                     table.getPk().getName()));
         }
         statement.close();

@@ -7,7 +7,7 @@ import ua.com.nov.model.datasource.MultiConnectionDataSource;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabasePK;
+import ua.com.nov.model.entity.database.DatabaseID;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -21,7 +21,7 @@ public abstract class AbstractDatabaseDaoTest {
 
     protected abstract DataSource getDataSource() throws SQLException;
 
-    protected abstract AbstractDao<DatabasePK, Database, Object> getDao();
+    protected abstract AbstractDao<DatabaseID, Database, Object> getDao();
 
     public abstract Database getTestDatabase();
 

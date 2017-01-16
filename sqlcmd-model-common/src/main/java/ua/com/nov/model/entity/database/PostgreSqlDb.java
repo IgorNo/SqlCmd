@@ -1,13 +1,8 @@
 package ua.com.nov.model.entity.database;
 
-import ua.com.nov.model.statement.Executable;
-import ua.com.nov.model.statement.PostgreSqlExecutor;
-
 public class PostgreSqlDb extends Database {
 
-    private static final Executable EXECUTOR = new PostgreSqlExecutor();
-
-    public PostgreSqlDb(DatabasePK pk) {
+    public PostgreSqlDb(DatabaseID pk) {
         super(pk);
     }
 
@@ -19,17 +14,26 @@ public class PostgreSqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public PostgreSqlDb(DatabasePK pk, String password) {
+    public PostgreSqlDb(DatabaseID pk, String password) {
         super(pk, password);
     }
 
     @Override
     public Executable getExecutor() {
-        return EXECUTOR;
+        return new PostgreSqlExecutor();
     }
 
     @Override
     public String getProperties() {
         return "";
     }
+
+    private class PostgreSqlExecutor extends Executor {
+
+        @Override
+        public String getSelectAllDbStmt() {
+            return "SELECT datname FROM pg_database WHERE datistemplate = false";
+        }
+    }
+
 }

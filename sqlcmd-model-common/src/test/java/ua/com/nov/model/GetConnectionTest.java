@@ -1,12 +1,9 @@
 package ua.com.nov.model;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 import ua.com.nov.model.datasource.MultiConnectionDataSource;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
-import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.HyperSqlDb;
 import ua.com.nov.model.entity.database.MySqlDb;
 import ua.com.nov.model.entity.database.PostgreSqlDb;
@@ -15,6 +12,8 @@ import ua.com.nov.model.util.DataSourceUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import static org.junit.Assert.assertTrue;
 
 public class GetConnectionTest {
 
