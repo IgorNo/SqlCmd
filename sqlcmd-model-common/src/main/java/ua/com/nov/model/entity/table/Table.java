@@ -1,6 +1,7 @@
 package ua.com.nov.model.entity.table;
 
-import ua.com.nov.model.entity.key.PrimaryKey;
+import ua.com.nov.model.entity.key.ForeignKey;
+import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.row.RowData;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.column.ColumnID;
@@ -16,8 +17,13 @@ public class Table {
     private String remarks;  // explanatory comment on the table
 
     private Map<ColumnID, Column> columns = new HashMap<>(); // all table columns
-    private Map<Short, PrimaryKey> primaryKey = new TreeMap<>(); // table primary key columns
+    private Key primaryKey; // table primary key columns
+    private List<Key> uniqueKeyList; // table unique key list
+    private List<ForeignKey> foreignKeyList; // table foreign key list
+    private List<String> checkExpressionList; // table check expression list
     private List<RowData> rows = new ArrayList<>();   // table data
+
+    private String tableProperies;
 
     public Table(TableID pk) {
         this(pk, "TABLE");
@@ -92,12 +98,27 @@ public class Table {
         throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, pk.getName()));
     }
 
-    public int getNumberOfPrimaryKeyColumns() {
-        return primaryKey.size();
+    public Key getPrimaryKey() {
+        if (primaryKey == null) primaryKey = Key.create();
+        return primaryKey;
     }
 
-    public String getPrimaryKeyColumnName(int index) {
-        return primaryKey.get(index).getPkName();
+    public List<Key> getUniqueKeyList() {
+        if (uniqueKeyList == null) uniqueKeyList = new ArrayList<>();
+        return uniqueKeyList;
     }
 
+    public List<ForeignKey> getForeignKeyList() {
+        if (foreignKeyList == null) foreignKeyList = new ArrayList<>();
+        return foreignKeyList;
+    }
+
+    public List<String> getCheckExpressionList() {
+        if (checkExpressionList == null) checkExpressionList = new ArrayList<>();
+        return checkExpressionList;
+    }
+
+    public String getTableProperies() {
+        return tableProperies;
+    }
 }

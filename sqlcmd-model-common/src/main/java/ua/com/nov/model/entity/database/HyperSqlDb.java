@@ -24,7 +24,7 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public String getProperties() {
+    public String getDbProperties() {
         return "";
     }
 

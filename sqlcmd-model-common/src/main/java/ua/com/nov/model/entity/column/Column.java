@@ -1,5 +1,7 @@
 package ua.com.nov.model.entity.column;
 
+import java.util.List;
+
 public class Column {
     private ColumnID pk;
     private String name;
@@ -15,7 +17,6 @@ public class Column {
     private int ordinalPosition; // index of column in table (starting at 1)
     private boolean isAutoIncrement; // Indicates whether this column is auto incremented
     private boolean isGeneratedColumn; // Indicates whether this is a generated column
-    private boolean isUnique;  // Indicates whether this is a unique column
 
     /*
      * The columnSize attribute specifies the column size for the given column.

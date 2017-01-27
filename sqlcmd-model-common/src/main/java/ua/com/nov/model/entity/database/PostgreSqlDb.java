@@ -23,11 +23,6 @@ public class PostgreSqlDb extends Database {
         return new PostgreSqlExecutor();
     }
 
-    @Override
-    public String getProperties() {
-        return "";
-    }
-
     private class PostgreSqlExecutor extends Executor {
 
         @Override

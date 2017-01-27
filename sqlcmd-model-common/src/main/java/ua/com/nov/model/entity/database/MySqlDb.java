@@ -23,11 +23,6 @@ public class MySqlDb extends Database {
         return new MySqlExecutor();
     }
 
-    @Override
-    public String getProperties() {
-        return "";
-    }
-
     private class MySqlExecutor extends Executor {
     }
 }
