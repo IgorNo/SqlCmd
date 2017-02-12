@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.database;
 
 // Builder Pattern
-public class DbDataType {
+public class DataType {
     public static final int TYPE_NO_NULLS = 0; // does not allow NULL values
     public static final int TYPE_NULLABLE = 1; // allows NULL values
     public static final int TYPE_NULLABLE_UNKNOWN = 2;  // nullability unknown
@@ -12,8 +12,8 @@ public class DbDataType {
     public static final int TYPE_SEARCABLE = 3;     // Supported for all WHERE ..
 
     private final String typeName;
-    private final int dataType;   // SQL data type from java.sql.Types
-    private final int precision;  // maximum precision
+    private final int jdbcDataType; // SQL data type from java.sql.Types
+    private final int precision;    // maximum precision
     private final String literalPrefix;   // prefix used to quote a literal (may be 'null')
     private final String literalSuffix;   // suffix used to quote a literal (may be 'null')
     private final String createParams;    // parameters used in creating the type (may be 'null')
@@ -132,14 +132,14 @@ public class DbDataType {
             return this;
         }
 
-        public DbDataType build() {
-            return new DbDataType(this);
+        public DataType build() {
+            return new DataType(this);
         }
     }
 
-    private DbDataType(Builder builder) {
+    private DataType(Builder builder) {
         this.typeName = builder.typeName;
-        this.dataType = builder.dataType;
+        this.jdbcDataType = builder.dataType;
         this.precision = builder.precision;
         this.literalPrefix = builder.literalPrefix;
         this.literalSuffix = builder.literalSuffix;
@@ -160,8 +160,8 @@ public class DbDataType {
         return typeName;
     }
 
-    public int getDataType() {
-        return dataType;
+    public int getJdbcDataType() {
+        return jdbcDataType;
     }
 
     public int getPrecision() {

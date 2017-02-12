@@ -1,6 +1,8 @@
 package ua.com.nov.model.entity.database;
 
-public class MySqlDb extends Database {
+import ua.com.nov.model.entity.column.Column;
+
+public final class MySqlDb extends Database {
 
     public MySqlDb(DatabaseID pk) {
         super(pk);
@@ -24,6 +26,15 @@ public class MySqlDb extends Database {
     }
 
     private class MySqlExecutor extends Executor {
+        @Override
+        protected void addFullTypeName(Column col, StringBuilder result) {
+            result.append(col.getDataType().getTypeName());
+            addSizeAndPrecision(col, result);
+            if (col.isAutoIncrement()) {
+                if (col.getDataType().isAutoIncrement()) result.append(" AUTO_INCREMENT");
+                else throw new IllegalArgumentException();
+            }
+        }
     }
 }
 

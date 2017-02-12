@@ -1,12 +1,12 @@
 package ua.com.nov.model.entity.column;
 
-import java.util.List;
+import ua.com.nov.model.entity.database.DataType;
+import ua.com.nov.model.entity.table.Table;
 
 public class Column {
     private ColumnID pk;
     private String name;
-    private int dataType;        // SQL type from java.sql.Types
-    private String typeName;     // Data source dependent type name
+    private DataType dataType;
     private Integer columnSize;
     private Integer precision;   // the number of fractional digits. Null is returned for data types where
                                  // precision is not applicable
@@ -15,8 +15,8 @@ public class Column {
                                  // the value is enclosed in single quotes
     private String remarks;       // comment describing column
     private int ordinalPosition; // index of column in table (starting at 1)
-    private boolean isAutoIncrement; // Indicates whether this column is auto incremented
-    private boolean isGeneratedColumn; // Indicates whether this is a generated column
+    private boolean autoIncrement; // Indicates whether this column is auto incremented
+    private boolean generatedColumn; // Indicates whether this is a generated column
 
     /*
      * The columnSize attribute specifies the column size for the given column.
@@ -28,10 +28,15 @@ public class Column {
      * For the ROWID datatype, this is the length in bytes.
      * Null is returned for data types where the column size is not applicable.
     */
-    public Column(ColumnID pk, int ordinalPosition) {
-        this.pk = pk;
+    public Column(int ordinalPosition, ColumnID pk, DataType dataType) {
         this.ordinalPosition = ordinalPosition;
+        this.pk = pk;
         this.name = pk.getName();
+        this.dataType = dataType;
+    }
+
+    public Column(int ordinalPosition, Table table, String name, DataType dataType) {
+        this(ordinalPosition, new ColumnID(table.getId(), name), dataType);
     }
 
     public ColumnID getPk() {
@@ -42,10 +47,6 @@ public class Column {
         return name;
     }
 
-    public String getTypeName() {
-            return typeName;
-        }
-
     public Integer getColumnSize() {
             return columnSize;
         }
@@ -55,7 +56,7 @@ public class Column {
         }
 
     public boolean isAutoIncrement() {
-        return isAutoIncrement;
+        return autoIncrement;
     }
 
     public int isNullable() {
@@ -66,27 +67,23 @@ public class Column {
         pk.setName(name);
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
     public void setColumnSize(Integer columnSize) {
         this.columnSize = columnSize;
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
-        isAutoIncrement = autoIncrement;
+        this.autoIncrement = autoIncrement;
     }
 
     public void setNullable(int nullable) {
         this.nullable = nullable;
     }
 
-    public int getDataType() {
+    public DataType getDataType() {
         return dataType;
     }
 
-    public void setDataType(int dataType) {
+    public void setDataType(DataType dataType) {
         this.dataType = dataType;
     }
 
@@ -119,10 +116,11 @@ public class Column {
     }
 
     public boolean isGeneratedColumn() {
-        return isGeneratedColumn;
+        return generatedColumn;
     }
 
     public void setGeneratedColumn(boolean generatedColumn) {
-        isGeneratedColumn = generatedColumn;
+        this.generatedColumn = generatedColumn;
     }
+
 }

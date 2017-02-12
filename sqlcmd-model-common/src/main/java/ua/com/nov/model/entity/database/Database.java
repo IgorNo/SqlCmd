@@ -6,9 +6,13 @@ import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.table.Table;
 import ua.com.nov.model.util.DataSourceUtil;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public abstract class Database {
     private DatabaseID pk;
     private String password;
+    private List<DataType> dataTypes;
     private String dbProperties = "";
 
     public Database(DatabaseID pk) {
@@ -26,6 +30,29 @@ public abstract class Database {
     public Database(DatabaseID pk, String password) {
         this.pk = pk;
         this.password = password;
+    }
+
+    public List<DataType> getDataTypes() {
+        return dataTypes;
+    }
+
+    public void setDataTypes(List<DataType> dataTypes) {
+        this.dataTypes = dataTypes;
+    }
+
+    public DataType getDataType(String typeName) {
+        for (DataType dataType : dataTypes) {
+            if (dataType.getTypeName().equalsIgnoreCase(typeName)) return dataType;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public List<DataType> getListDataType(int jdbcDataType) {
+        List<DataType> result = new LinkedList<>();
+        for (DataType dataType : dataTypes) {
+            if (jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
+        }
+        return result;
     }
 
     public String getDbProperties() {
@@ -109,7 +136,7 @@ public abstract class Database {
 
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < numberOfColumns; i++) {
-                if (i != 0) result.append(',');
+                if (i != 0) result.append(", ");
                 addColumnDefinition(i, table, result);
 
             }
@@ -134,15 +161,19 @@ public abstract class Database {
 
         private void addColumnDefinition(int i, Table table, StringBuilder result) {
             Column col = table.getColumn(i);
-            if (col.getName().equals("") || col.getTypeName().trim().isEmpty()) throw new IllegalArgumentException();
+            if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
+                throw new IllegalArgumentException();
+            }
 
+            result.append(col.getName()).append(' ');
             addFullTypeName(col, result);
             addNotNull(col, result);
             addDefaultValue(col, result);
         }
 
-        protected void addFullTypeName(Column col, StringBuilder result) {
-            result.append(col.getName()).append(' ').append(col.getTypeName());
+        protected abstract void addFullTypeName(Column col, StringBuilder result);
+
+        protected void addSizeAndPrecision(Column col, StringBuilder result) {
             if (col.getColumnSize() != null) {
                 result.append('(').append(col.getColumnSize()).append(')');
                 if (col.getPrecision() != null) result.append(',').append(col.getPrecision());
@@ -188,7 +219,13 @@ public abstract class Database {
                 }
                 result.append(')');
             }
+            if (key.getDeleteRule() != null) {
+                result.append(" ON DELETE ").append(key.getDeleteRule().getAction());
+            }
+            if (key.getUpdateRule() != null) {
+                result.append(" ON UPDATE ").append(key.getUpdateRule().getAction());
+            }
         }
-
     }
+
 }
