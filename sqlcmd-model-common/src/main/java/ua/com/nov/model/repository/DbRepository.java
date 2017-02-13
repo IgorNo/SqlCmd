@@ -20,20 +20,15 @@ public class DbRepository {
         return uniqeDbRepository;
     }
 
-    public boolean removeDb(Database db) {
-        if (!repository.containsKey(db.getPk())) {
-            repository.remove(db.getPk());
-            return true;
-        }
-        return false;
+    public Database removeDb(Database db) {
+        return repository.remove(db.getPk());
     }
 
-    public boolean addDb(Database db) {
+    public Database addDb(Database db) {
         if (!repository.containsKey(db.getPk())) {
             repository.put(db.getPk(), db);
-            return true;
         }
-        return false;
+        return repository.get(db.getPk());
     }
 
     public Database getDb(DatabaseID pk) {

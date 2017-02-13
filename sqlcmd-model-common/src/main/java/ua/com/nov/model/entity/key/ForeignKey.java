@@ -6,59 +6,65 @@ import ua.com.nov.model.entity.column.Column;
 import java.util.Map;
 
 public class ForeignKey {
-    /**
-     * For the field <code>updateRule</code>, indicates that
-     * when the primary key is updated, the foreign key (imported key) is changed to agree with it.
-     * For the field <code>deleteRule</code>, it indicates that
-     * when the primary key is deleted, rows that imported that key are deleted.
-     */
-    public static final int RULE_CASCADE = 0;
+    public enum Rule {
+        /**
+         * For the field <code>updateRule</code>, indicates that
+         * when the primary key is updated, the foreign key (imported key) is changed to agree with it.
+         * For the field <code>deleteRule</code>, it indicates that
+         * when the primary key is deleted, rows that imported that key are deleted.
+         */
+        CASCADE(0, "CASCADE"),
 
-    /**
-     * For the field <code>updateRule</code>, indicates that
-     * a primary key may not be updated if it has been imported by another table as a foreign key.
-     * For the field <code>deleteRule</code>, indicates that
-     * a primary key may not be deleted if it has been imported by another table as a foreign key.
-     */
-    public static final int RULE_RESTRICT = 1;
+        /**
+         * For the field <code>updateRule</code>, indicates that
+         * a primary key may not be updated if it has been imported by another table as a foreign key.
+         * For the field <code>deleteRule</code>, indicates that
+         * a primary key may not be deleted if it has been imported by another table as a foreign key.
+         */
+        RESTRICT(1, "RESTRICT"),
 
-    /**
-     * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
-     * when the primary key is updated or deleted, the foreign key (imported key) is changed to <code>NULL</code>.
-     */
-    public static final int RULE_SET_NULL = 2;
+        /**
+         * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
+         * when the primary key is updated or deleted, the foreign key (imported key) is changed to <code>NULL</code>.
+         */
+       SET_NULL(2, "SET NULL"),
 
-    /**
-     * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
-     * if the primary key has been imported, it cannot be updated or deleted.
-     */
-    public static final int RULE_NO_ACTION = 3;
+        /**
+         * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
+         * if the primary key has been imported, it cannot be updated or deleted.
+         */
+        NO_ACTION(3, "NO ACTION"),
 
-    /**
-     * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
-     * if the primary key is updated or deleted, the foreign key (imported key) is set to the default value.
-     */
-    public static final int RULE_SET_DEFAULT = 4;
+        /**
+         * For the field <code>updateRule</code> and <code>deleteRule</code>, indicates that
+         * if the primary key is updated or deleted, the foreign key (imported key) is set to the default value.
+         */
+       SET_DEFAULT(4, "SET DEFAULT");
 
-    /**
-     * Indicates deferrability.  See SQL-92 for a definition.
-     */
-    public static final int RULE_INITIALLY_DEFFERED = 5;
+        private final String action;
+        private final int ordinalNumber;
 
-    /**
-     * Indicates deferrability.  See SQL-92 for a definition.
-     */
-    public static final int RULE_INITIALLY_IMMEDIATE = 6;
+        Rule(int ordinalNumber, String action) {
+            this.action = action;
+            this.ordinalNumber = ordinalNumber;
+        }
 
-    /**
-     * Indicates deferrability.  See SQL-92 for a definition.
-     */
-    public static final int RULE_NOT_DEFERRABLE = 7;
+        public String getAction() {
+            return action;
+        }
+
+        public Rule getRule(int n) {
+            for (Rule rule : values()) {
+                if (rule.ordinalNumber == n) return rule;
+            }
+            throw new IllegalArgumentException();
+        }
+    }
 
     private Map<Integer, Pair<Column, Column>> foreignKey;
 
-    private int updateRule = 4; // to rule what happens to a foreign key when the primary key is updated
-    private int deleteRule = 4; // to rule what happens to a foreign key when the primary key is deleted
+    private Rule updateRule; // to action what happens to a foreign key when the primary key is updated
+    private Rule deleteRule; // to action what happens to a foreign key when the primary key is deleted
 
     private ForeignKey() {}
 
@@ -91,19 +97,19 @@ public class ForeignKey {
         return result;
     }
 
-    public int getUpdateRule() {
+    public Rule getUpdateRule() {
         return updateRule;
     }
 
-    public void setUpdateRule(int updateRule) {
+    public void setUpdateRule(Rule updateRule) {
         this.updateRule = updateRule;
     }
 
-    public int getDeleteRule() {
+    public Rule getDeleteRule() {
         return deleteRule;
     }
 
-    public void setDeleteRule(int deleteRule) {
+    public void setDeleteRule(Rule deleteRule) {
         this.deleteRule = deleteRule;
     }
 }

@@ -10,7 +10,7 @@ import ua.com.nov.model.entity.database.Database;
 import java.util.*;
 
 public class Table {
-    private TableID pk;     // table primary key
+    private TableID id;     // table primary key
     private String name;    // table name
     private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
@@ -23,24 +23,24 @@ public class Table {
     private List<String> checkExpressionList; // table check expression list
     private List<RowData> rows = new ArrayList<>();   // table data
 
-    private String tableProperies;
+    private String tableProperies = "";
 
-    public Table(TableID pk) {
-        this(pk, "TABLE");
+    public Table(TableID id) {
+        this(id, "TABLE");
     }
 
     public Table(Database db, String catalog, String schema, String name) {
         this(new TableID(db, catalog, schema, name));
     }
 
-    public Table(TableID pk, String type) {
-        this.pk = pk;
-        this.name = pk.getName();
+    public Table(TableID id, String type) {
+        this.id = id;
+        this.name = id.getName();
         this.type = type;
     }
 
-    public TableID getPk() {
-        return pk;
+    public TableID getId() {
+        return id;
     }
 
     public String getType() {
@@ -95,7 +95,7 @@ public class Table {
             if (columns.get(i).getPk().equals(columnName))
                 return i;
         }
-        throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, pk.getName()));
+        throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, id.getName()));
     }
 
     public Key getPrimaryKey() {
