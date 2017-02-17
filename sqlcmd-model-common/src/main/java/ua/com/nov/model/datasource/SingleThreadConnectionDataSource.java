@@ -1,20 +1,18 @@
 package ua.com.nov.model.datasource;
 
-import ua.com.nov.model.entity.database.Database;
-
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class SingleThreadConnectionDataSource extends AbstractDataSource {
+public class SingleThreadConnectionDataSource extends BaseDataSource {
     private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
 
-    public SingleThreadConnectionDataSource(Database db) throws SQLException{
-        super(db);
-        connectionHolder.set(getConnection(db, db.getUserName(), db.getPassword()));
+    public SingleThreadConnectionDataSource(DataSource dataSource) throws SQLException {
+        connectionHolder.set(dataSource.getConnection());
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return connectionHolder.get();
     }
 }

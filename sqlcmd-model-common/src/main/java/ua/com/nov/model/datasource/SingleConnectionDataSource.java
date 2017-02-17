@@ -1,24 +1,18 @@
 package ua.com.nov.model.datasource;
 
-import ua.com.nov.model.entity.database.Database;
-
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class SingleConnectionDataSource extends AbstractDataSource {
-    private Connection conn;
+public class SingleConnectionDataSource extends BaseDataSource {
+    private final Connection conn;
 
-    public SingleConnectionDataSource(Database db) {
-        super(db);
+    public SingleConnectionDataSource(DataSource dataSource) throws SQLException {
+        this.conn = dataSource.getConnection();
     }
-
 
     @Override
-    public synchronized Connection getConnection() throws SQLException {
-        if (conn == null) {
-            conn = getConnection(getDb(), getDb().getUserName(), getDb().getPassword());
-        }
+    public Connection getConnection() {
         return conn;
     }
-
 }

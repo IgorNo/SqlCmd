@@ -21,8 +21,8 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public Executable getExecutor() {
-        return new HyperSqlExecutor();
+    public SqlStatements getExecutor() {
+        return new HyperSqlStmts();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class HyperSqlDb extends Database {
         return "";
     }
 
-    public class HyperSqlExecutor extends Executor {
+    private class HyperSqlStmts extends AbstractSqlStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             result.append(col.getDataType().getTypeName());

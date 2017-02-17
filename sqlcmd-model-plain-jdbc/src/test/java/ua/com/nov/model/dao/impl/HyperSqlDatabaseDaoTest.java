@@ -1,27 +1,24 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Test;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.entity.database.HyperSqlDb;
-import ua.com.nov.model.util.DataSourceUtil;
+import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    public static final String URL = DataSourceUtil.HYPER_SQL_MEMORY_URL;
+    public static final String URL = DbUtil.HYPER_SQL_MEMORY_URL;
 
-    public static final DataSource DATA_SOURCE =
-            new SingleConnectionDataSource(new HyperSqlDb(URL + "sys", "root", "root"));
-
-    public static final Database TEST_DATABASE = new HyperSqlDb(URL + "tmp", "root", "root");
+    public static final DataSource DATA_SOURCE = DbUtil.HYPER_SQL_MEM_SYSTEM_DB;
 
     public static final AbstractDao<DatabaseID, Database, Object> DAO = new HyperSqlDatabaseDao();
+
+    public static final Database TEST_DATABASE = new HyperSqlDb(URL + "tmp", "root", "root");
 
     @Override
     public Database getTestDatabase() {
@@ -29,7 +26,7 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public DataSource getDataSource() throws SQLException {
+    public DataSource getDataSourceDB() {
         return DATA_SOURCE;
     }
 
@@ -46,9 +43,4 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @After
     public void tearDown() throws SQLException{ /*NOP*/ }
-
-    @AfterClass
-    public static void tearDownClass() throws SQLException{
-        DATA_SOURCE.getConnection().close();
-    }
 }

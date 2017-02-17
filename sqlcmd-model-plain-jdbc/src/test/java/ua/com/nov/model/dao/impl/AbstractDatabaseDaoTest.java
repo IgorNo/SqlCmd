@@ -1,11 +1,11 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.datasource.MultiConnectionDataSource;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.DatabaseID;
 
@@ -19,11 +19,17 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
-    protected abstract DataSource getDataSource() throws SQLException;
+    private static DataSource dataSource;
+
+    public abstract DataSource getDataSourceDB();
+    public abstract Database getTestDatabase();
+
+    protected DataSource getDataSource() throws SQLException {
+        if (dataSource == null) dataSource =  new SingleConnectionDataSource(getDataSourceDB());
+        return dataSource;
+    }
 
     protected abstract AbstractDao<DatabaseID, Database, Object> getDao();
-
-    public abstract Database getTestDatabase();
 
     @Before
     public void setUp() throws SQLException {
@@ -34,8 +40,7 @@ public abstract class AbstractDatabaseDaoTest {
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        DataSource tmpDataSource = new MultiConnectionDataSource(getTestDatabase());
-        Connection conn = tmpDataSource.getConnection();
+        Connection conn = getTestDatabase().getConnection();
         assertTrue(conn != null);
         conn.close();
     }
@@ -43,8 +48,7 @@ public abstract class AbstractDatabaseDaoTest {
     @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException {
         getDao().delete(getTestDatabase());
-        DataSource tmpDataSource = new SingleConnectionDataSource(getTestDatabase());
-        Connection conn = tmpDataSource.getConnection();
+        Connection conn = getTestDatabase().getConnection();
         assertTrue(conn == null);
         conn.close();
     }
@@ -54,5 +58,10 @@ public abstract class AbstractDatabaseDaoTest {
         Statement statement = getDataSource().getConnection().createStatement();
         statement.executeUpdate(DROP_DB_IF_EXISTS_SQL + getTestDatabase().getName());
         statement.close();
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws SQLException{
+        dataSource.getConnection().close();
     }
 }

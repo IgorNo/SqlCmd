@@ -1,15 +1,21 @@
 package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.util.DataSourceUtil;
+import ua.com.nov.model.util.DbUtil;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Database {
+public abstract class Database extends BaseDataSource {
     private DatabaseID pk;
     private String password;
     private List<DataType> dataTypes;
@@ -32,12 +38,40 @@ public abstract class Database {
         this.password = password;
     }
 
-    public List<DataType> getDataTypes() {
-        return dataTypes;
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(getDbUrl(), getUserName(), password);
     }
 
-    public void setDataTypes(List<DataType> dataTypes) {
-        this.dataTypes = dataTypes;
+    public Database load() throws SQLException {
+        Connection conn = getConnection();
+        dataTypes = getDataTypes(conn);
+        conn.close();
+        return this;
+    }
+
+    private List<DataType> getDataTypes(Connection conn) throws SQLException {
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        List<DataType> dataTypeList = new ArrayList<>();
+        while (rs.next()) {
+            DataType dataType = new DataType.Builder(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"))
+                    .precision(rs.getInt("PRECISION"))
+                    .literalPrefix(rs.getString("LITERAL_PREFIX"))
+                    .literalSuffix(rs.getString("LITERAL_SUFFIX"))
+                    .createParams(rs.getString("CREATE_PARAMS"))
+                    .nullable(rs.getShort("NULLABLE"))
+                    .caseSensitive(rs.getBoolean("CASE_SENSITIVE"))
+                    .searchable(rs.getShort("SEARCHABLE"))
+                    .unsignedAttribute(rs.getBoolean("UNSIGNED_ATTRIBUTE"))
+                    .fixedPrecScale(rs.getBoolean("FIXED_PREC_SCALE"))
+                    .autoIncrement(rs.getBoolean("AUTO_INCREMENT"))
+                    .localTypeName(rs.getString("LOCAL_TYPE_NAME"))
+                    .minimumScale(rs.getInt("MINIMUM_SCALE"))
+                    .maximumScale(rs.getInt("MAXIMUM_SCALE"))
+                    .numPrecRadix(rs.getInt("NUM_PREC_RADIX"))
+                    .build();
+            dataTypeList.add(dataType);
+        }
+        return dataTypeList;
     }
 
     public DataType getDataType(String typeName) {
@@ -63,7 +97,7 @@ public abstract class Database {
         this.dbProperties = dbProperties;
     }
 
-    public abstract Executable getExecutor();
+    public abstract SqlStatements getExecutor();
 
     public DatabaseID getPk() {
         return pk;
@@ -74,7 +108,7 @@ public abstract class Database {
     }
 
     public String getName() {
-        return DataSourceUtil.getDatabaseName(getDbUrl());
+        return DbUtil.getDatabaseName(getDbUrl());
     }
 
     public String getUserName() {
@@ -85,7 +119,7 @@ public abstract class Database {
         return password;
     }
 
-    protected abstract class Executor implements Executable {
+    protected abstract class AbstractSqlStatements implements SqlStatements {
 
         public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
         public static final String DROP_DB_SQL = "DROP DATABASE %s";

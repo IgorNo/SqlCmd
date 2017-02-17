@@ -2,7 +2,7 @@ package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.entity.table.Table;
 
-public interface Executable {
+public interface SqlStatements {
 
     String getCreateDbStmt();
     String getDropDbStmt();

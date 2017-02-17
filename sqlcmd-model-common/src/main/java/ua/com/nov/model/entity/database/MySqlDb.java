@@ -21,11 +21,11 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public Executable getExecutor() {
-        return new MySqlExecutor();
+    public SqlStatements getExecutor() {
+        return new MySqlStmts();
     }
 
-    private class MySqlExecutor extends Executor {
+    private class MySqlStmts extends AbstractSqlStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             result.append(col.getDataType().getTypeName());

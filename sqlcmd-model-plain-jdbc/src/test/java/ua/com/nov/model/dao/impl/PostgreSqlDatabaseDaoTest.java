@@ -1,13 +1,11 @@
 package ua.com.nov.model.dao.impl;
 
-import org.junit.AfterClass;
 import org.junit.Test;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.entity.database.PostgreSqlDb;
-import ua.com.nov.model.util.DataSourceUtil;
+import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -16,10 +14,9 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 
 public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    public static final String URL = DataSourceUtil.POSTGRE_SQL_LOCAL_URL;
+    public static final String URL = DbUtil.POSTGRE_SQL_LOCAL_URL;
 
-    public static final DataSource DATA_SOURCE =
-            new SingleConnectionDataSource(new PostgreSqlDb(URL + "postgres", "postgres", "postgres"));
+    public static final DataSource DATA_SOURCE = DbUtil.POSTGRE_SQL_LOCAL_SYSTEM_DB;
 
     public static final AbstractDao<DatabaseID, Database, Object> DAO = new PostgreSqlDatabaseDao();
 
@@ -31,7 +28,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public DataSource getDataSource() throws SQLException {
+    public DataSource getDataSourceDB() {
         return DATA_SOURCE;
     }
 
@@ -47,8 +44,4 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
         assertTrue(databases.containsKey(databaseID));
     }
 
-    @AfterClass
-    public static void tearDownClass() throws SQLException{
-        DATA_SOURCE.getConnection().close();
-    }
 }

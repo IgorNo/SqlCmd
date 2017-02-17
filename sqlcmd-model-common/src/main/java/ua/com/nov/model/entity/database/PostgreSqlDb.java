@@ -23,11 +23,11 @@ public class PostgreSqlDb extends Database {
     }
 
     @Override
-    public Executable getExecutor() {
-        return new PostgreSqlExecutor();
+    public SqlStatements getExecutor() {
+        return new PostgreSqlStmts();
     }
 
-    private class PostgreSqlExecutor extends Executor {
+    private class PostgreSqlStmts extends AbstractSqlStatements {
         @Override
         public String getSelectAllDbStmt() {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
@@ -36,7 +36,7 @@ public class PostgreSqlDb extends Database {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             if (col.isAutoIncrement()) {
-                switch (col.getDataType()) {
+                switch (col.getDataType().getJdbcDataType()) {
                     case Types.SMALLINT:
                         result.append("SMALLSERIAL");
                         break;
@@ -50,7 +50,7 @@ public class PostgreSqlDb extends Database {
                         throw new IllegalArgumentException();
                 }
             } else {
-                result.append(col.getTypeName());
+                result.append(col.getDataType().getTypeName());
             }
             addSizeAndPrecision(col, result);
         }
