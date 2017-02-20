@@ -1,22 +1,9 @@
 package ua.com.nov.model.dao;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractDao<K, V, A> implements Dao<K, V, A> {
-
-    private DataSource dataSource;
-
-    protected DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
+public abstract class BaseDao<K, V, O> implements Dao<K, V, O> {
 
     @Override
     public void create(V value) throws SQLException {
@@ -24,17 +11,17 @@ public abstract class AbstractDao<K, V, A> implements Dao<K, V, A> {
     }
 
     @Override
-    public V readByPK(K id) throws SQLException {
+    public V readOne(K id) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<K, V> readAllFrom(A ambient) throws SQLException {
-        throw new UnsupportedOperationException();
+    public Map<K, V> readN(int nStart, int number) throws SQLException {
+        return null;
     }
 
     @Override
-    public Map<K, V> readAll() throws SQLException {
+    public Map<K, V> readAll(O topLevelObject) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
@@ -49,12 +36,12 @@ public abstract class AbstractDao<K, V, A> implements Dao<K, V, A> {
     }
 
     @Override
-    public void deleteAllFrom(A ambient) throws SQLException {
+    public void deleteAll(O topLevelObject) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int count(A ambient) throws SQLException {
+    public int count(O topLevelObject) throws SQLException {
         throw new UnsupportedOperationException();
     }
 }
