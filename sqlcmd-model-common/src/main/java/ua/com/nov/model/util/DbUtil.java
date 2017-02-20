@@ -33,7 +33,7 @@ public class DbUtil {
 
     public static Database getDatabase(Connection conn) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
-        return DbRepository.getInstance().getDb(new DatabaseID(metaData.getURL(), metaData.getUserName()));
+        return DbRepository.getDb(new DatabaseID(metaData.getURL(), metaData.getUserName()));
     }
 
     public static String getDatabaseName(String url) {

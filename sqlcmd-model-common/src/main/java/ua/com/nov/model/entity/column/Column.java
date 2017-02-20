@@ -10,7 +10,7 @@ public class Column {
     private Integer columnSize;
     private Integer precision;   // the number of fractional digits. Null is returned for data types where
                                  // precision is not applicable
-    private int nullable = 2;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
+    private int nullable = 1;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
     private String defaultValue; //default value for the column, which should be interpreted as a string when
                                  // the value is enclosed in single quotes
     private String remarks;       // comment describing column

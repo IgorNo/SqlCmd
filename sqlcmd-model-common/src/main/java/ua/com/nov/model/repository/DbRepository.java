@@ -8,30 +8,30 @@ import java.util.Map;
 
 public class DbRepository {
     private static DbRepository uniqeDbRepository;
-    private Map<DatabaseID, Database> repository = new HashMap<>();
+    private static Map<DatabaseID, Database> repository = new HashMap<>();
 
     private DbRepository() {
     }
 
-    public static DbRepository getInstance() {
-        if (uniqeDbRepository == null){
-            uniqeDbRepository = new DbRepository();
-        }
-        return uniqeDbRepository;
-    }
+//    public static DbRepository getInstance() {
+//        if (uniqeDbRepository == null){
+//            uniqeDbRepository = new DbRepository();
+//        }
+//        return uniqeDbRepository;
+//    }
 
     public Database removeDb(Database db) {
         return repository.remove(db.getPk());
     }
 
-    public Database addDb(Database db) {
+    public static Database addDb(Database db) {
         if (!repository.containsKey(db.getPk())) {
             repository.put(db.getPk(), db);
         }
         return repository.get(db.getPk());
     }
 
-    public Database getDb(DatabaseID pk) {
+    public static Database getDb(DatabaseID pk) {
         Database db = repository.get(pk);
         if (db == null) {
             throw new IllegalArgumentException(

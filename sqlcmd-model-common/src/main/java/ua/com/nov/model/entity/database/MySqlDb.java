@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.entity.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 
 public final class MySqlDb extends Database {
@@ -21,7 +22,7 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public SqlStatements getExecutor() {
+    public SqlStatementSource getExecutor() {
         return new MySqlStmts();
     }
 

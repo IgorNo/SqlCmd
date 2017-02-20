@@ -1,10 +1,12 @@
 package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.datasource.BaseDataSource;
+import ua.com.nov.model.entity.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.repository.DbRepository;
 import ua.com.nov.model.util.DbUtil;
 
 import java.sql.Connection;
@@ -36,6 +38,7 @@ public abstract class Database extends BaseDataSource {
     public Database(DatabaseID pk, String password) {
         this.pk = pk;
         this.password = password;
+        DbRepository.addDb(this);
     }
 
     public Connection getConnection() throws SQLException {
@@ -97,7 +100,7 @@ public abstract class Database extends BaseDataSource {
         this.dbProperties = dbProperties;
     }
 
-    public abstract SqlStatements getExecutor();
+    public abstract SqlStatementSource getExecutor();
 
     public DatabaseID getPk() {
         return pk;
@@ -119,7 +122,7 @@ public abstract class Database extends BaseDataSource {
         return password;
     }
 
-    protected abstract class AbstractSqlStatements implements SqlStatements {
+    protected abstract class AbstractSqlStatements implements SqlStatementSource {
 
         public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
         public static final String DROP_DB_SQL = "DROP DATABASE %s";
@@ -130,22 +133,22 @@ public abstract class Database extends BaseDataSource {
 
 
         @Override
-        public String getCreateDbStmt() {
+        public String getCreateStmt() {
             return String.format(CREATE_DB_SQL, getName(), getDbProperties());
         }
 
         @Override
-        public String getDropDbStmt() {
+        public String getDeleteStmt() {
             return String.format(DROP_DB_SQL, getName());
         }
 
         @Override
-        public String getAlterDbStmt() {
+        public String getUpdateStmt() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public String getSelectAllDbStmt() {
+        public String getReadAllStmt() {
             throw new UnsupportedOperationException();
         }
 
@@ -171,8 +174,7 @@ public abstract class Database extends BaseDataSource {
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < numberOfColumns; i++) {
                 if (i != 0) result.append(", ");
-                addColumnDefinition(i, table, result);
-
+                addColumnDefinition(i + 1, table, result);
             }
 
             addKey(table.getPrimaryKey(), ", PRIMARY KEY", result);
@@ -189,12 +191,11 @@ public abstract class Database extends BaseDataSource {
                 result.append(", CHECK(").append(chekExpr).append(')');
             }
 
-            result.append(')');
             return result.toString();
         }
 
-        private void addColumnDefinition(int i, Table table, StringBuilder result) {
-            Column col = table.getColumn(i);
+        private void addColumnDefinition(int ordinalPosition, Table table, StringBuilder result) {
+            Column col = table.getColumn(ordinalPosition);
             if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
                 throw new IllegalArgumentException();
             }

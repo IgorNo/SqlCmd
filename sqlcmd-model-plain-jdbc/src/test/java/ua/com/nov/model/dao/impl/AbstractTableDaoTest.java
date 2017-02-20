@@ -4,12 +4,15 @@ import org.junit.After;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.entity.column.Column;
+import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.table.Table;
 import ua.com.nov.model.entity.table.TableID;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
@@ -29,36 +32,42 @@ public abstract class AbstractTableDaoTest {
     }
 
     protected void createTestData(String schema) throws SQLException {
-        tableID1 = new TableID(getTestDatabase(), null, schema, "table1");
+        Database testDb = getTestDatabase().load();
+        DataType intDataType = testDb.getListDataType(Types.INTEGER).get(0);
+        tableID1 = new TableID(testDb, null, schema, "table1");
         table1 = new Table(tableID1);
+        table1.addColumn(new Column(1, table1, "id1", intDataType));
         DAO.create(table1);
         tableID2 = new TableID(getTestDatabase(), null, schema, "table2");
         table2 = new Table(tableID2);
+        table2.addColumn(new Column(1, table2, "id2", intDataType));
         DAO.create(table2);
         tableID3 = new TableID(getTestDatabase(), null, schema, "table3");
+        table3 = new Table(tableID3);
+        table3.addColumn(new Column(1, table3, "id3", intDataType));
         table3 = new Table(tableID3);
         DAO.create(table3);
     }
 
     @Test
     public void testCreateTable() throws SQLException {
-        assertTrue(DAO.readByPK(tableID1).getPk().equals(tableID1));
+        assertTrue(DAO.readByPK(tableID1).getId().equals(tableID1));
     }
 
     @Test
     public void testReadTableByPK() throws SQLException {
-        assertTrue(DAO.readByPK(tableID3).getPk().equals(tableID3));
+        assertTrue(DAO.readByPK(tableID3).getId().equals(tableID3));
     }
 
     @Test
     public void testReadAllTables() throws SQLException{
         Map<TableID, Table> tables = DAO.readAll();
         Table table = tables.get(tableID1);
-        assertTrue(table1.getPk().equals(table.getPk()));
+        assertTrue(table1.getId().equals(table.getId()));
         table = tables.get(tableID2);
-        assertTrue(table2.getPk().equals(table.getPk()));
+        assertTrue(table2.getId().equals(table.getId()));
         table = tables.get(tableID3);
-        assertTrue(table3.getPk().equals(table.getPk()));
+        assertTrue(table3.getId().equals(table.getId()));
     }
 
     @Test
@@ -66,7 +75,7 @@ public abstract class AbstractTableDaoTest {
         table1.setName("table11");
         DAO.update(table1);
         tableID1.setName("table11");
-        assertTrue(DAO.readByPK(tableID1).getPk().equals(tableID1));
+        assertTrue(DAO.readByPK(tableID1).getId().equals(tableID1));
     }
 
     @Test(expected = IllegalArgumentException.class)

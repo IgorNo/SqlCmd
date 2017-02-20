@@ -16,7 +16,7 @@ public class Table {
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private String remarks;  // explanatory comment on the table
 
-    private Map<ColumnID, Column> columns = new HashMap<>(); // all table columns
+    private Map<Integer, Column> columns = new HashMap<>(); // all table columns
     private Key primaryKey; // table primary key columns
     private List<Key> uniqueKeyList; // table unique key list
     private List<ForeignKey> foreignKeyList; // table foreign key list
@@ -68,14 +68,12 @@ public class Table {
         columns.clear();
     }
 
-    public boolean addColumn(Column column) {
-        if (columns.containsKey(column.getPk())) return false;
-        columns.put(column.getPk(), column);
-        return true;
-    }
-
-    public void addAllColums(Map<ColumnID, Column> columnMap) {
-        columns.putAll(columnMap);
+    public void addColumn(Column col) {
+        if (columns.containsKey(col.getOrdinalPosition())) {
+            throw new IllegalArgumentException(String.format("Column with ordinal position %s alredy exists",
+                    col.getOrdinalPosition()));
+        }
+        columns.put(col.getOrdinalPosition(), col);
     }
 
     public int getNumberOfColumns() {

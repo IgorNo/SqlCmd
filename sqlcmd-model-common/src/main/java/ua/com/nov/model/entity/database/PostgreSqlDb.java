@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.entity.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 
 import java.sql.Types;
@@ -23,13 +24,13 @@ public class PostgreSqlDb extends Database {
     }
 
     @Override
-    public SqlStatements getExecutor() {
+    public SqlStatementSource getExecutor() {
         return new PostgreSqlStmts();
     }
 
     private class PostgreSqlStmts extends AbstractSqlStatements {
         @Override
-        public String getSelectAllDbStmt() {
+        public String getReadAllStmt() {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
         }
 

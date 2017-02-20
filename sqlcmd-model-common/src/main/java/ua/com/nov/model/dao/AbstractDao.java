@@ -9,7 +9,7 @@ public abstract class AbstractDao<K, V, A> implements Dao<K, V, A> {
 
     private DataSource dataSource;
 
-    public DataSource getDataSource() {
+    protected DataSource getDataSource() {
         return dataSource;
     }
 

@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.entity.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 
 public class HyperSqlDb extends Database {
@@ -21,7 +22,7 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public SqlStatements getExecutor() {
+    public SqlStatementSource getExecutor() {
         return new HyperSqlStmts();
     }
 
