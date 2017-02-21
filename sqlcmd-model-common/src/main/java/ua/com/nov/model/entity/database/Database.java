@@ -1,11 +1,14 @@
 package ua.com.nov.model.entity.database;
 
+import ua.com.nov.model.dao.BaseSqlStmtSource;
+import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.datasource.BaseDataSource;
-import ua.com.nov.model.entity.SqlStatementSource;
+import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableID;
 import ua.com.nov.model.repository.DbRepository;
 import ua.com.nov.model.util.DbUtil;
 
@@ -17,7 +20,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Database extends BaseDataSource {
+public abstract class Database
+        extends BaseDataSource
+        implements Persistent<DatabaseID, Database> {
+
     private DatabaseID pk;
     private String password;
     private List<DataType> dataTypes;
@@ -41,6 +47,8 @@ public abstract class Database extends BaseDataSource {
         DbRepository.addDb(this);
     }
 
+    public abstract SqlStatementSource<TableID, Table> getTableSqlStmtSource();
+    
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getDbUrl(), getUserName(), password);
     }
@@ -100,8 +108,6 @@ public abstract class Database extends BaseDataSource {
         this.dbProperties = dbProperties;
     }
 
-    public abstract SqlStatementSource getExecutor();
-
     public DatabaseID getPk() {
         return pk;
     }
@@ -122,48 +128,38 @@ public abstract class Database extends BaseDataSource {
         return password;
     }
 
-    protected abstract class AbstractSqlStatements implements SqlStatementSource {
+    protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<DatabaseID, Database> {
 
         public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
         public static final String DROP_DB_SQL = "DROP DATABASE %s";
 
+        @Override
+        public String getCreateStmt(Database db) {
+            return String.format(CREATE_DB_SQL, db.getName(), db.getDbProperties());
+        }
+
+        @Override
+        public String getDeleteStmt(Database db) {
+            return String.format(DROP_DB_SQL, db.getName());
+        }
+
+    }
+
+    protected abstract static class AbstractSqlTableStatements extends BaseSqlStmtSource<TableID, Table> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
 
-
         @Override
-        public String getCreateStmt() {
-            return String.format(CREATE_DB_SQL, getName(), getDbProperties());
-        }
-
-        @Override
-        public String getDeleteStmt() {
-            return String.format(DROP_DB_SQL, getName());
-        }
-
-        @Override
-        public String getUpdateStmt() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getReadAllStmt() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getCreateTableStmt(Table table) {
+        public String getCreateStmt(Table table) {
             return String.format(CREATE_TABLE_SQL, table.getName(), getCreateTableDefinition(table), table.getTableProperies());
         }
 
-        @Override
-        public String getDropTableStmt(Table table) {
+        public String getDropStmt(Table table) {
             return DROP_TABLE_SQL;
         }
 
-        @Override
-        public String getUpdateTableStmt(Table table) {
+        public String getUpdateStmt(Table table) {
             return RENAME_TABLE_SQL;
         }
 
@@ -261,6 +257,6 @@ public abstract class Database extends BaseDataSource {
                 result.append(" ON UPDATE ").append(key.getUpdateRule().getAction());
             }
         }
-    }
 
+    }
 }

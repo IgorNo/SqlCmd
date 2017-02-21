@@ -1,15 +1,19 @@
 package ua.com.nov.model.entity.table;
 
+import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.column.Column;
+import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.row.RowData;
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.column.ColumnID;
-import ua.com.nov.model.entity.database.Database;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class Table {
+public class Table implements Persistent<TableID, Table> {
     private TableID id;     // table primary key
     private String name;    // table name
     private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
@@ -37,6 +41,11 @@ public class Table {
         this.id = id;
         this.name = id.getName();
         this.type = type;
+    }
+
+    @Override
+    public SqlStatementSource<TableID, Table> getSqlStmtSource() {
+        return id.getDb().getTableSqlStmtSource();
     }
 
     public TableID getId() {

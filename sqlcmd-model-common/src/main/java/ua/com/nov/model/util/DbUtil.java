@@ -1,8 +1,6 @@
 package ua.com.nov.model.util;
 
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseID;
-import ua.com.nov.model.entity.database.HyperSqlDb;
+import ua.com.nov.model.entity.database.*;
 import ua.com.nov.model.repository.DbRepository;
 
 import java.sql.Connection;
@@ -25,10 +23,10 @@ public class DbUtil {
             new HyperSqlDb(HYPER_SQL_FILE_URL + "sys", "root", "root");
 
     public static final Database MY_SQL_LOCAL_SYSTEM_DB =
-            new HyperSqlDb(MY_SQL_LOCAL_URL + "sys", "root", "root");
+            new MySqlDb(MY_SQL_LOCAL_URL + "sys", "root", "root");
 
     public static final Database POSTGRE_SQL_LOCAL_SYSTEM_DB =
-            new HyperSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
+            new PostgreSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
 
 
     public static Database getDatabase(Connection conn) throws SQLException {

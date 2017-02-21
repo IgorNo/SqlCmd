@@ -1,9 +1,11 @@
 package ua.com.nov.model.entity.column;
 
+import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.table.Table;
 
-public class Column {
+public class Column implements Persistent<ColumnID, Column> {
     private ColumnID pk;
     private String name;
     private DataType dataType;
@@ -37,6 +39,11 @@ public class Column {
 
     public Column(int ordinalPosition, Table table, String name, DataType dataType) {
         this(ordinalPosition, new ColumnID(table.getId(), name), dataType);
+    }
+
+    @Override
+    public SqlStatementSource<ColumnID, Column> getSqlStmtSource() {
+        return null;
     }
 
     public ColumnID getPk() {

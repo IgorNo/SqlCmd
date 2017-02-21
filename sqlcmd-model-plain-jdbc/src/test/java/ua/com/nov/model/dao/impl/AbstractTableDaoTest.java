@@ -1,9 +1,11 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
-import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.dao.BaseDao;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.database.Database;
@@ -19,7 +21,10 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractTableDaoTest {
 
-    public static final AbstractDao<TableID, Table, Database> DAO = new TableDao();
+    public static final BaseDao<TableID, Table, Database> DAO = new TableDao();
+
+    private static DataSource dataSource;
+
     private TableID tableID1, tableID2, tableID3;
     private Table table1, table2, table3;
 
@@ -27,8 +32,8 @@ public abstract class AbstractTableDaoTest {
 
     protected static void createDataSource(AbstractDatabaseDaoTest dbTest) throws SQLException {
         dbTest.setUp();
-        DataSource tmpDataSource = new SingleConnectionDataSource(dbTest.getTestDatabase());
-        DAO.setDataSource(tmpDataSource);
+        dataSource  = new SingleConnectionDataSource(dbTest.getTestDatabase());
+        DAO.setDataSource(dbTest.getDataSource());
     }
 
     protected void createTestData(String schema) throws SQLException {
@@ -49,19 +54,26 @@ public abstract class AbstractTableDaoTest {
         DAO.create(table3);
     }
 
+    @BeforeClass
+    public static void setUpClass() throws SQLException {
+
+        DAO.setDataSource(dataSource);
+    }
+
+
     @Test
     public void testCreateTable() throws SQLException {
-        assertTrue(DAO.readByPK(tableID1).getId().equals(tableID1));
+        assertTrue(DAO.readOne(tableID1).getId().equals(tableID1));
     }
 
     @Test
     public void testReadTableByPK() throws SQLException {
-        assertTrue(DAO.readByPK(tableID3).getId().equals(tableID3));
+        assertTrue(DAO.readOne(tableID3).getId().equals(tableID3));
     }
 
     @Test
     public void testReadAllTables() throws SQLException{
-        Map<TableID, Table> tables = DAO.readAll();
+        Map<TableID, Table> tables = DAO.readAll(null);
         Table table = tables.get(tableID1);
         assertTrue(table1.getId().equals(table.getId()));
         table = tables.get(tableID2);
@@ -75,24 +87,28 @@ public abstract class AbstractTableDaoTest {
         table1.setName("table11");
         DAO.update(table1);
         tableID1.setName("table11");
-        assertTrue(DAO.readByPK(tableID1).getId().equals(tableID1));
+        assertTrue(DAO.readOne(tableID1).getId().equals(tableID1));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void  testDeleteTable() throws SQLException {
         DAO.delete(table2);
-        DAO.readByPK(tableID2);
+        DAO.readOne(tableID2);
     }
 
     @Test
     public void testDeleteAllTables() throws SQLException {
-        DAO.deleteAllFrom(null);
-        assertTrue(DAO.readAll().size() == 0);
+        DAO.deleteAll(null);
+        assertTrue(DAO.readAll(null).size() == 0);
     }
 
     @After
     public void tearDown() throws SQLException{
-        DAO.deleteAllFrom(null);
+        DAO.deleteAll(null);
+    }
+
+    public static void tearDownClass() throws SQLException {
+        dataSource.getConnection().close();
     }
 
 }

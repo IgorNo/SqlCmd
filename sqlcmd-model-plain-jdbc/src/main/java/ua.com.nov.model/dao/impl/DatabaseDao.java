@@ -1,39 +1,43 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.DatabaseID;
+import ua.com.nov.model.entity.database.PostgreSqlDb;
+import ua.com.nov.model.repository.DbRepository;
+import ua.com.nov.model.util.DbUtil;
 
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
+import java.util.HashMap;
 import java.util.Map;
 
-public class DatabaseDao extends AbstractDao<DatabaseID, Database, Object> {
+public class DatabaseDao extends DataDefinitionDao<DatabaseID, Database, Object> {
+    protected DatabaseDao() {}
 
-    protected DatabaseDao() {
+    @Override
+    public Map<DatabaseID, Database> readAll(Object nullObject) throws SQLException {
+        Map<DatabaseID, Database> result = new HashMap<>();
+        Connection conn = getDataSource().getConnection();
+
+        try (Statement stmt = conn.createStatement()) {
+            DatabaseMetaData metaData = conn.getMetaData();
+            SqlStatementSource source = DbRepository.getDb(new DatabaseID(metaData.getURL(), metaData.getUserName()))
+                    .getSqlStmtSource();
+
+            try (ResultSet databases = stmt.executeQuery(source.getReadAllStmt())) {
+                while (databases.next()) {
+                    String url = DbUtil.getDatabaseUrl(conn) + databases.getString(1);
+                    DatabaseID databaseID = new DatabaseID(url, conn.getMetaData().getUserName());
+                    result.put(databaseID, new PostgreSqlDb(databaseID));
+                }
+            }
+        }
+        return result;
     }
 
     @Override
-    public void create(Database db) throws SQLException {
-        Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(db.getExecutor().getCreateStmt());
-        stmt.close();
-    }
-
-    @Override
-    public void delete(Database db) throws SQLException {
-        Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(db.getExecutor().getDeleteStmt());
-        stmt.close();
-    }
-
-    @Override
-    public Map<DatabaseID, Database> readAllFrom(Object ambient) throws SQLException {
-        return readAll();
-    }
-
-    @Override
-    public int count(Object ambient) throws SQLException {
-        return readAllFrom(ambient).size();
+    public int count(Object nullObject) throws SQLException {
+        return readAll(nullObject).size();
     }
 }

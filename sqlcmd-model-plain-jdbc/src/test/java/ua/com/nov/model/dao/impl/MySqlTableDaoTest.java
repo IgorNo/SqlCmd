@@ -14,14 +14,9 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         return DB_TEST.getTestDatabase();
     }
 
-    @BeforeClass
-    public static void setUpClass() throws SQLException {
-        createDataSource(DB_TEST);
-    }
-
     @AfterClass
     public static void tearDownClass() throws SQLException {
+        AbstractTableDaoTest.tearDownClass();
         DB_TEST.tearDown();
     }
-
 }

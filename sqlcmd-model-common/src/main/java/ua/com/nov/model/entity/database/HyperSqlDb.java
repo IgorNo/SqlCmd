@@ -1,9 +1,16 @@
 package ua.com.nov.model.entity.database;
 
-import ua.com.nov.model.entity.SqlStatementSource;
+import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
+import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableID;
 
 public class HyperSqlDb extends Database {
+    private static final SqlStatementSource<DatabaseID, Database>
+            DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
+    private static final SqlStatementSource<TableID, Table>
+            TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
+
 
     public HyperSqlDb(DatabaseID pk) {
         super(pk);
@@ -22,8 +29,13 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public SqlStatementSource getExecutor() {
-        return new HyperSqlStmts();
+    public SqlStatementSource<DatabaseID, Database> getSqlStmtSource() {
+        return DATABASE_SQL_STATEMENT_SOURCE;
+    }
+
+    @Override
+    public SqlStatementSource<TableID, Table> getTableSqlStmtSource() {
+        return TABLE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
@@ -31,7 +43,19 @@ public class HyperSqlDb extends Database {
         return "";
     }
 
-    private class HyperSqlStmts extends AbstractSqlStatements {
+    private static class HyperSqlDbStmts extends AbstractSqlDbStatements {
+        @Override
+        public String getCreateStmt(Database db) {
+           throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getDeleteStmt(Database db) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static class HyperSqlTableStmts extends AbstractSqlTableStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             result.append(col.getDataType().getTypeName());
@@ -42,5 +66,4 @@ public class HyperSqlDb extends Database {
             }
         }
     }
-
 }

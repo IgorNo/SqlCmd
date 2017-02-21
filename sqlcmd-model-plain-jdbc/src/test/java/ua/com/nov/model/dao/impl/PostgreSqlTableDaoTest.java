@@ -15,19 +15,14 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
         return DB_TEST.getTestDatabase();
     }
 
-    @BeforeClass
-    public static void setUpClass() throws SQLException {
-        createDataSource(DB_TEST);
-    }
-
     @Before
     public void setUp() throws SQLException{
         createTestData("public");
     }
-    
+
     @AfterClass
     public static void tearDownClass() throws SQLException {
-        DAO.getDataSource().getConnection().close();
+        AbstractTableDaoTest.tearDownClass();
         DB_TEST.tearDown();
     }
 }
