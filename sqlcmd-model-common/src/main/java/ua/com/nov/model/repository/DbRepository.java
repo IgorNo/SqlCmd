@@ -21,14 +21,14 @@ public class DbRepository {
 //    }
 
     public Database removeDb(Database db) {
-        return repository.remove(db.getPk());
+        return repository.remove(db.getId());
     }
 
     public static Database addDb(Database db) {
-        if (!repository.containsKey(db.getPk())) {
-            repository.put(db.getPk(), db);
+        if (!repository.containsKey(db.getId())) {
+            repository.put(db.getId(), db);
         }
-        return repository.get(db.getPk());
+        return repository.get(db.getId());
     }
 
     public static Database getDb(DatabaseID pk) {

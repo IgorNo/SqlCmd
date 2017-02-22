@@ -24,13 +24,13 @@ public abstract class Database
         extends BaseDataSource
         implements Persistent<DatabaseID, Database> {
 
-    private DatabaseID pk;
+    private DatabaseID id;
     private String password;
     private List<DataType> dataTypes;
     private String dbProperties = "";
 
-    public Database(DatabaseID pk) {
-        this(pk, null);
+    public Database(DatabaseID id) {
+        this(id, null);
     }
 
     public Database(String dbUrl, String userName) {
@@ -41,14 +41,14 @@ public abstract class Database
         this(new DatabaseID(dbUrl, userName), password);
     }
 
-    public Database(DatabaseID pk, String password) {
-        this.pk = pk;
+    public Database(DatabaseID id, String password) {
+        this.id = id;
         this.password = password;
         DbRepository.addDb(this);
     }
 
     public abstract SqlStatementSource<TableID, Table> getTableSqlStmtSource();
-    
+
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getDbUrl(), getUserName(), password);
     }
@@ -108,12 +108,16 @@ public abstract class Database
         this.dbProperties = dbProperties;
     }
 
-    public DatabaseID getPk() {
-        return pk;
+    public DatabaseID getId() {
+        return id;
+    }
+
+    public void setId(DatabaseID id) {
+        this.id = id;
     }
 
     public String getDbUrl() {
-        return pk.getDbUrl();
+        return id.getDbUrl();
     }
 
     public String getName() {
@@ -121,12 +125,14 @@ public abstract class Database
     }
 
     public String getUserName() {
-        return pk.getUserName();
+        return id.getUserName();
     }
 
     public String getPassword() {
         return password;
     }
+
+
 
     protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<DatabaseID, Database> {
 

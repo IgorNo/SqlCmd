@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
-    public static final BaseDao<DatabaseID, Database, Object> DAO = new DatabaseDao();
+    public static final BaseDao<DatabaseID, Database, Database> DAO = new DatabaseDao();
 
     private static DataSource dataSource;
 

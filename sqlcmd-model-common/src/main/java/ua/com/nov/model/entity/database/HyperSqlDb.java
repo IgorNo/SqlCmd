@@ -11,7 +11,6 @@ public class HyperSqlDb extends Database {
     private static final SqlStatementSource<TableID, Table>
             TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
 
-
     public HyperSqlDb(DatabaseID pk) {
         super(pk);
     }

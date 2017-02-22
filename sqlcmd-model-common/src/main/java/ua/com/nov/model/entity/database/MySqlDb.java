@@ -11,7 +11,6 @@ public final class MySqlDb extends Database {
     private static final SqlStatementSource<TableID, Table>
             TABLE_SQL_STATEMENT_SOURCE = new MySqlTableStmts();
 
-
     public MySqlDb(DatabaseID pk) {
         super(pk);
     }

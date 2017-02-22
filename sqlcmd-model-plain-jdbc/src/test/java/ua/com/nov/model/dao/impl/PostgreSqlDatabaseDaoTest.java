@@ -32,9 +32,9 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        Map<DatabaseID, Database> databases = DAO.readAll(null);
         DatabaseID databaseID = new DatabaseID(URL + "tmp", "postgres");
+        Map<DatabaseID, Database> databases = DAO.readAll(TEST_DATABASE);
         assertTrue(databases.containsKey(databaseID));
     }
-    
+
 }
