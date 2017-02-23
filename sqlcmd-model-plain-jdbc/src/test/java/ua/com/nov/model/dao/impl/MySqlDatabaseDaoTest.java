@@ -1,8 +1,6 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.dao.BaseDao;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.entity.database.MySqlDb;
 import ua.com.nov.model.util.DbUtil;
 

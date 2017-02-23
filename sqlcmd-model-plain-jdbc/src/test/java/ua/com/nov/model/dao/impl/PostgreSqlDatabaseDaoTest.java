@@ -1,15 +1,14 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.Test;
-import ua.com.nov.model.dao.BaseDao;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseID;
+import ua.com.nov.model.entity.database.DatabaseId;
 import ua.com.nov.model.entity.database.PostgreSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -32,9 +31,9 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        DatabaseID databaseID = new DatabaseID(URL + "tmp", "postgres");
-        Map<DatabaseID, Database> databases = DAO.readAll(TEST_DATABASE);
-        assertTrue(databases.containsKey(databaseID));
+        DatabaseId databaseId = new DatabaseId(URL + "tmp", "postgres");
+        List<Database> databases = DAO.readAll(TEST_DATABASE);
+        assertTrue(databases.contains(TEST_DATABASE));
     }
 
 }

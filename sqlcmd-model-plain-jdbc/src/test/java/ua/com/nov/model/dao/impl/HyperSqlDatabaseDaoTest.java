@@ -1,18 +1,14 @@
 package ua.com.nov.model.dao.impl;
 
-import org.hsqldb.HsqlException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.BaseDao;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseID;
 import ua.com.nov.model.entity.database.HyperSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final String URL = DbUtil.HYPER_SQL_MEMORY_URL;

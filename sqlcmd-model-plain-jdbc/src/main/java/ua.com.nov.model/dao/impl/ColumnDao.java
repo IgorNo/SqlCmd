@@ -1,10 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.column.ColumnID;
+import ua.com.nov.model.entity.column.ColumnId;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TableID;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -13,33 +12,47 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ColumnDao extends DataDefinitionDao<ColumnID, Column, Table> {
+public class ColumnDao extends DataDefinitionDao<Column> {
+    @Override
+    protected ResultSet getOneResultSet(Column value) throws SQLException {
+        return null;
+    }
+
+    @Override
+    protected ResultSet getAllResultSet(Column template) throws SQLException {
+        return null;
+    }
+
+    @Override
+    protected ResultSet getNResultSet(int nStart, int number, Column template) throws SQLException {
+        return null;
+    }
 
     public static final String CREATE_COLUMN_SQL = "ALTER TABLE %s ADD COLUMN %s";
+
     private static String getColumnDefinition(Column col) {
         StringBuilder result = new StringBuilder(col.getName());
         result.append(' ').append(col.getDataType().getTypeName()).append(' ');
         return result.toString();
     }
 
-    @Override
-    public Column readOne(ColumnID pk) throws SQLException {
+
+    public Column readOne(ColumnId key) throws SQLException {
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getColumns(pk.getTableID().getCatalog(), pk.getTableID().getSchema(),
-                pk.getTableID().getName(), pk.getName());
+        ResultSet rs = dbMetaData.getColumns(key.getTable().getId().getCatalog(), key.getTable().getId().getSchema(),
+                key.getTable().getName(), key.getName());
 
         if (!rs.next()) throw new IllegalArgumentException(String.format("Column '%s' doesn't exist in table '%s.%s'.",
-                pk.getName(), pk.getTableID().getSchema(), pk.getTableID().getName()));
+                key.getName(), key.getTable().getId().getSchema(), key.getTable().getName()));
 
-        return  getColumn(conn, rs);
+        return  getColumn(key, rs);
     }
 
-    private static Column getColumn(Connection conn, ResultSet rs) throws SQLException {
-        TableID tableID = TableDao.readTablePK(conn, rs);
-        ColumnID columnID = new ColumnID(tableID, rs.getString("COLUMN_NAME"));
-        DataType dataType = tableID.getDb().getDataType(rs.getString("TYPE_NAME"));
-        Column column = new Column(rs.getInt("ORDINAL_POSITION"), columnID, dataType);
+    private static Column getColumn(ColumnId key, ResultSet rs) throws SQLException {
+        ColumnId columnId = new ColumnId(key.getTable(), rs.getString("COLUMN_NAME"));
+        DataType dataType = key.getTable().getId().getDb().getDataType(rs.getString("TYPE_NAME"));
+        Column column = new Column(rs.getInt("ORDINAL_POSITION"), columnId, dataType);
         column.setColumnSize(rs.getInt("COLUMN_SIZE"));
         column.setPrecision(rs.getInt("DECIMAL_DIGITS"));
         column.setNullable(rs.getInt("NULLABLE"));
@@ -50,9 +63,8 @@ public class ColumnDao extends DataDefinitionDao<ColumnID, Column, Table> {
         return column;
     }
 
-    @Override
-    public Map<ColumnID, Column> readAll(Table table) throws SQLException {
-        Map<ColumnID, Column> columns = new HashMap<>();
+    public Map<ColumnId, Column> readAll(Table table) throws SQLException {
+        Map<ColumnId, Column> columns = new HashMap<>();
 
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
@@ -60,8 +72,8 @@ public class ColumnDao extends DataDefinitionDao<ColumnID, Column, Table> {
                 table.getId().getName(), null);
 
         while (rs.next()) {
-            Column column = getColumn(conn, rs);
-            columns.put(column.getPk(), column);
+            Column column = getColumn(new ColumnId(table, rs.getString("COLUMN_NAME")), rs);
+            columns.put(column.getId(), column);
         }
 
         return columns;
