@@ -1,23 +1,23 @@
 package ua.com.nov.model.dao;
 
-public abstract class BaseSqlStmtSource<K, V> implements SqlStatementSource<K, V> {
+public abstract class BaseSqlStmtSource<V, C> implements SqlStatementSource<V, C> {
     @Override
     public String getCreateStmt(V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadOneStmt(K key) {
+    public String getReadOneStmt(V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadNStmt(int nStart, int number) {
+    public String getReadNStmt(int nStart, int number, C container) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadAllStmt() {
+    public String getReadAllStmt(C container) {
         throw new UnsupportedOperationException();
     }
 
@@ -32,12 +32,12 @@ public abstract class BaseSqlStmtSource<K, V> implements SqlStatementSource<K, V
     }
 
     @Override
-    public String getDeleteAllStmt() {
+    public String getDeleteAllStmt(C container) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getCountStmt() {
+    public String getCountStmt(C container) {
         throw new UnsupportedOperationException();
     }
 }

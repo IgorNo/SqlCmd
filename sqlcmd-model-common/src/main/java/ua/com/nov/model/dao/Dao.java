@@ -2,23 +2,23 @@ package ua.com.nov.model.dao;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
 
-public interface Dao<K, V, O> {
+public interface Dao<V> {
 
     void setDataSource(DataSource dataSource);
 
     //Create
     void create(V value) throws SQLException;
 
-    //Read by primary key
-    V readOne(K id) throws SQLException;
+    //Read one value from container
+    V readOne(V value) throws SQLException;
 
-    //Read N values
-    Map<K, V> readN(int nStart, int number) throws SQLException;
+    //Read N values from container
+    List<V> readN(int nStart, int number, V template) throws SQLException;
 
-    //Read All from top level Object
-    Map<K, V> readAll(O topLevelObject) throws SQLException;
+    //Read All from container
+    List<V> readAll(V template) throws SQLException;
 
     //Update
     void update(V value) throws SQLException;
@@ -26,9 +26,9 @@ public interface Dao<K, V, O> {
     //Delete
     void delete(V value) throws SQLException;
 
-    //Delete all from ambient
-    void deleteAll(O topLevelObject) throws SQLException;
+    //Delete all from container
+    void deleteAll(V template) throws SQLException;
     
     //Count
-    int count(O topLevelObject) throws SQLException;
+    int count(V template) throws SQLException;
 }

@@ -1,14 +1,14 @@
 package ua.com.nov.model.dao;
 
-public interface SqlStatementSource<K, V> {
+public interface SqlStatementSource<V, C> {
 
     String getCreateStmt(V value);
-    String getReadOneStmt(K key);
-    String getReadNStmt(int nStart, int number);
-    String getReadAllStmt();
+    String getReadOneStmt(V value);
+    String getReadNStmt(int nStart, int number, C container);
+    String getReadAllStmt(C container);
     String getUpdateStmt(V value);
     String getDeleteStmt(V value);
-    String getDeleteAllStmt();
-    String getCountStmt();
+    String getDeleteAllStmt(C container);
+    String getCountStmt(C container);
 
 }
