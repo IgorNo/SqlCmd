@@ -1,14 +1,14 @@
 package ua.com.nov.model.repository;
 
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseID;
+import ua.com.nov.model.entity.database.DatabaseId;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class DbRepository {
     private static DbRepository uniqeDbRepository;
-    private static Map<DatabaseID, Database> repository = new HashMap<>();
+    private static Map<DatabaseId, Database> repository = new HashMap<>();
 
     private DbRepository() {
     }
@@ -31,7 +31,7 @@ public class DbRepository {
         return repository.get(db.getId());
     }
 
-    public static Database getDb(DatabaseID pk) {
+    public static Database getDb(DatabaseId pk) {
         Database db = repository.get(pk);
         if (db == null) {
             throw new IllegalArgumentException(

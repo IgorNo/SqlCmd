@@ -1,6 +1,7 @@
 package ua.com.nov.model.entity.table;
 
 import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.database.Database;
@@ -8,48 +9,62 @@ import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.row.RowData;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Table implements Persistent<TableID, Table> {
-    private TableID id;     // table primary key
+public class Table implements Persistent<TableId, Table, Database> {
+    private TableId id;     // table primary id
     private String name;    // table name
     private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private String remarks;  // explanatory comment on the table
 
-    private Map<Integer, Column> columns = new HashMap<>(); // all table columns
-    private Key primaryKey; // table primary key columns
-    private List<Key> uniqueKeyList; // table unique key list
-    private List<ForeignKey> foreignKeyList; // table foreign key list
+    private Map<Integer, Column> columns = new HashMap<>(); // all table column
+    private Key primaryKey; // table primary id column
+    private List<Key> uniqueKeyList; // table unique id list
+    private List<ForeignKey> foreignKeyList; // table foreign id list
     private List<String> checkExpressionList; // table check expression list
     private List<RowData> rows = new ArrayList<>();   // table data
 
     private String tableProperies = "";
 
-    public Table(TableID id) {
+    private TableRowMapper rowMapper = new TableRowMapper();
+
+    public Table(TableId id) {
         this(id, "TABLE");
     }
 
     public Table(Database db, String catalog, String schema, String name) {
-        this(new TableID(db, catalog, schema, name));
+        this(new TableId(db, catalog, schema, name));
     }
 
-    public Table(TableID id, String type) {
+    public Table(TableId id, String type) {
         this.id = id;
         this.name = id.getName();
         this.type = type;
     }
 
+    public TableId getId() {
+        return id;
+    }
+
     @Override
-    public SqlStatementSource<TableID, Table> getSqlStmtSource() {
+    public Database getContainer() {
+        return id.getDb();
+    }
+
+    @Override
+    public SqlStatementSource<Table, Database> getSqlStmtSource() {
         return id.getDb().getTableSqlStmtSource();
     }
 
-    public TableID getId() {
-        return id;
+    @Override
+    public Mappable<Table> getRowMapper() {
+        return rowMapper;
     }
 
     public String getType() {
@@ -94,12 +109,12 @@ public class Table implements Persistent<TableID, Table> {
     }
 
     public String getColumnName(int index) {
-        return columns.get(index).getPk().getName();
+        return columns.get(index).getId().getName();
     }
 
     public int getColumnIndex(String columnName) {
         for (int i = 0; i < columns.size(); i++) {
-            if (columns.get(i).getPk().equals(columnName))
+            if (columns.get(i).getId().equals(columnName))
                 return i;
         }
         throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s", columnName, id.getName()));
@@ -127,5 +142,14 @@ public class Table implements Persistent<TableID, Table> {
 
     public String getTableProperies() {
         return tableProperies;
+    }
+
+    private class TableRowMapper implements Mappable<Table> {
+        @Override
+        public Table rowMap(ResultSet rs) throws SQLException {
+            TableId tableId = new TableId(getId().getDb(), rs.getString("TABLE_CAT"),
+                    rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
+            return new Table(tableId, rs.getString("TABLE_TYPE"));
+        }
     }
 }

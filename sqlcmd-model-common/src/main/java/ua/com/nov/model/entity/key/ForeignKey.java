@@ -79,7 +79,7 @@ public class ForeignKey {
     /* keySeq - sequence number within foreign key( a value of 1 represents the first column of
                 the foreign key, a value of 2 would represent the second column within the foreign key)
        fkColumm - foreign key column
-       pkColumn - primary key column ID that are referenced by the given table's foreign key columns
+       pkColumn - primary key column ID that are referenced by the given table's foreign key column
        */
     public void addColumns(int keySeq, Column fkColumm, Column pkColumn) {
         if (foreignKey.put(keySeq, new Pair<Column, Column>(fkColumm, pkColumn)) != null) throw new IllegalArgumentException();

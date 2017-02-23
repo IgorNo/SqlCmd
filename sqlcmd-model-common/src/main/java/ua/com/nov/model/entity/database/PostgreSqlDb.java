@@ -3,18 +3,17 @@ package ua.com.nov.model.entity.database;
 import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TableID;
 
 import java.sql.Types;
 
 public class PostgreSqlDb extends Database {
 
-    private static final SqlStatementSource<DatabaseID, Database>
+    private static final SqlStatementSource<Database, Database>
             DATABASE_SQL_STATEMENT_SOURCE = new PostgreSqlDbStmts();
-    private static final SqlStatementSource<TableID, Table>
+    private static final SqlStatementSource<Table, Database>
             TABLE_SQL_STATEMENT_SOURCE = new PostgreSqlTableStmts();
 
-    public PostgreSqlDb(DatabaseID pk) {
+    public PostgreSqlDb(DatabaseId pk) {
         super(pk);
     }
 
@@ -26,23 +25,23 @@ public class PostgreSqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public PostgreSqlDb(DatabaseID pk, String password) {
+    public PostgreSqlDb(DatabaseId pk, String password) {
         super(pk, password);
     }
 
     @Override
-    public SqlStatementSource<DatabaseID, Database> getSqlStmtSource() {
+    public SqlStatementSource<Database, Database> getSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
-    public SqlStatementSource<TableID, Table> getTableSqlStmtSource() {
+    public SqlStatementSource<Table, Database> getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
     }
 
     private static class PostgreSqlDbStmts extends AbstractSqlDbStatements {
         @Override
-        public String getReadAllStmt() {
+        public String getReadAllStmt(Database db) {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
         }
 

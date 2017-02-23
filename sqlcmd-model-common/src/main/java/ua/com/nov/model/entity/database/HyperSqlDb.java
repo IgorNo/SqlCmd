@@ -3,15 +3,14 @@ package ua.com.nov.model.entity.database;
 import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TableID;
 
 public class HyperSqlDb extends Database {
-    private static final SqlStatementSource<DatabaseID, Database>
+    private static final SqlStatementSource<Database, Database>
             DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
-    private static final SqlStatementSource<TableID, Table>
+    private static final SqlStatementSource<Table, Database>
             TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
 
-    public HyperSqlDb(DatabaseID pk) {
+    public HyperSqlDb(DatabaseId pk) {
         super(pk);
     }
 
@@ -23,17 +22,17 @@ public class HyperSqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public HyperSqlDb(DatabaseID pk, String password) {
+    public HyperSqlDb(DatabaseId pk, String password) {
         super(pk, password);
     }
 
     @Override
-    public SqlStatementSource<DatabaseID, Database> getSqlStmtSource() {
+    public SqlStatementSource<Database, Database> getSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
-    public SqlStatementSource<TableID, Table> getTableSqlStmtSource() {
+    public SqlStatementSource<Table, Database> getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
     }
 

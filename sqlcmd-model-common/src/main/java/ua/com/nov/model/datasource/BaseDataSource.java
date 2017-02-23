@@ -1,14 +1,10 @@
 package ua.com.nov.model.datasource;
 
-import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.repository.DbRepository;
-
 import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 public abstract class BaseDataSource implements DataSource {

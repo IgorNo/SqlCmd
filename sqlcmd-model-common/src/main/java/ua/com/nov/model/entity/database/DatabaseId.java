@@ -1,10 +1,10 @@
 package ua.com.nov.model.entity.database;
 
-public class DatabaseID {
+public class DatabaseId {
     private String dbUrl;
     private String userName;
 
-    public DatabaseID(String dbUrl, String userName) {
+    public DatabaseId(String dbUrl, String userName) {
         if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
         if (userName == null || "".equals(userName)) throw new IllegalArgumentException();
         this.dbUrl = dbUrl;
@@ -24,7 +24,7 @@ public class DatabaseID {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DatabaseID that = (DatabaseID) o;
+        DatabaseId that = (DatabaseId) o;
 
         if (!dbUrl.equals(that.dbUrl)) return false;
         return userName.equals(that.userName);

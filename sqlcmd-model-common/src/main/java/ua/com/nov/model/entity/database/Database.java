@@ -1,88 +1,69 @@
 package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.dao.BaseSqlStmtSource;
+import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.datasource.BaseDataSource;
+import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
 import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TableID;
 import ua.com.nov.model.repository.DbRepository;
 import ua.com.nov.model.util.DbUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Database
         extends BaseDataSource
-        implements Persistent<DatabaseID, Database> {
+        implements Persistent<DatabaseId, Database, Database> {
 
-    private DatabaseID id;
+    private DatabaseId id;
     private String password;
     private List<DataType> dataTypes;
     private String dbProperties = "";
 
-    public Database(DatabaseID id) {
+    public Database(DatabaseId id) {
         this(id, null);
     }
 
     public Database(String dbUrl, String userName) {
-        this(new DatabaseID(dbUrl, userName), null);
+        this(new DatabaseId(dbUrl, userName), null);
     }
 
     public Database(String dbUrl, String userName, String password) {
-        this(new DatabaseID(dbUrl, userName), password);
+        this(new DatabaseId(dbUrl, userName), password);
     }
 
-    public Database(DatabaseID id, String password) {
+    public Database(DatabaseId id, String password) {
         this.id = id;
         this.password = password;
         DbRepository.addDb(this);
     }
 
-    public abstract SqlStatementSource<TableID, Table> getTableSqlStmtSource();
+    public abstract SqlStatementSource<Table, Database> getTableSqlStmtSource();
+
+    @Override
+    public Database getContainer() {
+        return null;
+    }
+
+    @Override
+    public Mappable<Database> getRowMapper() {
+        throw new UnsupportedOperationException();
+    }
 
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getDbUrl(), getUserName(), password);
     }
 
-    public Database load() throws SQLException {
-        Connection conn = getConnection();
-        dataTypes = getDataTypes(conn);
-        conn.close();
-        return this;
-    }
-
-    private List<DataType> getDataTypes(Connection conn) throws SQLException {
-        ResultSet rs = conn.getMetaData().getTypeInfo();
-        List<DataType> dataTypeList = new ArrayList<>();
-        while (rs.next()) {
-            DataType dataType = new DataType.Builder(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"))
-                    .precision(rs.getInt("PRECISION"))
-                    .literalPrefix(rs.getString("LITERAL_PREFIX"))
-                    .literalSuffix(rs.getString("LITERAL_SUFFIX"))
-                    .createParams(rs.getString("CREATE_PARAMS"))
-                    .nullable(rs.getShort("NULLABLE"))
-                    .caseSensitive(rs.getBoolean("CASE_SENSITIVE"))
-                    .searchable(rs.getShort("SEARCHABLE"))
-                    .unsignedAttribute(rs.getBoolean("UNSIGNED_ATTRIBUTE"))
-                    .fixedPrecScale(rs.getBoolean("FIXED_PREC_SCALE"))
-                    .autoIncrement(rs.getBoolean("AUTO_INCREMENT"))
-                    .localTypeName(rs.getString("LOCAL_TYPE_NAME"))
-                    .minimumScale(rs.getInt("MINIMUM_SCALE"))
-                    .maximumScale(rs.getInt("MAXIMUM_SCALE"))
-                    .numPrecRadix(rs.getInt("NUM_PREC_RADIX"))
-                    .build();
-            dataTypeList.add(dataType);
-        }
-        return dataTypeList;
+    public void setDataTypes(List<DataType> dataTypes) {
+        this.dataTypes = dataTypes;
     }
 
     public DataType getDataType(String typeName) {
@@ -108,12 +89,8 @@ public abstract class Database
         this.dbProperties = dbProperties;
     }
 
-    public DatabaseID getId() {
+    public DatabaseId getId() {
         return id;
-    }
-
-    public void setId(DatabaseID id) {
-        this.id = id;
     }
 
     public String getDbUrl() {
@@ -134,7 +111,7 @@ public abstract class Database
 
 
 
-    protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<DatabaseID, Database> {
+    protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<Database, Database> {
 
         public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
         public static final String DROP_DB_SQL = "DROP DATABASE %s";
@@ -151,7 +128,22 @@ public abstract class Database
 
     }
 
-    protected abstract static class AbstractSqlTableStatements extends BaseSqlStmtSource<TableID, Table> {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Database database = (Database) o;
+
+        return id.equals(database.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    protected abstract static class AbstractSqlTableStatements extends BaseSqlStmtSource<Table, Database> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
@@ -161,12 +153,14 @@ public abstract class Database
             return String.format(CREATE_TABLE_SQL, table.getName(), getCreateTableDefinition(table), table.getTableProperies());
         }
 
-        public String getDropStmt(Table table) {
-            return DROP_TABLE_SQL;
+        @Override
+        public String getDeleteStmt(Table table) {
+            return String.format(DROP_TABLE_SQL, table.getName());
         }
 
+        @Override
         public String getUpdateStmt(Table table) {
-            return RENAME_TABLE_SQL;
+            return String.format(RENAME_TABLE_SQL, table.getId().getName(), table.getName());
         }
 
         private String getCreateTableDefinition(Table table) {
@@ -240,6 +234,7 @@ public abstract class Database
                 result.append(')');
             }
         }
+
         private void addForeignKey(ForeignKey key, StringBuilder result) {
             int numberOfKeyColumns = key.getNumberOfColumns();
             if (numberOfKeyColumns > 0) {
@@ -249,7 +244,7 @@ public abstract class Database
                     if (i != numberOfKeyColumns) result.append(',');
                 }
                 result.append(')');
-                result.append(" REFERENCES ").append(key.getPkColumn(0).getPk().getTableID().getName()).append(" (");
+                result.append(" REFERENCES ").append(key.getPkColumn(0).getId().getTable().getName()).append(" (");
                 for (int i = 1; i <= numberOfKeyColumns; i++) {
                     result.append(key.getPkColumn(i));
                     if (i != numberOfKeyColumns) result.append(',');
@@ -265,4 +260,5 @@ public abstract class Database
         }
 
     }
+
 }

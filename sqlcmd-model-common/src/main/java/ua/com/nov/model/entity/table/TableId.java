@@ -2,13 +2,13 @@ package ua.com.nov.model.entity.table;
 
 import ua.com.nov.model.entity.database.Database;
 
-public class TableID {
+public class TableId {
     private Database db;
     private String catalog; // table catalog
     private String schema;  // table schema
     private String name;    // table name
 
-    public TableID(Database db, String catalog, String schema, String name) {
+    public TableId(Database db, String catalog, String schema, String name) {
         this.db = db;
         this.catalog = catalog;
         this.schema = schema;
@@ -40,11 +40,11 @@ public class TableID {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TableID tableID = (TableID) o;
+        TableId tableId = (TableId) o;
 
-        if (catalog != null ? !catalog.equals(tableID.catalog) : tableID.catalog != null) return false;
-        if (!schema.equals(tableID.schema)) return false;
-        return name.equals(tableID.name);
+        if (catalog != null ? !catalog.equals(tableId.catalog) : tableId.catalog != null) return false;
+        if (!schema.equals(tableId.schema)) return false;
+        return name.equals(tableId.name);
     }
 
     @Override
