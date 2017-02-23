@@ -1,12 +1,13 @@
 package ua.com.nov.model.entity.column;
 
 import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.table.Table;
 
-public class Column implements Persistent<ColumnID, Column> {
-    private ColumnID pk;
+public class Column implements Persistent<ColumnId, Column, Table> {
+    private ColumnId id;
     private String name;
     private DataType dataType;
     private Integer columnSize;
@@ -30,25 +31,35 @@ public class Column implements Persistent<ColumnID, Column> {
      * For the ROWID datatype, this is the length in bytes.
      * Null is returned for data types where the column size is not applicable.
     */
-    public Column(int ordinalPosition, ColumnID pk, DataType dataType) {
+    public Column(int ordinalPosition, ColumnId id, DataType dataType) {
         this.ordinalPosition = ordinalPosition;
-        this.pk = pk;
-        this.name = pk.getName();
+        this.id = id;
+        this.name = id.getName();
         this.dataType = dataType;
     }
 
     public Column(int ordinalPosition, Table table, String name, DataType dataType) {
-        this(ordinalPosition, new ColumnID(table.getId(), name), dataType);
+        this(ordinalPosition, new ColumnId(table, name), dataType);
     }
 
     @Override
-    public SqlStatementSource<ColumnID, Column> getSqlStmtSource() {
+    public SqlStatementSource<Column, Table> getSqlStmtSource() {
         return null;
     }
 
-    public ColumnID getPk() {
-            return pk;
+    @Override
+    public Mappable getRowMapper() {
+        return null;
+    }
+
+    public ColumnId getId() {
+            return id;
         }
+
+    @Override
+    public Table getContainer() {
+        return id.getTable();
+    }
 
     public String getName() {
         return name;
@@ -71,7 +82,7 @@ public class Column implements Persistent<ColumnID, Column> {
     }
 
     public void setName(String name) {
-        pk.setName(name);
+        this.name = name;
     }
 
     public void setColumnSize(Integer columnSize) {
@@ -129,5 +140,4 @@ public class Column implements Persistent<ColumnID, Column> {
     public void setGeneratedColumn(boolean generatedColumn) {
         this.generatedColumn = generatedColumn;
     }
-
 }
