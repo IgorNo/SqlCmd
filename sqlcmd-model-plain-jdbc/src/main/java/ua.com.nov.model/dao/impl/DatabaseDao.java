@@ -1,15 +1,17 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.database.DatabaseId;
-import ua.com.nov.model.repository.DbRepository;
+import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,14 +64,14 @@ public final class DatabaseDao extends DataDefinitionDao<Database> {
         Connection conn = getDataSource().getConnection();
 
         try (Statement stmt = conn.createStatement()) {
-            DatabaseMetaData metaData = conn.getMetaData();
-            SqlStatementSource source = DbRepository.getDb(new DatabaseId(metaData.getURL(), metaData.getUserName()))
-                    .getSqlStmtSource();
+            SqlStatementSource source = db.getSqlStmtSource();
 
             try (ResultSet rs = stmt.executeQuery(source.getReadAllStmt(db))) {
                 while (rs.next()) {
                     String url = DbUtil.getDatabaseUrl(conn) + rs.getString(1);
-                    DatabaseId databaseId = new DatabaseId(url, conn.getMetaData().getUserName());
+                    String userName = conn.getMetaData().getUserName();
+                    if (userName.indexOf('@') > 0) userName = userName.substring(0, userName.indexOf('@'));
+                    DatabaseId databaseId = new DatabaseId(url, userName);
                     Class[] paramTypes = new Class[]{DatabaseId.class};
                     Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
                     Database database = constructor.newInstance(new Object[]{databaseId});

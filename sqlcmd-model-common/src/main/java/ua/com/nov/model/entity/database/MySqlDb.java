@@ -2,10 +2,12 @@ package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.statement.AbstractSqlDbStatements;
+import ua.com.nov.model.statement.AbstractSqlTableStatements;
 
 public final class MySqlDb extends Database {
-    private static final HyperSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
-    private static final HyperSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
+    private static final MySqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new MySqlDbStmts();
+    private static final MySqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new MySqlTableStmts();
 
     public MySqlDb(DatabaseId pk) {
         super(pk);
@@ -24,12 +26,12 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public HyperSqlDbStmts getSqlStmtSource() {
+    public MySqlDbStmts getSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
-    public HyperSqlTableStmts getTableSqlStmtSource() {
+    public MySqlTableStmts getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
     }
 
@@ -47,10 +49,14 @@ public final class MySqlDb extends Database {
         return parameter;
     }
 
-    private static class HyperSqlDbStmts extends AbstractSqlDbStatements {
+    private static class MySqlDbStmts extends AbstractSqlDbStatements {
+        @Override
+        public String getReadAllStmt(Database db) {
+            return "SHOW DATABASES";
+        }
     }
 
-    private static class HyperSqlTableStmts extends AbstractSqlTableStatements {
+    private static class MySqlTableStmts extends AbstractSqlTableStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             result.append(col.getDataType().getTypeName());

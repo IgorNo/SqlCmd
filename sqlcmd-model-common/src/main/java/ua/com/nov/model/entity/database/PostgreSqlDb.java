@@ -2,11 +2,12 @@ package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.statement.AbstractSqlDbStatements;
+import ua.com.nov.model.statement.AbstractSqlTableStatements;
 
 import java.sql.Types;
 
 public class PostgreSqlDb extends Database {
-
     private static final PostgreSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new PostgreSqlDbStmts();
     private static final PostgreSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new PostgreSqlTableStmts();
 

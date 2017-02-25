@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.column;
 
-import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.database.DataType;
@@ -52,6 +52,7 @@ public class Column implements Persistent<Column> {
         return null;
     }
 
+    @Override
     public ColumnId getId() {
             return id;
         }

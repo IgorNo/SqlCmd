@@ -1,4 +1,4 @@
-package ua.com.nov.model.dao;
+package ua.com.nov.model.statement;
 
 public interface SqlStatementSource<V> {
 

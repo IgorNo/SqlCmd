@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.table;
 
-import ua.com.nov.model.dao.SqlStatementSource;
+import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.column.Column;

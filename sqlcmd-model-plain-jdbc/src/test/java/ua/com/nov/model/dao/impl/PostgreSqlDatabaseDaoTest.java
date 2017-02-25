@@ -31,7 +31,6 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        DatabaseId databaseId = new DatabaseId(URL + "tmp", "postgres");
         List<Database> databases = DAO.readAll(TEST_DATABASE);
         assertTrue(databases.contains(TEST_DATABASE));
     }

@@ -2,6 +2,8 @@ package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.statement.AbstractSqlDbStatements;
+import ua.com.nov.model.statement.AbstractSqlTableStatements;
 
 public class HyperSqlDb extends Database {
     private static final HyperSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
