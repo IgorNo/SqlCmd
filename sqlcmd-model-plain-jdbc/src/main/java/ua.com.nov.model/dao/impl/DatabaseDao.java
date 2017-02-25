@@ -23,7 +23,6 @@ public final class DatabaseDao extends DataDefinitionDao<Database> {
     public Database readOne(Database db) throws SQLException {
         Connection conn = getDataSource().getConnection();
         db.setDataTypes(getDataTypes(conn));
-        conn.close();
         return db;
     }
 

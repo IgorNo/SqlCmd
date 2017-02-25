@@ -6,7 +6,7 @@ import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.database.DataType;
 import ua.com.nov.model.entity.table.Table;
 
-public class Column implements Persistent<ColumnId, Column, Table> {
+public class Column implements Persistent<Column> {
     private ColumnId id;
     private String name;
     private DataType dataType;
@@ -43,7 +43,7 @@ public class Column implements Persistent<ColumnId, Column, Table> {
     }
 
     @Override
-    public SqlStatementSource<Column, Table> getSqlStmtSource() {
+    public SqlStatementSource<Column> getSqlStmtSource() {
         return null;
     }
 
@@ -55,11 +55,6 @@ public class Column implements Persistent<ColumnId, Column, Table> {
     public ColumnId getId() {
             return id;
         }
-
-    @Override
-    public Table getContainer() {
-        return id.getTable();
-    }
 
     public String getName() {
         return name;

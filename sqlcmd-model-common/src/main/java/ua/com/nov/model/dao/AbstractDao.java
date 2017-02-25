@@ -18,8 +18,9 @@ public abstract class AbstractDao<V extends Persistent> implements Dao<V> {
     }
 
     @Override
-    public void setDataSource(DataSource dataSource) {
+    public AbstractDao<V> setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
+        return this;
     }
 
     protected abstract void executeUpdateStmt(String createStmt) throws SQLException;

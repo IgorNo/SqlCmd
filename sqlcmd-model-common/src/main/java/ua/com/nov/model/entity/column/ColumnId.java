@@ -18,5 +18,22 @@ public class ColumnId {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ColumnId)) return false;
+
+        ColumnId columnId = (ColumnId) o;
+
+        if (!table.equals(columnId.table)) return false;
+        return name.equalsIgnoreCase(columnId.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = table.hashCode();
+        result = 31 * result + name.toLowerCase().hashCode();
+        return result;
+    }
 }

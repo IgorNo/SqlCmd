@@ -1,14 +1,11 @@
 package ua.com.nov.model.entity.database;
 
-import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableId;
 
 public final class MySqlDb extends Database {
-    private static final SqlStatementSource<Database, Database>
-            DATABASE_SQL_STATEMENT_SOURCE = new MySqlDbStmts();
-    private static final SqlStatementSource<Table, Database>
-            TABLE_SQL_STATEMENT_SOURCE = new MySqlTableStmts();
+    private static final HyperSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
+    private static final HyperSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
 
     public MySqlDb(DatabaseId pk) {
         super(pk);
@@ -27,19 +24,33 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public SqlStatementSource<Database, Database> getSqlStmtSource() {
+    public HyperSqlDbStmts getSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
-    public SqlStatementSource<Table, Database> getTableSqlStmtSource() {
+    public HyperSqlTableStmts getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
     }
 
-    private static class MySqlDbStmts extends AbstractSqlDbStatements {
+
+    @Override
+    public String getFullTableName(TableId id) {
+        StringBuilder result = new StringBuilder();
+        if (id.getCatalog() != null) result.append(id.getCatalog()).append('.');
+        return result.append(id.getName()).toString();
     }
 
-    private static class MySqlTableStmts extends AbstractSqlTableStatements {
+    @Override
+    public String convert(String parameter) {
+        if (parameter != null) return parameter.toLowerCase();
+        return parameter;
+    }
+
+    private static class HyperSqlDbStmts extends AbstractSqlDbStatements {
+    }
+
+    private static class HyperSqlTableStmts extends AbstractSqlTableStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
             result.append(col.getDataType().getTypeName());

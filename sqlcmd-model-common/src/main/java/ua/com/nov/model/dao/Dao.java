@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface Dao<V> {
 
-    void setDataSource(DataSource dataSource);
+    Dao<V> setDataSource(DataSource dataSource);
 
     //Create
     void create(V value) throws SQLException;

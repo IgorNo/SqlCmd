@@ -4,19 +4,31 @@ import ua.com.nov.model.entity.database.Database;
 
 public class TableId {
     private Database db;
+    private String name;    // table name
     private String catalog; // table catalog
     private String schema;  // table schema
-    private String name;    // table name
 
-    public TableId(Database db, String catalog, String schema, String name) {
+    public TableId(Database db, String name, String catalog, String schema) {
         this.db = db;
         this.catalog = catalog;
         this.schema = schema;
         this.name = name;
     }
 
+    public TableId(Database db, String name) {
+        this(db, name, null, null);
+    }
+
     public Database getDb() {
         return db;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getFullName() {
+        return getDb().getFullTableName(this);
     }
 
     public String getCatalog() {
@@ -27,31 +39,20 @@ public class TableId {
         return schema;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof TableId)) return false;
 
-        TableId tableId = (TableId) o;
+        TableId id = (TableId) o;
 
-        if (catalog != null ? !catalog.equals(tableId.catalog) : tableId.catalog != null) return false;
-        if (!schema.equals(tableId.schema)) return false;
-        return name.equals(tableId.name);
+        return getFullName().equalsIgnoreCase(id.getFullName());
     }
 
     @Override
     public int hashCode() {
-        int result = catalog != null ? catalog.hashCode() : 0;
-        result = 31 * result + schema.hashCode();
-        result = 31 * result + name.hashCode();
+        int result = db.hashCode();
+        result = 31 * result + getFullName().toLowerCase().hashCode();
         return result;
     }
 }

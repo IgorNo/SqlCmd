@@ -11,9 +11,9 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    public static final String URL = DbUtil.HYPER_SQL_MEMORY_URL;
+    public static final String URL = DbUtil.HYPER_SQL_FILE_URL;
 
-    public static final DataSource DATA_SOURCE = DbUtil.HYPER_SQL_MEM_SYSTEM_DB;
+    public static final DataSource DATA_SOURCE = DbUtil.HYPER_SQL_FILE_SYSTEM_DB;
 
     public static final Database TEST_DATABASE = new HyperSqlDb(URL + "tmp", "root", "root");
 

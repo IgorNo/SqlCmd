@@ -1,15 +1,15 @@
 package ua.com.nov.model.entity.database;
 
 import ua.com.nov.model.dao.BaseSqlStmtSource;
-import ua.com.nov.model.dao.Dao;
-import ua.com.nov.model.dao.SqlStatementSource;
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
+import ua.com.nov.model.entity.row.RowData;
 import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableId;
 import ua.com.nov.model.repository.DbRepository;
 import ua.com.nov.model.util.DbUtil;
 
@@ -21,7 +21,7 @@ import java.util.List;
 
 public abstract class Database
         extends BaseDataSource
-        implements Persistent<DatabaseId, Database, Database> {
+        implements Persistent<Database> {
 
     private DatabaseId id;
     private String password;
@@ -46,12 +46,9 @@ public abstract class Database
         DbRepository.addDb(this);
     }
 
-    public abstract SqlStatementSource<Table, Database> getTableSqlStmtSource();
+    public abstract AbstractSqlTableStatements getTableSqlStmtSource();
 
-    @Override
-    public Database getContainer() {
-        return null;
-    }
+    public abstract String getFullTableName(TableId id);
 
     @Override
     public Mappable<Database> getRowMapper() {
@@ -61,6 +58,9 @@ public abstract class Database
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getDbUrl(), getUserName(), password);
     }
+
+    // convert 'parameter' to database format (to upper or lower case)
+    public abstract String convert(String parameter);
 
     public void setDataTypes(List<DataType> dataTypes) {
         this.dataTypes = dataTypes;
@@ -89,6 +89,7 @@ public abstract class Database
         this.dbProperties = dbProperties;
     }
 
+    @Override
     public DatabaseId getId() {
         return id;
     }
@@ -109,12 +110,11 @@ public abstract class Database
         return password;
     }
 
-
-
-    protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<Database, Database> {
+    protected abstract static class AbstractSqlDbStatements extends BaseSqlStmtSource<Database> {
 
         public static final String CREATE_DB_SQL = "CREATE DATABASE %s %s";
         public static final String DROP_DB_SQL = "DROP DATABASE %s";
+
 
         @Override
         public String getCreateStmt(Database db) {
@@ -143,27 +143,28 @@ public abstract class Database
         return id.hashCode();
     }
 
-    protected abstract static class AbstractSqlTableStatements extends BaseSqlStmtSource<Table, Database> {
+    protected abstract static class AbstractSqlTableStatements extends BaseSqlStmtSource<Table<? extends RowData>> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
 
         @Override
-        public String getCreateStmt(Table table) {
-            return String.format(CREATE_TABLE_SQL, table.getName(), getCreateTableDefinition(table), table.getTableProperies());
+        public String getCreateStmt(Table<? extends RowData> table) {
+            return String.format(CREATE_TABLE_SQL,
+                    table.getFullName(), getCreateTableDefinition(table), table.getTableProperies());
         }
 
         @Override
-        public String getDeleteStmt(Table table) {
+        public String getDeleteStmt(Table<? extends RowData> table) {
             return String.format(DROP_TABLE_SQL, table.getName());
         }
 
         @Override
-        public String getUpdateStmt(Table table) {
+        public String getUpdateStmt(Table<? extends RowData> table) {
             return String.format(RENAME_TABLE_SQL, table.getId().getName(), table.getName());
         }
 
-        private String getCreateTableDefinition(Table table) {
+        private String getCreateTableDefinition(Table<? extends RowData> table) {
             int numberOfColumns = table.getNumberOfColumns();
             if (numberOfColumns == 0) return "";
 

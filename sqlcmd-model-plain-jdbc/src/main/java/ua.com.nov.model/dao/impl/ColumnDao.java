@@ -40,7 +40,7 @@ public class ColumnDao extends DataDefinitionDao<Column> {
     public Column readOne(ColumnId key) throws SQLException {
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getColumns(key.getTable().getId().getCatalog(), key.getTable().getId().getSchema(),
+        ResultSet rs = dbMetaData.getColumns(key.getTable().getId().getDb().getName(), key.getTable().getId().getSchema(),
                 key.getTable().getName(), key.getName());
 
         if (!rs.next()) throw new IllegalArgumentException(String.format("Column '%s' doesn't exist in table '%s.%s'.",
@@ -68,7 +68,7 @@ public class ColumnDao extends DataDefinitionDao<Column> {
 
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getColumns(table.getId().getCatalog(), table.getId().getSchema(),
+        ResultSet rs = dbMetaData.getColumns(table.getId().getDb().getName(), table.getId().getSchema(),
                 table.getId().getName(), null);
 
         while (rs.next()) {

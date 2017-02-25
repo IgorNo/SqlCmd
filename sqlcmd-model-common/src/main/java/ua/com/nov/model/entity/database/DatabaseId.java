@@ -26,15 +26,15 @@ public class DatabaseId {
 
         DatabaseId that = (DatabaseId) o;
 
-        if (!dbUrl.equals(that.dbUrl)) return false;
+        if (!dbUrl.equalsIgnoreCase(that.dbUrl)) return false;
         return userName.equals(that.userName);
 
     }
 
     @Override
     public int hashCode() {
-        int result = dbUrl.hashCode();
-        result = 31 * result + userName.hashCode();
+        int result = dbUrl.toLowerCase().hashCode();
+        result = 31 * result + userName.toLowerCase().hashCode();
         return result;
     }
 }

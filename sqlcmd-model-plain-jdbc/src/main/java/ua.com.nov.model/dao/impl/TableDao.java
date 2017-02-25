@@ -12,10 +12,10 @@ public class TableDao extends DataDefinitionDao<Table> {
     @Override
     protected ResultSet getOneResultSet(Table table) throws SQLException {
         DatabaseMetaData dbMetaData = getDataSource().getConnection().getMetaData();
-        ResultSet rs = dbMetaData.getTables(table.getId().getCatalog(), table.getId().getSchema(), table.getName(), null);
+        ResultSet rs = dbMetaData.getTables(table.getDb().convert(table.getCatalog()),
+                table.getDb().convert(table.getSchema()), table.getDb().convert(table.getName()), null);
         if (!rs.next())
-            throw new IllegalArgumentException(String.format("Table '%s.%s' doesn't exist",
-                    table.getId().getSchema(), table.getId().getName()));
+            throw new IllegalArgumentException(String.format("Table '%s' doesn't exist", table.getFullName()));
         return rs;
     }
 

@@ -2,12 +2,9 @@ package ua.com.nov.model.entity;
 
 import ua.com.nov.model.dao.SqlStatementSource;
 
-public interface Persistent<K, V, C> {
-   K getId();
+public interface Persistent<V> extends Unique {
 
-   C getContainer();
-
-   SqlStatementSource<V, C> getSqlStmtSource();
+   SqlStatementSource<V> getSqlStmtSource();
 
    Mappable<V> getRowMapper();
 }
