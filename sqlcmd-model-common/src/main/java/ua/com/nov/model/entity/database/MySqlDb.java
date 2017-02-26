@@ -63,7 +63,7 @@ public final class MySqlDb extends Database {
             addSizeAndPrecision(col, result);
             if (col.isAutoIncrement()) {
                 if (col.getDataType().isAutoIncrement()) result.append(" AUTO_INCREMENT");
-                else throw new IllegalArgumentException();
+                else throw new IllegalArgumentException("This type can't be autoincrement");
             }
         }
     }

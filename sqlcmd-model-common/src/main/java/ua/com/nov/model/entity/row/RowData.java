@@ -1,12 +1,12 @@
 package ua.com.nov.model.entity.row;
 
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableMetaData;
 
 public class RowData {
-    private Table table;
+    private TableMetaData table;
     private Object[] values;
 
-    public RowData(Table table, Object[] values) {
+    public RowData(TableMetaData table, Object[] values) {
         this.table = table;
         this.values = new Object[table.getNumberOfColumns()];
     }

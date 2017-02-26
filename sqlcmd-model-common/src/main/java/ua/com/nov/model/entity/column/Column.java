@@ -4,22 +4,22 @@ import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableMetaData;
 
 public class Column implements Persistent<Column> {
-    private ColumnId id;
-    private String name;
-    private DataType dataType;
-    private Integer columnSize;
-    private Integer precision;   // the number of fractional digits. Null is returned for data types where
-                                 // precision is not applicable
-    private int nullable = 1;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
-    private String defaultValue; //default value for the column, which should be interpreted as a string when
-                                 // the value is enclosed in single quotes
-    private String remarks;       // comment describing column
-    private int ordinalPosition; // index of column in table (starting at 1)
-    private boolean autoIncrement; // Indicates whether this column is auto incremented
-    private boolean generatedColumn; // Indicates whether this is a generated column
+    private final int ordinalPosition; // index of column in table (starting at 1)
+    private final ColumnId id;
+    private final DataType dataType;
+    private String name; // This field uses for renaming column
+    private final Integer columnSize;
+    private final Integer precision;  // the number of fractional digits. Null is returned for data types where
+                                // precision is not applicable
+    private final int nullable;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
+    private final String defaultValue; //default value for the column, which should be interpreted as a string when
+    // the value is enclosed in single quotes
+    private final String remarks;       // comment describing column
+    private final boolean autoIncrement; // Indicates whether this column is auto incremented
+    private final boolean generatedColumn; // Indicates whether this is a generated column
 
     /*
      * The columnSize attribute specifies the column size for the given column.
@@ -31,16 +31,97 @@ public class Column implements Persistent<Column> {
      * For the ROWID datatype, this is the length in bytes.
      * Null is returned for data types where the column size is not applicable.
     */
-    public Column(int ordinalPosition, ColumnId id, DataType dataType) {
-        this.ordinalPosition = ordinalPosition;
-        this.id = id;
-        this.name = id.getName();
-        this.dataType = dataType;
+
+    public static class Builder {
+        private final int ordinalPosition; // index of column in table (starting at 1)
+        private final ColumnId id;
+        private final DataType dataType;
+        private Integer columnSize;
+
+        private Integer precision;  // the number of fractional digits. Null is returned for data types where
+        // precision is not applicable
+        private int nullable = DataType.TYPE_NULLABLE; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
+        private String defaultValue; //default value for the column, which should be interpreted as a string when
+        // the value is enclosed in single quotes
+        private String remarks;      // comment describing column
+        private boolean autoIncrement;   // Indicates whether this column is auto incremented
+        private boolean generatedColumn; // Indicates whether this is a generated column
+
+        public Builder(int ordinalPosition, ColumnId id, DataType dataType) {
+            this.ordinalPosition = ordinalPosition;
+            this.id = id;
+            this.dataType = dataType;
+        }
+
+        public Builder(int ordinalPosition, TableMetaData table, String name, DataType dataType) {
+            this(ordinalPosition, new ColumnId(table, name), dataType);
+        }
+
+        public Builder columnSize(Integer columnSize) {
+            if (columnSize != null) {
+                int maxColumnSize = dataType.getPrecision();
+                if (maxColumnSize > 0 && columnSize > maxColumnSize) {
+                    throw new IllegalArgumentException(String.format("Column size = %d greater than the max valid value = %d",
+                            columnSize, maxColumnSize));
+                }
+            }
+            this.columnSize = columnSize;
+            return this;
+        }
+
+        public Builder precision(Integer precision) {
+            this.precision = precision;
+            return this;
+        }
+
+        public Builder nullable(int nullable) {
+            this.nullable = nullable;
+            return this;
+        }
+
+        public Builder defaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public Builder remarks(String remarks) {
+            this.remarks = remarks;
+            return this;
+        }
+
+        public Builder autoIncrement(boolean autoIncrement) {
+            if (!dataType.isAutoIncrement()) throw new IllegalArgumentException("This column can not be autoincrement");
+            this.autoIncrement = autoIncrement;
+            return this;
+        }
+
+        public Builder generatedColumn(boolean generatedColumn) {
+            this.generatedColumn = generatedColumn;
+            return this;
+        }
+
+        public Column build() {
+            return new Column(this);
+        }
     }
 
-    public Column(int ordinalPosition, Table table, String name, DataType dataType) {
-        this(ordinalPosition, new ColumnId(table, name), dataType);
+    public Column(Builder builder) {
+        if (builder.precision != null && builder.precision > builder.columnSize) {
+            throw new IllegalArgumentException("Precision can not be greater than column size");
+        }
+        this.ordinalPosition = builder.ordinalPosition;
+        this.id = builder.id;
+        this.dataType = builder.dataType;
+        this.name = id.getName();
+        this.columnSize = builder.columnSize;
+        this.precision = builder.precision;
+        this.nullable = builder.nullable;
+        this.defaultValue = builder.defaultValue;
+        this.remarks = builder.remarks;
+        this.autoIncrement = builder.autoIncrement;
+        this.generatedColumn = builder.generatedColumn;
     }
+
 
     @Override
     public SqlStatementSource<Column> getSqlStmtSource() {
@@ -54,75 +135,39 @@ public class Column implements Persistent<Column> {
 
     @Override
     public ColumnId getId() {
-            return id;
-        }
+        return id;
+    }
 
     public String getName() {
         return name;
     }
 
     public Integer getColumnSize() {
-            return columnSize;
-        }
+        return columnSize;
+    }
 
     public Integer getPrecision() {
-            return precision;
-        }
+        return precision;
+    }
 
     public boolean isAutoIncrement() {
         return autoIncrement;
-    }
-
-    public int isNullable() {
-        return nullable;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setColumnSize(Integer columnSize) {
-        this.columnSize = columnSize;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
-    }
-
-    public void setNullable(int nullable) {
-        this.nullable = nullable;
-    }
-
-    public DataType getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
-    }
-
-    public void setPrecision(Integer precision) {
-        this.precision = precision;
     }
 
     public int getNullable() {
         return nullable;
     }
 
+    public DataType getDataType() {
+        return dataType;
+    }
+
     public String getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
     public String getRemarks() {
         return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     public int getOrdinalPosition() {
@@ -133,7 +178,8 @@ public class Column implements Persistent<Column> {
         return generatedColumn;
     }
 
-    public void setGeneratedColumn(boolean generatedColumn) {
-        this.generatedColumn = generatedColumn;
+    public void setName(String name) {
+        this.name = name;
     }
+
 }

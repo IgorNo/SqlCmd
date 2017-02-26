@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.column.ColumnId;
 import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableMetaData;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -52,18 +52,18 @@ public class ColumnDao extends DataDefinitionDao<Column> {
     private static Column getColumn(ColumnId key, ResultSet rs) throws SQLException {
         ColumnId columnId = new ColumnId(key.getTable(), rs.getString("COLUMN_NAME"));
         DataType dataType = key.getTable().getId().getDb().getDataType(rs.getString("TYPE_NAME"));
-        Column column = new Column(rs.getInt("ORDINAL_POSITION"), columnId, dataType);
-        column.setColumnSize(rs.getInt("COLUMN_SIZE"));
-        column.setPrecision(rs.getInt("DECIMAL_DIGITS"));
-        column.setNullable(rs.getInt("NULLABLE"));
-        column.setRemarks(rs.getString("REMARKS"));
-        column.setDefaultValue(rs.getString("COLUMN_DEF"));
-        column.setAutoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-        column.setGeneratedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"));
+
+        Column column = new Column.Builder(rs.getInt("ORDINAL_POSITION"), columnId, dataType)
+        .columnSize(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
+        .nullable(rs.getInt("TYPE_NULLABLE")).remarks(rs.getString("REMARKS"))
+        .defaultValue(rs.getString("COLUMN_DEF"))
+                .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"))
+        .generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"))
+                .build();
         return column;
     }
 
-    public Map<ColumnId, Column> readAll(Table table) throws SQLException {
+    public Map<ColumnId, Column> readAll(TableMetaData table) throws SQLException {
         Map<ColumnId, Column> columns = new HashMap<>();
 
         Connection conn = getDataSource().getConnection();

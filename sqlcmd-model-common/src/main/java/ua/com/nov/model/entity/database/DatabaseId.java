@@ -1,8 +1,8 @@
 package ua.com.nov.model.entity.database;
 
 public class DatabaseId {
-    private String dbUrl;
-    private String userName;
+    private final String dbUrl;
+    private final String userName;
 
     public DatabaseId(String dbUrl, String userName) {
         if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();

@@ -1,17 +1,17 @@
 package ua.com.nov.model.entity.column;
 
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.table.TableMetaData;
 
 public class ColumnId {
-    private Table table;
-    private String name;
+    private final TableMetaData table;
+    private final String name;
 
-    public ColumnId(Table table, String name) {
+    public ColumnId(TableMetaData table, String name) {
         this.table = table;
         this.name = name;
     }
 
-    public Table getTable() {
+    public TableMetaData getTable() {
         return table;
     }
 

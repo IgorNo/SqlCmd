@@ -7,8 +7,8 @@ import ua.com.nov.model.entity.database.Database;
 
 import java.sql.SQLException;
 
-public class MySqlTableDaoTest extends AbstractTableDaoTest {
-    public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
+public class PostgreSqlTableMetaDataDaoTest extends AbstractTableDaoTest {
+    public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new PostgreSqlDatabaseDaoTest();
 
     @Override
     protected Database getTestDatabase() {
@@ -22,8 +22,8 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
 
     @Before
     @Override
-    public void setUp() throws SQLException {
-        createTestData(getTestDatabase().getName(), null);
+    public void setUp() throws SQLException{
+        createTestData(null, "public");
         super.setUp();
     }
 

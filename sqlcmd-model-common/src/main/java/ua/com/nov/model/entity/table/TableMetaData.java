@@ -16,10 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Table<E extends RowData> implements Persistent<Table<? extends RowData>> {
-    private TableId id;     // table primary id
-    private String name;    // table name
-    private String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
+public class TableMetaData implements Persistent<TableMetaData> {
+    private final TableId id;     // table primary id
+    private String name;    // This field uses for renaming table
+    private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private String remarks;  // explanatory comment on the table
 
@@ -28,33 +28,32 @@ public class Table<E extends RowData> implements Persistent<Table<? extends RowD
     private List<Key> uniqueKeyList; // table unique id list
     private List<ForeignKey> foreignKeyList; // table foreign id list
     private List<String> checkExpressionList; // table check expression list
-    private List<E> rows = new ArrayList<>();   // table data
 
     private String tableProperies = "";
 
     private TableRowMapper rowMapper = new TableRowMapper();
 
-    public Table(TableId id) {
+    public TableMetaData(TableId id) {
         this(id, "TABLE");
     }
 
-    public Table(Database db, String name, String catalog, String schema) {
+    public TableMetaData(Database db, String name, String catalog, String schema) {
         this(new TableId(db, name, catalog, schema));
     }
 
-    public Table(TableId id, String type) {
+    public TableMetaData(TableId id, String type) {
         this.id = id;
         this.name = id.getName();
         this.type = type;
     }
 
     @Override
-    public SqlStatementSource<Table<? extends RowData>> getSqlStmtSource() {
+    public SqlStatementSource<TableMetaData> getSqlStmtSource() {
         return id.getDb().getTableSqlStmtSource();
     }
 
     @Override
-    public Mappable<Table<? extends RowData>> getRowMapper() {
+    public Mappable<TableMetaData> getRowMapper() {
         return rowMapper;
     }
 
@@ -119,6 +118,10 @@ public class Table<E extends RowData> implements Persistent<Table<? extends RowD
         return columns.get(index);
     }
 
+    public Column getColumn(String columnName) {
+        return getColumn(getColumnIndex(columnName));
+    }
+
     public String getColumnName(int index) {
         return columns.get(index).getId().getName();
     }
@@ -158,9 +161,9 @@ public class Table<E extends RowData> implements Persistent<Table<? extends RowD
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Table)) return false;
+        if (!(o instanceof TableMetaData)) return false;
 
-        Table<?> table = (Table<?>) o;
+        TableMetaData table = (TableMetaData) o;
 
         return id.equals(table.id);
     }
@@ -170,15 +173,15 @@ public class Table<E extends RowData> implements Persistent<Table<? extends RowD
         return id.hashCode();
     }
 
-    private class TableRowMapper implements Mappable<Table<? extends RowData>> {
+    private class TableRowMapper implements Mappable<TableMetaData> {
         @Override
-        public Table<E> rowMap(ResultSet rs) throws SQLException {
+        public TableMetaData rowMap(ResultSet rs) throws SQLException {
             TableId tableId = new TableId(getId().getDb(), rs.getString("TABLE_NAME"),
                     rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
             if (tableId.equals(getId())) {
-                return Table.this;
+                return new TableMetaData(getId(), rs.getString("TABLE_TYPE"));
             } else {
-                return new Table(tableId, rs.getString("TABLE_TYPE"));
+                return new TableMetaData(tableId, rs.getString("TABLE_TYPE"));
             }
         }
     }

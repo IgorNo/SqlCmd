@@ -63,13 +63,31 @@ public abstract class Database extends BaseDataSource implements Persistent<Data
         for (DataType dataType : dataTypes) {
             if (dataType.getTypeName().equalsIgnoreCase(typeName)) return dataType;
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
     }
 
-    public List<DataType> getListDataType(int jdbcDataType) {
+    /**
+     *
+     * @param jdbcDataType
+     * @return List of DataType elements of that have jdbcDataType
+     */
+    public List<DataType> getDataTypes(int jdbcDataType) {
         List<DataType> result = new LinkedList<>();
         for (DataType dataType : dataTypes) {
             if (jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
+        }
+        return result;
+    }
+
+    /**
+     *
+     * @param jdbcDataType
+     * @return List of DataType elements of that have jdbcDataType and are autoincremental
+     */
+    public List<DataType> getAutoincrementalDataTypes(int jdbcDataType) {
+        List<DataType> result = new LinkedList<>();
+        for (DataType dataType : dataTypes) {
+            if (dataType.isAutoIncrement() && jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
         }
         return result;
     }

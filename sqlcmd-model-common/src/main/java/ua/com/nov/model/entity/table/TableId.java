@@ -3,10 +3,10 @@ package ua.com.nov.model.entity.table;
 import ua.com.nov.model.entity.database.Database;
 
 public class TableId {
-    private Database db;
-    private String name;    // table name
-    private String catalog; // table catalog
-    private String schema;  // table schema
+    private final Database db;
+    private final String name;    // table name
+    private final String catalog; // table catalog
+    private final String schema;  // table schema
 
     public TableId(Database db, String name, String catalog, String schema) {
         this.db = db;

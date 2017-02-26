@@ -9,7 +9,7 @@ public class DataType {
     public static final int TYPE_PRED_NONE = 0;     // No support
     public static final int TYPE_PRED_CHAR = 1;     // Only supported with WHERE .. LIKE
     public static final int TYPE_PRED_BASIC = 2;    // Supported except for WHERE .. LIKE
-    public static final int TYPE_SEARCABLE = 3;     // Supported for all WHERE ..
+    public static final int TYPE_SEARCHABLE = 3;     // Supported for all WHERE ..
 
     private final String typeName;
     private final int jdbcDataType; // SQL data type from java.sql.Types
@@ -21,7 +21,7 @@ public class DataType {
                                     // May be TYPE_NO_NULLS, TYPE_NULLABLE, TYPE_NULLABLE_UNKNOWN
     private final boolean caseSensitive;    // is it case sensitive.
     private final int searchable;           // can you use "WHERE" based on this type:
-                                            // TYPE_PRED_NONE, TYPE_PRED_CHAR, TYPE_PRED_BASIC, TYPE_SEARCABLE
+                                            // TYPE_PRED_NONE, TYPE_PRED_CHAR, TYPE_PRED_BASIC, TYPE_SEARCHABLE
     private final boolean unsignedAttribute;
     private final boolean fixedPrecScale; // can it be a money value.
     private final boolean autoIncrement;  // can it be used for an auto-increment value.

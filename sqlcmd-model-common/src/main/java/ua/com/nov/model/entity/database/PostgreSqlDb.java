@@ -60,24 +60,12 @@ public class PostgreSqlDb extends Database {
     private static class PostgreSqlTableStmts extends AbstractSqlTableStatements {
         @Override
         protected void addFullTypeName(Column col, StringBuilder result) {
-            if (col.isAutoIncrement()) {
-                switch (col.getDataType().getJdbcDataType()) {
-                    case Types.SMALLINT:
-                        result.append("SMALLSERIAL");
-                        break;
-                    case Types.INTEGER:
-                        result.append("SERIAL");
-                        break;
-                    case Types.BIGINT:
-                        result.append("BIGSERIAL");
-                        break;
-                    default:
-                        throw new IllegalArgumentException();
-                }
-            } else {
-                result.append(col.getDataType().getTypeName());
-            }
+            result.append(col.getDataType().getTypeName());
             addSizeAndPrecision(col, result);
+            if (col.isAutoIncrement()) {
+                if (!col.getDataType().isAutoIncrement())
+                    throw new IllegalArgumentException("This type can't be autoincrement");
+            }
         }
     }
 
