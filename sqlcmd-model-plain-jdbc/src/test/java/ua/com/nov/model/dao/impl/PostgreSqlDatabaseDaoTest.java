@@ -2,8 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.Test;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseId;
-import ua.com.nov.model.entity.database.PostgreSqlDb;
+import ua.com.nov.model.entity.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
@@ -17,7 +16,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     public static final DataSource DATA_SOURCE = DbUtil.POSTGRE_SQL_LOCAL_SYSTEM_DB;
 
-    public static final Database TEST_DATABASE = new PostgreSqlDb(URL + "tmp", "postgres", "postgres");
+    public static final Database TEST_DATABASE = new PostgresSqlDb(URL + "tmp", "postgres", "postgres");
 
     @Override
     public Database getTestDatabase() {
@@ -31,7 +30,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        List<Database> databases = DAO.readAll(TEST_DATABASE);
+        List<Database> databases = DAO.readAll(TEST_DATABASE.getId());
         assertTrue(databases.contains(TEST_DATABASE));
     }
 

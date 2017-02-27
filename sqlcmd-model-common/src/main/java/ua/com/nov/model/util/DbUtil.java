@@ -26,13 +26,8 @@ public class DbUtil {
             new MySqlDb(MY_SQL_LOCAL_URL + "sys", "root", "root");
 
     public static final Database POSTGRE_SQL_LOCAL_SYSTEM_DB =
-            new PostgreSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
+            new PostgresSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
 
-
-    public static Database getDatabase(Connection conn) throws SQLException {
-        DatabaseMetaData metaData = conn.getMetaData();
-        return DbRepository.getDb(new DatabaseId(metaData.getURL(), metaData.getUserName()));
-    }
 
     public static String getDatabaseName(String url) {
         int beginIndex = url.lastIndexOf('/') + 1;

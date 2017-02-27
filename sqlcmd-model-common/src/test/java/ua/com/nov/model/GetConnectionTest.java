@@ -5,7 +5,7 @@ import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
 import ua.com.nov.model.entity.database.HyperSqlDb;
 import ua.com.nov.model.entity.database.MySqlDb;
-import ua.com.nov.model.entity.database.PostgreSqlDb;
+import ua.com.nov.model.entity.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
@@ -28,7 +28,7 @@ public class GetConnectionTest {
     @Test
     public void testGetPostgreSqlLocalConnection() throws SQLException{
         String dbUrl = DbUtil.POSTGRE_SQL_LOCAL_URL + "postgres";
-        DataSource dataSource = new SingleThreadConnectionDataSource(new PostgreSqlDb(dbUrl, "postgres", "postgres"));
+        DataSource dataSource = new SingleThreadConnectionDataSource(new PostgresSqlDb(dbUrl, "postgres", "postgres"));
         Connection connection = dataSource.getConnection();
         System.out.println(connection.getMetaData().getDatabaseProductName());
         assertTrue(connection != null);

@@ -1,7 +1,7 @@
 package ua.com.nov.model.repository;
 
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseId;
+import ua.com.nov.model.entity.database.Database.DatabaseId;
 
 import java.util.HashMap;
 import java.util.Map;

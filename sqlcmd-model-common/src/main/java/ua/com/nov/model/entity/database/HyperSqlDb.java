@@ -9,10 +9,6 @@ public class HyperSqlDb extends Database {
     private static final HyperSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
     private static final HyperSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
 
-    public HyperSqlDb(DatabaseId pk) {
-        super(pk);
-    }
-
     public HyperSqlDb(String dbUrl, String userName) {
         super(dbUrl, userName);
     }
@@ -21,10 +17,10 @@ public class HyperSqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public HyperSqlDb(DatabaseId pk, String password) {
-        super(pk, password);
+    public HyperSqlDb(String dbUrl, String userName, String password, String dbProperties) {
+        super(dbUrl, userName, password, dbProperties);
     }
-    
+
     @Override
     public HyperSqlDbStmts getSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
@@ -59,7 +55,7 @@ public class HyperSqlDb extends Database {
         }
 
         @Override
-        public String getDeleteStmt(Database db) {
+        public String getDeleteStmt(DatabaseId id) {
             throw new UnsupportedOperationException();
         }
     }

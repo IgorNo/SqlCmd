@@ -7,24 +7,20 @@ import ua.com.nov.model.statement.AbstractSqlTableStatements;
 
 import java.sql.Types;
 
-public class PostgreSqlDb extends Database {
+public class PostgresSqlDb extends Database {
     private static final PostgreSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new PostgreSqlDbStmts();
     private static final PostgreSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new PostgreSqlTableStmts();
 
-    public PostgreSqlDb(DatabaseId pk) {
-        super(pk);
-    }
-
-    public PostgreSqlDb(String dbUrl, String userName) {
+    public PostgresSqlDb(String dbUrl, String userName) {
         super(dbUrl, userName);
     }
 
-    public PostgreSqlDb(String dbUrl, String userName, String password) {
+    public PostgresSqlDb(String dbUrl, String userName, String password) {
         super(dbUrl, userName, password);
     }
 
-    public PostgreSqlDb(DatabaseId pk, String password) {
-        super(pk, password);
+    public PostgresSqlDb(String dbUrl, String userName, String password, String dbProperties) {
+        super(dbUrl, userName, password, dbProperties);
     }
 
     @Override
@@ -52,7 +48,7 @@ public class PostgreSqlDb extends Database {
 
     private static class PostgreSqlDbStmts extends AbstractSqlDbStatements {
         @Override
-        public String getReadAllStmt(Database db) {
+        public String getReadAllStmt(DatabaseId id) {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
         }
     }

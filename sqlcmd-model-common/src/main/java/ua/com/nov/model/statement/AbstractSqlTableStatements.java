@@ -1,33 +1,33 @@
 package ua.com.nov.model.statement;
 
-import ua.com.nov.model.entity.table.TableMetaData;
+import ua.com.nov.model.entity.table.Table;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
-import ua.com.nov.model.entity.row.RowData;
+import ua.com.nov.model.entity.table.TableId;
 
-public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableMetaData> {
+public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId,Table> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
 
         @Override
-        public String getCreateStmt(TableMetaData table) {
+        public String getCreateStmt(Table table) {
             return String.format(CREATE_TABLE_SQL,
                     table.getFullName(), getCreateTableDefinition(table), table.getTableProperies());
         }
 
         @Override
-        public String getDeleteStmt(TableMetaData table) {
-            return String.format(DROP_TABLE_SQL, table.getName());
+        public String getDeleteStmt(TableId id) {
+            return String.format(DROP_TABLE_SQL, id.getName());
         }
 
         @Override
-        public String getUpdateStmt(TableMetaData table) {
+        public String getUpdateStmt(Table table) {
             return String.format(RENAME_TABLE_SQL, table.getId().getName(), table.getName());
         }
 
-        private String getCreateTableDefinition(TableMetaData table) {
+        private String getCreateTableDefinition(Table table) {
             int numberOfColumns = table.getNumberOfColumns();
             if (numberOfColumns == 0) return "";
 
@@ -54,7 +54,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             return result.toString();
         }
 
-        private void addColumnDefinition(int ordinalPosition, TableMetaData table, StringBuilder result) {
+        private void addColumnDefinition(int ordinalPosition, Table table, StringBuilder result) {
             Column col = table.getColumn(ordinalPosition);
             if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
                 throw new IllegalArgumentException();

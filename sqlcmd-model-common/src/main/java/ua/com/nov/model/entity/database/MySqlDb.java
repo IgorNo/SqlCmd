@@ -9,10 +9,6 @@ public final class MySqlDb extends Database {
     private static final MySqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new MySqlDbStmts();
     private static final MySqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new MySqlTableStmts();
 
-    public MySqlDb(DatabaseId pk) {
-        super(pk);
-    }
-
     public MySqlDb(String dbUrl, String userName) {
         super(dbUrl, userName);
     }
@@ -21,8 +17,8 @@ public final class MySqlDb extends Database {
         super(dbUrl, userName, password);
     }
 
-    public MySqlDb(DatabaseId pk, String password) {
-        super(pk, password);
+    public MySqlDb(String dbUrl, String userName, String password, String dbProperties) {
+        super(dbUrl, userName, password, dbProperties);
     }
 
     @Override
@@ -51,7 +47,7 @@ public final class MySqlDb extends Database {
 
     private static class MySqlDbStmts extends AbstractSqlDbStatements {
         @Override
-        public String getReadAllStmt(Database db) {
+        public String getReadAllStmt(DatabaseId id) {
             return "SHOW DATABASES";
         }
     }

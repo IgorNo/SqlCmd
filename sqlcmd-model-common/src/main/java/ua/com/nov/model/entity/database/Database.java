@@ -3,49 +3,46 @@ package ua.com.nov.model.entity.database;
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.table.TableId;
-import ua.com.nov.model.repository.DbRepository;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
+import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Database extends BaseDataSource implements Persistent<Database> {
-    private DatabaseId id;
-    private String password;
+public abstract class Database extends BaseDataSource implements Unique {
+    private final DatabaseId id;
+    private final String password;
     private List<DataType> dataTypes;
-    private String dbProperties = "";
-
-    public Database(DatabaseId id) {
-        this(id, null);
-    }
+    private final String dbProperties;
 
     public Database(String dbUrl, String userName) {
-        this(new DatabaseId(dbUrl, userName), null);
+        this(dbUrl, userName, null, "");
     }
 
     public Database(String dbUrl, String userName, String password) {
-        this(new DatabaseId(dbUrl, userName), password);
+        this(dbUrl, userName, password, "");
     }
 
-    public Database(DatabaseId id, String password) {
-        this.id = id;
+    public Database(String dbUrl, String userName, String password, String dbProperties) {
+        this.id = new DatabaseId(dbUrl, userName);
         this.password = password;
-        DbRepository.addDb(this);
+        this.dbProperties = dbProperties;
     }
 
     public abstract AbstractSqlTableStatements getTableSqlStmtSource();
 
-    public abstract String getFullTableName(TableId id);
+    public abstract SqlStatementSource<DatabaseId,Database> getSqlStmtSource();
 
-    @Override
-    public Mappable<Database> getRowMapper() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract String getFullTableName(TableId id);
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -96,10 +93,6 @@ public abstract class Database extends BaseDataSource implements Persistent<Data
         return dbProperties;
     }
 
-    public void setDbProperties(String dbProperties) {
-        this.dbProperties = dbProperties;
-    }
-
     @Override
     public DatabaseId getId() {
         return id;
@@ -110,7 +103,7 @@ public abstract class Database extends BaseDataSource implements Persistent<Data
     }
 
     public String getName() {
-        return DbUtil.getDatabaseName(getDbUrl());
+        return id.getName();
     }
 
     public String getUserName() {
@@ -120,8 +113,6 @@ public abstract class Database extends BaseDataSource implements Persistent<Data
     public String getPassword() {
         return password;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
@@ -137,4 +128,84 @@ public abstract class Database extends BaseDataSource implements Persistent<Data
     public int hashCode() {
         return id.hashCode();
     }
+
+    public class DatabaseId implements Persistent<Database> {
+        private final String dbUrl;
+        private final String userName;
+        private final DbRowMapper rowMapper = new DbRowMapper();
+
+        public DatabaseId(String dbUrl, String userName) {
+            if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
+            this.dbUrl = dbUrl;
+            this.userName = userName;
+        }
+
+        @Override
+        public SqlStatementSource<DatabaseId,Database> getSqlStmtSource() {
+            return Database.this.getSqlStmtSource();
+        }
+
+        @Override
+        public Mappable<Database> getRowMapper() {
+            return rowMapper;
+        }
+
+        public String getDbUrl() {
+            return dbUrl;
+        }
+
+        public Database getDatabase() {
+            return Database.this;
+        }
+
+        public String getName() {
+            return DbUtil.getDatabaseName(getDbUrl());
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DatabaseId that = (DatabaseId) o;
+
+            if (!dbUrl.equalsIgnoreCase(that.dbUrl)) return false;
+            return userName.equals(that.userName);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = dbUrl.toLowerCase().hashCode();
+            result = 31 * result + userName.toLowerCase().hashCode();
+            return result;
+        }
+
+        public class DbRowMapper implements Mappable<Database> {
+            @Override
+            public Database rowMap(ResultSet rs) throws SQLException {
+                String url = DbUtil.getDatabaseUrl(dbUrl) + rs.getString(1);
+                Class[] paramTypes = new Class[]{String.class, String.class};
+                Database db = null;
+                try {
+                    Constructor<? extends Database> constructor = Database.this.getClass().getConstructor(paramTypes);
+                    db = constructor.newInstance(new Object[]{url, userName});
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                return db;
+            }
+        }
+    }
+
 }

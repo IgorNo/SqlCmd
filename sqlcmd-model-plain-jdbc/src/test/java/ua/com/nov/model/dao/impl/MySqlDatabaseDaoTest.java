@@ -2,7 +2,6 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.Test;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseId;
 import ua.com.nov.model.entity.database.MySqlDb;
 import ua.com.nov.model.util.DbUtil;
 
@@ -31,7 +30,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        List<Database> databases = DAO.readAll(TEST_DATABASE);
+        List<Database> databases = DAO.readAll(TEST_DATABASE.getId());
         assertTrue(databases.contains(TEST_DATABASE));
     }
 

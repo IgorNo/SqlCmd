@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.column.ColumnId;
 import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.TableMetaData;
+import ua.com.nov.model.entity.table.Table;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -12,19 +12,19 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ColumnDao extends DataDefinitionDao<Column> {
+public class ColumnDao extends DataDefinitionDao<ColumnId, Column> {
     @Override
-    protected ResultSet getOneResultSet(Column value) throws SQLException {
+    protected ResultSet getOneResultSet(ColumnId id) throws SQLException {
         return null;
     }
 
     @Override
-    protected ResultSet getAllResultSet(Column template) throws SQLException {
+    protected ResultSet getAllResultSet(ColumnId template) throws SQLException {
         return null;
     }
 
     @Override
-    protected ResultSet getNResultSet(int nStart, int number, Column template) throws SQLException {
+    protected ResultSet getNResultSet(int nStart, int number, ColumnId template) throws SQLException {
         return null;
     }
 
@@ -63,7 +63,7 @@ public class ColumnDao extends DataDefinitionDao<Column> {
         return column;
     }
 
-    public Map<ColumnId, Column> readAll(TableMetaData table) throws SQLException {
+    public Map<ColumnId, Column> readAll(Table table) throws SQLException {
         Map<ColumnId, Column> columns = new HashMap<>();
 
         Connection conn = getDataSource().getConnection();

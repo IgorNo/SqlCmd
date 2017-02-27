@@ -1,22 +1,17 @@
 package ua.com.nov.model.entity.table;
 
-import ua.com.nov.model.statement.SqlStatementSource;
-import ua.com.nov.model.entity.Mappable;
-import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.column.Column;
 import ua.com.nov.model.entity.database.Database;
 import ua.com.nov.model.entity.key.ForeignKey;
 import ua.com.nov.model.entity.key.Key;
-import ua.com.nov.model.entity.row.RowData;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TableMetaData implements Persistent<TableMetaData> {
+public class Table implements Unique {
     private final TableId id;     // table primary id
     private String name;    // This field uses for renaming table
     private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
@@ -31,30 +26,18 @@ public class TableMetaData implements Persistent<TableMetaData> {
 
     private String tableProperies = "";
 
-    private TableRowMapper rowMapper = new TableRowMapper();
-
-    public TableMetaData(TableId id) {
+    public Table(TableId id) {
         this(id, "TABLE");
     }
 
-    public TableMetaData(Database db, String name, String catalog, String schema) {
+    public Table(Database db, String name, String catalog, String schema) {
         this(new TableId(db, name, catalog, schema));
     }
 
-    public TableMetaData(TableId id, String type) {
+    public Table(TableId id, String type) {
         this.id = id;
         this.name = id.getName();
         this.type = type;
-    }
-
-    @Override
-    public SqlStatementSource<TableMetaData> getSqlStmtSource() {
-        return id.getDb().getTableSqlStmtSource();
-    }
-
-    @Override
-    public Mappable<TableMetaData> getRowMapper() {
-        return rowMapper;
     }
 
     public TableId getId() {
@@ -161,9 +144,9 @@ public class TableMetaData implements Persistent<TableMetaData> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TableMetaData)) return false;
+        if (!(o instanceof Table)) return false;
 
-        TableMetaData table = (TableMetaData) o;
+        Table table = (Table) o;
 
         return id.equals(table.id);
     }
@@ -173,16 +156,4 @@ public class TableMetaData implements Persistent<TableMetaData> {
         return id.hashCode();
     }
 
-    private class TableRowMapper implements Mappable<TableMetaData> {
-        @Override
-        public TableMetaData rowMap(ResultSet rs) throws SQLException {
-            TableId tableId = new TableId(getId().getDb(), rs.getString("TABLE_NAME"),
-                    rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
-            if (tableId.equals(getId())) {
-                return new TableMetaData(getId(), rs.getString("TABLE_TYPE"));
-            } else {
-                return new TableMetaData(tableId, rs.getString("TABLE_TYPE"));
-            }
-        }
-    }
 }

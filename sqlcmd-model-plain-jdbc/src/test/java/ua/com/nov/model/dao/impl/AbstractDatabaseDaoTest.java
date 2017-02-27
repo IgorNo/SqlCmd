@@ -7,7 +7,7 @@ import org.junit.Test;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.DatabaseId;
+import ua.com.nov.model.entity.database.Database.DatabaseId;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
-    public static final AbstractDao<Database> DAO = new DatabaseDao();
+    public static final AbstractDao<DatabaseId, Database> DAO = new DatabaseDao();
 
     private static DataSource dataSource;
 
@@ -47,7 +47,7 @@ public abstract class AbstractDatabaseDaoTest {
 
     @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException {
-        DAO.delete(getTestDatabase());
+        DAO.delete(getTestDatabase().getId());
         Connection conn = getTestDatabase().getConnection();
         assertTrue(conn == null);
         conn.close();

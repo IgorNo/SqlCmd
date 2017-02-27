@@ -2,9 +2,9 @@ package ua.com.nov.model.entity;
 
 import ua.com.nov.model.statement.SqlStatementSource;
 
-public interface Persistent<V> extends Unique {
+public interface Persistent<V> {
 
-   SqlStatementSource<V> getSqlStmtSource();
+   <K> SqlStatementSource<K,V> getSqlStmtSource();
 
    Mappable<V> getRowMapper();
 }

@@ -1,12 +1,10 @@
 package ua.com.nov.model.entity.column;
 
-import ua.com.nov.model.statement.SqlStatementSource;
-import ua.com.nov.model.entity.Mappable;
-import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.TableMetaData;
+import ua.com.nov.model.entity.table.Table;
 
-public class Column implements Persistent<Column> {
+public class Column implements Unique {
     private final int ordinalPosition; // index of column in table (starting at 1)
     private final ColumnId id;
     private final DataType dataType;
@@ -53,7 +51,7 @@ public class Column implements Persistent<Column> {
             this.dataType = dataType;
         }
 
-        public Builder(int ordinalPosition, TableMetaData table, String name, DataType dataType) {
+        public Builder(int ordinalPosition, Table table, String name, DataType dataType) {
             this(ordinalPosition, new ColumnId(table, name), dataType);
         }
 
@@ -122,16 +120,6 @@ public class Column implements Persistent<Column> {
         this.generatedColumn = builder.generatedColumn;
     }
 
-
-    @Override
-    public SqlStatementSource<Column> getSqlStmtSource() {
-        return null;
-    }
-
-    @Override
-    public Mappable getRowMapper() {
-        return null;
-    }
 
     @Override
     public ColumnId getId() {

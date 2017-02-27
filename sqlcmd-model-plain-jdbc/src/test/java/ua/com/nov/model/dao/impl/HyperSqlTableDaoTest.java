@@ -2,28 +2,22 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import ua.com.nov.model.entity.database.Database;
 
 import java.sql.SQLException;
 
-public class MySqlTableMetaDataDaoTest extends AbstractTableDaoTest {
-    public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
+public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
+    public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
 
     @Override
     protected Database getTestDatabase() {
         return DATABASE_DAO_TEST.getTestDatabase();
     }
 
-    @BeforeClass
-    public static void setUpClass() throws SQLException {
-        DATABASE_DAO_TEST.setUp();
-    }
-
     @Before
     @Override
     public void setUp() throws SQLException {
-        createTestData(getTestDatabase().getName(), null);
+        createTestData(null, "PUBLIC");
         super.setUp();
     }
 

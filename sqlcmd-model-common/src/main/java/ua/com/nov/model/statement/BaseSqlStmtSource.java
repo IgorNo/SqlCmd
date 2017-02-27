@@ -1,23 +1,23 @@
 package ua.com.nov.model.statement;
 
-public abstract class BaseSqlStmtSource<V> implements SqlStatementSource<V> {
+public abstract class BaseSqlStmtSource<K,V> implements SqlStatementSource<K,V> {
     @Override
     public String getCreateStmt(V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadOneStmt(V value) {
+    public String getReadOneStmt(K key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadNStmt(int nStart, int number, V value) {
+    public String getReadNStmt(int nStart, int number, K key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getReadAllStmt(V value) {
+    public String getReadAllStmt(K key) {
         throw new UnsupportedOperationException();
     }
 
@@ -27,17 +27,17 @@ public abstract class BaseSqlStmtSource<V> implements SqlStatementSource<V> {
     }
 
     @Override
-    public String getDeleteStmt(V value) {
+    public String getDeleteStmt(K key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getDeleteAllStmt(V value) {
+    public String getDeleteAllStmt(K key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getCountStmt(V value) {
+    public String getCountStmt(K key) {
         throw new UnsupportedOperationException();
     }
 }

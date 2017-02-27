@@ -2,13 +2,14 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public abstract class DataDefinitionDao<V extends Persistent>
-        extends AbstractDao<V>
+public abstract class DataDefinitionDao<K extends Persistent<V>, V extends Unique>
+        extends AbstractDao<K,V>
 {
     @Override
     protected void executeUpdateStmt(String sqlStmt) throws SQLException {
@@ -18,12 +19,10 @@ public abstract class DataDefinitionDao<V extends Persistent>
     }
 
     @Override
-    public void deleteAll(V template) throws SQLException {
+    public void deleteAll(K template) throws SQLException {
         List<V> vList = readAll(template);
-        Statement stmt = getDataSource().getConnection().createStatement();
         for (V v : vList) {
-            delete(v);
+            delete(v.getId());
         }
-        stmt.close();
     }
 }

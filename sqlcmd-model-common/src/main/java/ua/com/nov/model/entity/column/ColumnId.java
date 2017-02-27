@@ -1,22 +1,35 @@
 package ua.com.nov.model.entity.column;
 
-import ua.com.nov.model.entity.table.TableMetaData;
+import ua.com.nov.model.entity.Mappable;
+import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.statement.SqlStatementSource;
 
-public class ColumnId {
-    private final TableMetaData table;
+public class ColumnId implements Persistent<Column> {
+    private final Table table;
     private final String name;
 
-    public ColumnId(TableMetaData table, String name) {
+    public ColumnId(Table table, String name) {
         this.table = table;
         this.name = name;
     }
 
-    public TableMetaData getTable() {
+    public Table getTable() {
         return table;
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public SqlStatementSource<ColumnId,Column> getSqlStmtSource() {
+        return null;
+    }
+
+    @Override
+    public Mappable<Column> getRowMapper() {
+        return null;
     }
 
     @Override
