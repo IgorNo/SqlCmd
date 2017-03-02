@@ -1,8 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.Persistent;
-import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
 
 import java.sql.Connection;
@@ -10,7 +11,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TableDao extends DataDefinitionDao<TableId, Table> {
+public class TableDao extends DataDefinitionDao<TableId, Table, Database> {
 
     @Override
     public ResultSet getOneResultSet(TableId id) throws SQLException {
@@ -24,18 +25,28 @@ public class TableDao extends DataDefinitionDao<TableId, Table> {
     }
 
     @Override
-    protected ResultSet getNResultSet(int nStart, int number, TableId template) throws SQLException {
-        throw new UnsupportedOperationException();
+    protected ResultSet getNResultSet(int nStart, int number, Database containerId) throws SQLException {
+        return null;
     }
 
     @Override
-    protected ResultSet getAllResultSet(TableId id) throws SQLException {
+    protected ResultSet getAllResultSet(Database db) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        if (DbUtil.getDatabaseUrl(conn).equalsIgnoreCase(id.getDb().getDbUrl())) {
+        if (DbUtil.getDatabaseUrl(conn).equalsIgnoreCase(db.getDbUrl())) {
             throw new IllegalArgumentException("Connected and read databases don't equal");
         }
         DatabaseMetaData dbMetaData = conn.getMetaData();
         ResultSet rs = dbMetaData.getTables(null, null, null, new String[] {"TABLE"});
         return rs;
+    }
+
+    @Override
+    protected Table rowMap(Database containerId, ResultSet rs) throws SQLException {
+        return null;
+    }
+
+    @Override
+    protected SqlStatementSource<TableId, Table, Database> getSqlStmtSource(Database db) {
+        return db.getTableSqlStmtSource();
     }
 }

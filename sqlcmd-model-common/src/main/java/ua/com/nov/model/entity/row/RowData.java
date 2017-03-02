@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.row;
 
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.metadata.table.Table;
 
 public class RowData {
     private Table table;

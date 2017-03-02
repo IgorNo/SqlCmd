@@ -1,12 +1,15 @@
-package ua.com.nov.model.entity.database;
+package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
+import ua.com.nov.model.statement.SqlStatementSource;
 
 public class HyperSqlDb extends Database {
-    private static final HyperSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperSqlDbStmts();
+    private static final HyperDbSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new HyperDbSqlDbStmts();
     private static final HyperSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new HyperSqlTableStmts();
 
     public HyperSqlDb(String dbUrl, String userName) {
@@ -22,13 +25,18 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public HyperSqlDbStmts getSqlStmtSource() {
+    public HyperDbSqlDbStmts getDatabaseSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
     public HyperSqlTableStmts getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
+    }
+
+    @Override
+    public SqlStatementSource<MetaDataId, Column, Table> getColumnSqlStmtSource() {
+        return null;
     }
 
     @Override
@@ -48,14 +56,14 @@ public class HyperSqlDb extends Database {
         return "";
     }
 
-    private static class HyperSqlDbStmts extends AbstractSqlDbStatements {
+    private static class HyperDbSqlDbStmts extends AbstractSqlDbStatements {
         @Override
         public String getCreateStmt(Database db) {
            throw new UnsupportedOperationException();
         }
 
         @Override
-        public String getDeleteStmt(DatabaseId id) {
+        public String getDeleteStmt(DbId dbId) {
             throw new UnsupportedOperationException();
         }
     }

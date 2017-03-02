@@ -1,11 +1,12 @@
-package ua.com.nov.model.entity.database;
+package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
-
-import java.sql.Types;
+import ua.com.nov.model.statement.SqlStatementSource;
 
 public class PostgresSqlDb extends Database {
     private static final PostgreSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new PostgreSqlDbStmts();
@@ -24,13 +25,18 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    public PostgreSqlDbStmts getSqlStmtSource() {
+    public PostgreSqlDbStmts getDatabaseSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
     public PostgreSqlTableStmts getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
+    }
+
+    @Override
+    public SqlStatementSource<MetaDataId, Column, Table> getColumnSqlStmtSource() {
+        return null;
     }
 
     @Override
@@ -48,7 +54,7 @@ public class PostgresSqlDb extends Database {
 
     private static class PostgreSqlDbStmts extends AbstractSqlDbStatements {
         @Override
-        public String getReadAllStmt(DatabaseId id) {
+        public String getReadAllStmt(Database db) {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
         }
     }

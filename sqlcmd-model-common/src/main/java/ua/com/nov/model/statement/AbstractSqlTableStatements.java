@@ -1,12 +1,14 @@
 package ua.com.nov.model.statement;
 
-import ua.com.nov.model.entity.table.Table;
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.key.ForeignKey;
-import ua.com.nov.model.entity.key.Key;
-import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.metadata.constraint.Check;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
+import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.TableId;
 
-public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId,Table> {
+public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId, Table, Database> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
@@ -14,7 +16,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
         @Override
         public String getCreateStmt(Table table) {
             return String.format(CREATE_TABLE_SQL,
-                    table.getFullName(), getCreateTableDefinition(table), table.getTableProperies());
+                    table.getFullName(), getCreateTableDefinition(table), table.getTableProperties());
         }
 
         @Override
@@ -24,7 +26,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
 
         @Override
         public String getUpdateStmt(Table table) {
-            return String.format(RENAME_TABLE_SQL, table.getId().getName(), table.getName());
+            return String.format(RENAME_TABLE_SQL, table.getId().getName(), table.getNewName());
         }
 
         private String getCreateTableDefinition(Table table) {
@@ -39,15 +41,15 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
 
             addKey(table.getPrimaryKey(), ", PRIMARY KEY", result);
 
-            for (Key key : table.getUniqueKeyList()) {
+            for (Key key : table.getUniqueKeyCollection()) {
                 addKey(key, ", UNIQUE", result);
             }
 
-            for (ForeignKey key : table.getForeignKeyList()) {
+            for (ForeignKey key : table.getForeignKeyCollection()) {
                 addForeignKey(key, result);
             }
 
-            for (String chekExpr : table.getCheckExpressionList()) {
+            for (Check chekExpr : table.getCheckExpressionCollecttion()) {
                 result.append(", CHECK(").append(chekExpr).append(')');
             }
 
@@ -59,7 +61,6 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
                 throw new IllegalArgumentException();
             }
-
             result.append(col.getName()).append(' ');
             addFullTypeName(col, result);
             addNotNull(col, result);
@@ -70,7 +71,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
 
         protected void addSizeAndPrecision(Column col, StringBuilder result) {
             if (col.getColumnSize() != null) {
-                result.append('(').append(col.getColumnSize()).append(')');
+                result.append('(').append(col.getColumnSize());
                 if (col.getPrecision() != null) result.append(',').append(col.getPrecision());
                 result.append(')');
             }
@@ -78,7 +79,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
 
         private void addNotNull(Column col, StringBuilder result) {
             if (col.getNullable() == 2) throw new IllegalArgumentException();
-            if (col.getNullable() == 1) result.append(" NOT NULL");
+            if (col.getNullable() == 0) result.append(" NOT NULL");
         }
 
         private void addDefaultValue(Column col, StringBuilder result) {
@@ -108,7 +109,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
                     if (i != numberOfKeyColumns) result.append(',');
                 }
                 result.append(')');
-                result.append(" REFERENCES ").append(key.getPkColumn(0).getId().getTable().getName()).append(" (");
+                result.append(" REFERENCES ").append(key.getPkColumn(0).getId().getContainerId().getName()).append(" (");
                 for (int i = 1; i <= numberOfKeyColumns; i++) {
                     result.append(key.getPkColumn(i));
                     if (i != numberOfKeyColumns) result.append(',');

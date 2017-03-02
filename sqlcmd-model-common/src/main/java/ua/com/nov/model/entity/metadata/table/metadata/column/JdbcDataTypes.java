@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.column;
+package ua.com.nov.model.entity.metadata.table.metadata.column;
 
 import java.sql.Types;
 
@@ -13,19 +13,19 @@ public enum JdbcDataTypes {
         BOOLEAN(Types.BOOLEAN),
         NULL(Types.NULL), OTHER(Types.OTHER);
 
-        private final int dataType;
+        private final int jdbcDataType;
 
-        JdbcDataTypes(int dataType) {
-            this.dataType = dataType;
+        JdbcDataTypes(int jdbcDataType) {
+            this.jdbcDataType = jdbcDataType;
         }
 
-        public int getDataType() {
-            return dataType;
+        public int getJdbcDataType() {
+            return jdbcDataType;
         }
 
         public String getTypeName(int sqlDataType) {
             for (JdbcDataTypes type : values()) {
-                if (type.getDataType() == sqlDataType) return type.toString();
+                if (type.getJdbcDataType() == sqlDataType) return type.toString();
             }
             throw new IllegalArgumentException();
         }

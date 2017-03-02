@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.HyperSqlDb;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.HyperSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;

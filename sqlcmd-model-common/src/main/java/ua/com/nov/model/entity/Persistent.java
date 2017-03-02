@@ -1,10 +1,7 @@
 package ua.com.nov.model.entity;
 
-import ua.com.nov.model.statement.SqlStatementSource;
+import ua.com.nov.model.entity.metadata.database.Database;
 
-public interface Persistent<V> {
-
-   <K> SqlStatementSource<K,V> getSqlStmtSource();
-
-   Mappable<V> getRowMapper();
+public interface Persistent{
+   Database getDb();
 }

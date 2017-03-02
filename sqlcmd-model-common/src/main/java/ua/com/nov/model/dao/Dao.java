@@ -1,14 +1,12 @@
 package ua.com.nov.model.dao;
 
-import ua.com.nov.model.entity.Persistent;
-
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface Dao<K,V> {
+public interface Dao<K,V,C> {
 
-    Dao<K,V> setDataSource(DataSource dataSource);
+    Dao<K,V,C> setDataSource(DataSource dataSource);
 
     //Create
     void create(V value) throws SQLException;
@@ -17,10 +15,10 @@ public interface Dao<K,V> {
     V read(K key) throws SQLException;
 
     //Read N values from container
-    List<V> readN(int nStart, int number, K template) throws SQLException;
+    List<V> readN(int nStart, int number, C containerId) throws SQLException;
 
     //Read All from container
-    List<V> readAll(K template) throws SQLException;
+    List<V> readAll(C containerId) throws SQLException;
 
     //Update
     void update(V value) throws SQLException;
@@ -29,8 +27,8 @@ public interface Dao<K,V> {
     void delete(K key) throws SQLException;
 
     //Delete all from container
-    void deleteAll(K key) throws SQLException;
+    void deleteAll(C containerId) throws SQLException;
     
     //Count
-    int count(K key) throws SQLException;
+    int count(C containerId) throws SQLException;
 }

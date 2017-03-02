@@ -3,9 +3,9 @@ package ua.com.nov.model;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
-import ua.com.nov.model.entity.database.HyperSqlDb;
-import ua.com.nov.model.entity.database.MySqlDb;
-import ua.com.nov.model.entity.database.PostgresSqlDb;
+import ua.com.nov.model.entity.metadata.database.HyperSqlDb;
+import ua.com.nov.model.entity.metadata.database.MySqlDb;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;

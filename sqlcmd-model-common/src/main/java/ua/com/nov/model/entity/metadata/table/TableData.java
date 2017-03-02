@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.table;
+package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.row.RowData;
 

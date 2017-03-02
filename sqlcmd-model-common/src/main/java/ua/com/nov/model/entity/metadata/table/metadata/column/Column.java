@@ -1,17 +1,16 @@
-package ua.com.nov.model.entity.column;
+package ua.com.nov.model.entity.metadata.table.metadata.column;
 
-import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
 
-public class Column implements Unique {
-    private final int ordinalPosition; // index of column in table (starting at 1)
-    private final ColumnId id;
+public class Column extends AbstractMetaData<MetaDataId> {
+    private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
-    private String name; // This field uses for renaming column
     private final Integer columnSize;
     private final Integer precision;  // the number of fractional digits. Null is returned for data types where
-                                // precision is not applicable
+    // precision is not applicable
     private final int nullable;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
     private final String defaultValue; //default value for the column, which should be interpreted as a string when
     // the value is enclosed in single quotes
@@ -31,36 +30,52 @@ public class Column implements Unique {
     */
 
     public static class Builder {
-        private final int ordinalPosition; // index of column in table (starting at 1)
-        private final ColumnId id;
+        private final MetaDataId id;
         private final DataType dataType;
-        private Integer columnSize;
 
+        private int ordinalPosition; // index of column in table (starting at 1)
+        private Integer columnSize;
         private Integer precision;  // the number of fractional digits. Null is returned for data types where
-        // precision is not applicable
+                                    // precision is not applicable
         private int nullable = DataType.TYPE_NULLABLE; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
         private String defaultValue; //default value for the column, which should be interpreted as a string when
-        // the value is enclosed in single quotes
+                                     // the value is enclosed in single quotes
         private String remarks;      // comment describing column
         private boolean autoIncrement;   // Indicates whether this column is auto incremented
         private boolean generatedColumn; // Indicates whether this is a generated column
 
-        public Builder(int ordinalPosition, ColumnId id, DataType dataType) {
-            this.ordinalPosition = ordinalPosition;
+        public Builder(MetaDataId id, DataType dataType) {
             this.id = id;
             this.dataType = dataType;
         }
 
-        public Builder(int ordinalPosition, Table table, String name, DataType dataType) {
-            this(ordinalPosition, new ColumnId(table, name), dataType);
+        public Builder(Column col) {
+            this(col.getId(), col.dataType);
+            this.columnSize = col.columnSize;
+            this.precision = col.precision;
+            this.nullable = col.nullable;
+            this.defaultValue = col.defaultValue;
+            this.remarks = col.remarks;
+            this.autoIncrement = col.autoIncrement;
+            this.generatedColumn = col.generatedColumn;
+        }
+
+        public Builder(TableId tableId, String name, DataType dataType) {
+            this(new MetaDataId(tableId, name), dataType);
+        }
+
+        public Builder ordinalPosition(int ordinalPosition) {
+            this.ordinalPosition = ordinalPosition;
+            return this;
         }
 
         public Builder columnSize(Integer columnSize) {
             if (columnSize != null) {
                 int maxColumnSize = dataType.getPrecision();
                 if (maxColumnSize > 0 && columnSize > maxColumnSize) {
-                    throw new IllegalArgumentException(String.format("Column size = %d greater than the max valid value = %d",
-                            columnSize, maxColumnSize));
+                    throw new IllegalArgumentException(
+                            String.format("Column size = %d greater than the max valid value = %d",
+                                    columnSize, maxColumnSize));
                 }
             }
             this.columnSize = columnSize;
@@ -73,6 +88,9 @@ public class Column implements Unique {
         }
 
         public Builder nullable(int nullable) {
+            if (dataType.getNullable() == DataType.TYPE_NO_NULLS && nullable == DataType.TYPE_NULLABLE) {
+                throw new IllegalArgumentException("This column type can not be nullable.");
+            }
             this.nullable = nullable;
             return this;
         }
@@ -88,7 +106,9 @@ public class Column implements Unique {
         }
 
         public Builder autoIncrement(boolean autoIncrement) {
-            if (!dataType.isAutoIncrement()) throw new IllegalArgumentException("This column can not be autoincrement");
+            if (!dataType.isAutoIncrement()) {
+                throw new IllegalArgumentException("This column type can not be autoincrement.");
+            }
             this.autoIncrement = autoIncrement;
             return this;
         }
@@ -104,13 +124,12 @@ public class Column implements Unique {
     }
 
     public Column(Builder builder) {
+        super(builder.id);
         if (builder.precision != null && builder.precision > builder.columnSize) {
-            throw new IllegalArgumentException("Precision can not be greater than column size");
+            throw new IllegalArgumentException("Precision can not be greater than column size.");
         }
         this.ordinalPosition = builder.ordinalPosition;
-        this.id = builder.id;
         this.dataType = builder.dataType;
-        this.name = id.getName();
         this.columnSize = builder.columnSize;
         this.precision = builder.precision;
         this.nullable = builder.nullable;
@@ -120,14 +139,8 @@ public class Column implements Unique {
         this.generatedColumn = builder.generatedColumn;
     }
 
-
-    @Override
-    public ColumnId getId() {
-        return id;
-    }
-
     public String getName() {
-        return name;
+        return getId().getName();
     }
 
     public Integer getColumnSize() {
@@ -166,8 +179,7 @@ public class Column implements Unique {
         return generatedColumn;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOrdinalPosition(int ordinalPosition) {
+        this.ordinalPosition = ordinalPosition;
     }
-
 }

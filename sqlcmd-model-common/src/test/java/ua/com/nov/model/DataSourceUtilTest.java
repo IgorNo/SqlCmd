@@ -2,8 +2,7 @@ package ua.com.nov.model;
 
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.PostgresSqlDb;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;

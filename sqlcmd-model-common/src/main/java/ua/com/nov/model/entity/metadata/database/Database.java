@@ -1,11 +1,16 @@
-package ua.com.nov.model.entity.database;
+package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.datasource.BaseDataSource;
+import ua.com.nov.model.entity.Child;
 import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.table.TableId;
-import ua.com.nov.model.statement.AbstractSqlTableStatements;
+import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.column.JdbcDataTypes;
 import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
 
@@ -18,8 +23,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class Database extends BaseDataSource implements Unique {
-    private final DatabaseId id;
+public abstract class Database extends BaseDataSource implements Unique<Database.DbId>, Child<Database>, Persistent {
+    private final DbId id;
     private final String password;
     private List<DataType> dataTypes;
     private final String dbProperties;
@@ -33,16 +38,28 @@ public abstract class Database extends BaseDataSource implements Unique {
     }
 
     public Database(String dbUrl, String userName, String password, String dbProperties) {
-        this.id = new DatabaseId(dbUrl, userName);
+        this.id = new DbId(dbUrl, userName);
         this.password = password;
         this.dbProperties = dbProperties;
     }
 
-    public abstract AbstractSqlTableStatements getTableSqlStmtSource();
+    public abstract SqlStatementSource<DbId,Database,Database> getDatabaseSqlStmtSource();
 
-    public abstract SqlStatementSource<DatabaseId,Database> getSqlStmtSource();
+    public abstract SqlStatementSource<TableId,Table,Database> getTableSqlStmtSource();
+
+    public abstract SqlStatementSource<MetaDataId,Column,Table> getColumnSqlStmtSource();
 
     public abstract String getFullTableName(TableId id);
+
+    @Override
+    public Database getContainerId() {
+        return this;
+    }
+
+    @Override
+    public Database getDb() {
+        return this;
+    }
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -89,12 +106,24 @@ public abstract class Database extends BaseDataSource implements Unique {
         return result;
     }
 
+    public DataType getMostApproximateDataTypes(JdbcDataTypes type) {
+        List<DataType> dataTypes = getDataTypes(type.getJdbcDataType());
+        if (dataTypes.size() == 0) {
+            throw new IllegalArgumentException(String.format("Data type &s doesn't support this database",
+                    type.toString()));
+        }
+        for (DataType dataType : dataTypes) {
+            if (dataType.getTypeName().equalsIgnoreCase(type.toString())) return dataType;
+        }
+        return dataTypes.get(0);
+    }
+
     public String getDbProperties() {
         return dbProperties;
     }
 
     @Override
-    public DatabaseId getId() {
+    public DbId getId() {
         return id;
     }
 
@@ -129,25 +158,23 @@ public abstract class Database extends BaseDataSource implements Unique {
         return id.hashCode();
     }
 
-    public class DatabaseId implements Persistent<Database> {
+
+
+    public class DbId extends AbstractMetaDataId<Database> implements Persistent{
         private final String dbUrl;
         private final String userName;
         private final DbRowMapper rowMapper = new DbRowMapper();
 
-        public DatabaseId(String dbUrl, String userName) {
+        public DbId(String dbUrl, String userName) {
+            super(Database.this, userName);
             if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
             this.dbUrl = dbUrl;
             this.userName = userName;
         }
 
         @Override
-        public SqlStatementSource<DatabaseId,Database> getSqlStmtSource() {
-            return Database.this.getSqlStmtSource();
-        }
-
-        @Override
-        public Mappable<Database> getRowMapper() {
-            return rowMapper;
+        public Database getDb() {
+            return Database.this;
         }
 
         public String getDbUrl() {
@@ -171,11 +198,10 @@ public abstract class Database extends BaseDataSource implements Unique {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            DatabaseId that = (DatabaseId) o;
+            DbId that = (DbId) o;
 
             if (!dbUrl.equalsIgnoreCase(that.dbUrl)) return false;
             return userName.equals(that.userName);
-
         }
 
         @Override
@@ -185,7 +211,7 @@ public abstract class Database extends BaseDataSource implements Unique {
             return result;
         }
 
-        public class DbRowMapper implements Mappable<Database> {
+        public class DbRowMapper implements Mappable {
             @Override
             public Database rowMap(ResultSet rs) throws SQLException {
                 String url = DbUtil.getDatabaseUrl(dbUrl) + rs.getString(1);

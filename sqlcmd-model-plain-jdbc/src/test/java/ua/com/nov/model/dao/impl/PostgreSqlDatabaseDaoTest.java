@@ -1,8 +1,8 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.Test;
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.PostgresSqlDb;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
@@ -30,7 +30,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testReadAll() throws SQLException {
-        List<Database> databases = DAO.readAll(TEST_DATABASE.getId());
+        List<Database> databases = DAO.readAll(TEST_DATABASE);
         assertTrue(databases.contains(TEST_DATABASE));
     }
 

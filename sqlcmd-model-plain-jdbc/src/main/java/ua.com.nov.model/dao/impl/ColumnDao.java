@@ -1,30 +1,33 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.column.ColumnId;
-import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.table.Table;
+import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
-public class ColumnDao extends DataDefinitionDao<ColumnId, Column> {
+public class ColumnDao extends DataDefinitionDao<MetaDataId, Column, TableId> {
+
     @Override
-    protected ResultSet getOneResultSet(ColumnId id) throws SQLException {
+    protected ResultSet getOneResultSet(MetaDataId id) throws SQLException {
         return null;
     }
 
     @Override
-    protected ResultSet getAllResultSet(ColumnId template) throws SQLException {
+    protected ResultSet getAllResultSet(TableId template) throws SQLException {
         return null;
     }
 
     @Override
-    protected ResultSet getNResultSet(int nStart, int number, ColumnId template) throws SQLException {
+    protected ResultSet getNResultSet(int nStart, int number, TableId template) throws SQLException {
         return null;
     }
 
@@ -37,23 +40,23 @@ public class ColumnDao extends DataDefinitionDao<ColumnId, Column> {
     }
 
 
-    public Column readOne(ColumnId key) throws SQLException {
+    public Column readOne(MetaDataId key) throws SQLException {
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getColumns(key.getTable().getId().getDb().getName(), key.getTable().getId().getSchema(),
-                key.getTable().getName(), key.getName());
+        ResultSet rs = dbMetaData.getColumns(key.getContainerId().getDb().getName(), key.getContainerId().getSchema(),
+                key.getContainerId().getName(), key.getName());
 
         if (!rs.next()) throw new IllegalArgumentException(String.format("Column '%s' doesn't exist in table '%s.%s'.",
-                key.getName(), key.getTable().getId().getSchema(), key.getTable().getName()));
+                key.getName(), key.getContainerId().getSchema(), key.getContainerId().getName()));
 
         return  getColumn(key, rs);
     }
 
-    private static Column getColumn(ColumnId key, ResultSet rs) throws SQLException {
-        ColumnId columnId = new ColumnId(key.getTable(), rs.getString("COLUMN_NAME"));
-        DataType dataType = key.getTable().getId().getDb().getDataType(rs.getString("TYPE_NAME"));
+    private static Column getColumn(MetaDataId key, ResultSet rs) throws SQLException {
+        MetaDataId columnId = new MetaDataId(key.getContainerId(), rs.getString("COLUMN_NAME"));
+        DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
-        Column column = new Column.Builder(rs.getInt("ORDINAL_POSITION"), columnId, dataType)
+        Column column = new Column.Builder(columnId, dataType)
         .columnSize(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
         .nullable(rs.getInt("TYPE_NULLABLE")).remarks(rs.getString("REMARKS"))
         .defaultValue(rs.getString("COLUMN_DEF"))
@@ -63,21 +66,31 @@ public class ColumnDao extends DataDefinitionDao<ColumnId, Column> {
         return column;
     }
 
-    public Map<ColumnId, Column> readAll(Table table) throws SQLException {
-        Map<ColumnId, Column> columns = new HashMap<>();
+    @Override
+    public List<Column> readAll(TableId id) throws SQLException {
+        List<Column> columns = new LinkedList<>();
 
         Connection conn = getDataSource().getConnection();
         DatabaseMetaData dbMetaData = conn.getMetaData();
-        ResultSet rs = dbMetaData.getColumns(table.getId().getDb().getName(), table.getId().getSchema(),
-                table.getId().getName(), null);
+        ResultSet rs = dbMetaData.getColumns(id.getDb().getName(), id.getSchema(),
+                id.getName(), null);
 
         while (rs.next()) {
-            Column column = getColumn(new ColumnId(table, rs.getString("COLUMN_NAME")), rs);
-            columns.put(column.getId(), column);
+            Column column = getColumn(new MetaDataId(id, rs.getString("COLUMN_NAME")), rs);
+            columns.add(column);
         }
 
         return columns;
     }
 
+    @Override
+    protected Column rowMap(TableId containerId, ResultSet rs) throws SQLException {
+        return null;
+    }
+
+    @Override
+    protected SqlStatementSource<MetaDataId, Column, TableId> getSqlStmtSource(Database db) {
+        return null;
+    }
 }
 

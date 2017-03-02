@@ -1,10 +1,13 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.database.DataType;
-import ua.com.nov.model.entity.database.Database;
-import ua.com.nov.model.entity.database.Database.DatabaseId;
+import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.Database.DbId;
 import ua.com.nov.model.statement.SqlStatementSource;
+import ua.com.nov.model.util.DbUtil;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,13 +15,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DatabaseDao extends DataDefinitionDao<DatabaseId, Database> {
+public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Database> {
 
     @Override
-    public Database read(DatabaseId id) throws SQLException {
+    public Database read(DbId dbId) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        id.getDatabase().setDataTypes(getDataTypes(conn));
-        return id.getDatabase();
+        dbId.getDatabase().setDataTypes(getDataTypes(conn));
+        return dbId.getDatabase();
     }
 
     private List<DataType> getDataTypes(Connection conn) throws SQLException {
@@ -47,35 +50,55 @@ public final class DatabaseDao extends DataDefinitionDao<DatabaseId, Database> {
     }
 
     @Override
-    public List<Database> readN(int nStart, int number, DatabaseId id) throws SQLException {
+    public List<Database> readN(int nStart, int number, Database db) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteAll(DatabaseId key) throws SQLException {
+    public void deleteAll(Database db) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int count(DatabaseId id) throws SQLException {
-        return readAll(id).size();
-    }
-
-    @Override
-    protected ResultSet getOneResultSet(DatabaseId key) throws SQLException {
+    protected ResultSet getOneResultSet(DbId key) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected ResultSet getAllResultSet(DatabaseId id) throws SQLException {
+    protected ResultSet getNResultSet(int nStart, int number, Database db) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected ResultSet getAllResultSet(Database db) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        SqlStatementSource source = id.getSqlStmtSource();
+        SqlStatementSource source = getSqlStmtSource(db);
         Statement stmt = conn.createStatement();
-        return stmt.executeQuery(source.getReadAllStmt(id));
+        return stmt.executeQuery(source.getReadAllStmt(db));
     }
 
     @Override
-    protected ResultSet getNResultSet(int nStart, int number, DatabaseId template) throws SQLException {
-        throw new UnsupportedOperationException();
+    protected Database rowMap(Database db, ResultSet rs) throws SQLException {
+        String url = DbUtil.getDatabaseUrl(db.getDbUrl()) + rs.getString(1);
+        Class[] paramTypes = new Class[]{String.class, String.class};
+        Database result = null;
+        try {
+            Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
+            return constructor.newInstance(new Object[]{url, db.getUserName()});
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    protected SqlStatementSource<DbId, Database, Database> getSqlStmtSource(Database db) {
+        return db.getDatabaseSqlStmtSource();
     }
 }

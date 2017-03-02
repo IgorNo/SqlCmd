@@ -1,9 +1,12 @@
-package ua.com.nov.model.entity.database;
+package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.column.Column;
-import ua.com.nov.model.entity.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
+import ua.com.nov.model.statement.SqlStatementSource;
 
 public final class MySqlDb extends Database {
     private static final MySqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new MySqlDbStmts();
@@ -22,13 +25,18 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public MySqlDbStmts getSqlStmtSource() {
+    public MySqlDbStmts getDatabaseSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
 
     @Override
     public MySqlTableStmts getTableSqlStmtSource() {
         return TABLE_SQL_STATEMENT_SOURCE;
+    }
+
+    @Override
+    public SqlStatementSource<MetaDataId, Column, Table> getColumnSqlStmtSource() {
+        return null;
     }
 
 
@@ -47,7 +55,7 @@ public final class MySqlDb extends Database {
 
     private static class MySqlDbStmts extends AbstractSqlDbStatements {
         @Override
-        public String getReadAllStmt(DatabaseId id) {
+        public String getReadAllStmt(Database db) {
             return "SHOW DATABASES";
         }
     }

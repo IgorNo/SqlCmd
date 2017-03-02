@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
 import org.junit.Before;
-import ua.com.nov.model.entity.database.Database;
+import ua.com.nov.model.entity.metadata.database.Database;
 
 import java.sql.SQLException;
 

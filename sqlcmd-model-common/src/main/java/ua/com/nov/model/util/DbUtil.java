@@ -1,10 +1,11 @@
 package ua.com.nov.model.util;
 
-import ua.com.nov.model.entity.database.*;
-import ua.com.nov.model.repository.DbRepository;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.HyperSqlDb;
+import ua.com.nov.model.entity.metadata.database.MySqlDb;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 public class DbUtil {
@@ -28,6 +29,13 @@ public class DbUtil {
     public static final Database POSTGRE_SQL_LOCAL_SYSTEM_DB =
             new PostgresSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
 
+    public static String getDatabaseProductName(String url) {
+        int beginIndex = url.indexOf(':') + 1;
+        if (beginIndex < 0) throw new IllegalArgumentException(url);
+        int endIndex = url.indexOf(':', beginIndex);
+        if (endIndex < 0) throw new IllegalArgumentException(url);
+        return url.substring(beginIndex, endIndex);
+    }
 
     public static String getDatabaseName(String url) {
         int beginIndex = url.lastIndexOf('/') + 1;
