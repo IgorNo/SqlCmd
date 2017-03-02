@@ -60,17 +60,17 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
     }
 
     @Override
-    protected ResultSet getOneResultSet(DbId key) throws SQLException {
+    protected ResultSet getResultSet(DbId key) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected ResultSet getNResultSet(int nStart, int number, Database db) throws SQLException {
+    protected ResultSet getResultSet(int nStart, int number, Database db) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected ResultSet getAllResultSet(Database db) throws SQLException {
+    protected ResultSet getResultSet(Database db) throws SQLException {
         Connection conn = getDataSource().getConnection();
         SqlStatementSource source = getSqlStmtSource(db);
         Statement stmt = conn.createStatement();

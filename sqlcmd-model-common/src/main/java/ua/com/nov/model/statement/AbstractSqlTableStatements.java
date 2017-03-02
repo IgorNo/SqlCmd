@@ -8,7 +8,7 @@ import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.TableId;
 
-public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId, Table, Database> {
+public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId, Table, Database.DbId> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
         public static final String DROP_TABLE_SQL = "DROP TABLE %s";
         public static final String RENAME_TABLE_SQL = "ALTER TABLE %s RENAME TO %s";
@@ -34,9 +34,12 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             if (numberOfColumns == 0) return "";
 
             StringBuilder result = new StringBuilder();
-            for (int i = 0; i < numberOfColumns; i++) {
-                if (i != 0) result.append(", ");
-                addColumnDefinition(i + 1, table, result);
+
+            String s = "";
+            for (Column column : table.getColumnCollection()) {
+                result.append(s);
+                addColumnDefinition(column, result);
+                if (s.isEmpty()) s = ", ";
             }
 
             addKey(table.getPrimaryKey(), ", PRIMARY KEY", result);
@@ -56,8 +59,7 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             return result.toString();
         }
 
-        private void addColumnDefinition(int ordinalPosition, Table table, StringBuilder result) {
-            Column col = table.getColumn(ordinalPosition);
+        private void addColumnDefinition(Column col, StringBuilder result) {
             if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
                 throw new IllegalArgumentException();
             }

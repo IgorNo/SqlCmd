@@ -1,32 +1,23 @@
 package ua.com.nov.model.entity.metadata.table;
 
-import ua.com.nov.model.entity.Mappable;
-import ua.com.nov.model.entity.Persistent;
-import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
+import ua.com.nov.model.entity.metadata.database.Database;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-public class TableId extends AbstractMetaDataId<Database> implements Persistent{
+public class TableId extends AbstractMetaDataId<Database.DbId> {
     private final String catalog; // table catalog
     private final String schema;  // table schema
 
-    public TableId(Database db, String name, String catalog, String schema) {
+    public TableId(Database.DbId db, String name, String catalog, String schema) {
         super(db, name);
         this.catalog = catalog;
         this.schema = schema;
     }
 
-    @Override
-    public Database getDb() {
-        return getContainerId().getDb();
-    }
-
-    public TableId(Database db, String name) {
+    public TableId(Database.DbId db, String name) {
         this(db, name, null, null);
     }
 
+    @Override
     public String getFullName() {
         return getDb().getFullTableName(this);
     }
@@ -55,17 +46,5 @@ public class TableId extends AbstractMetaDataId<Database> implements Persistent{
         result = 31 * result + getFullName().toLowerCase().hashCode();
         return result;
     }
-
-    public class TableRowMapper implements Mappable {
-        @Override
-        public Table.Builder rowMap(ResultSet rs) throws SQLException {
-            TableId tableId = new TableId(getDb(), rs.getString("TABLE_NAME"),
-                    rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
-            if (tableId.equals(this)) {
-                return new Table.Builder(TableId.this, rs.getString("TABLE_TYPE"));
-            } else {
-                return new Table.Builder(tableId, rs.getString("TABLE_TYPE"));
-            }
-        }
-    }
+    
 }

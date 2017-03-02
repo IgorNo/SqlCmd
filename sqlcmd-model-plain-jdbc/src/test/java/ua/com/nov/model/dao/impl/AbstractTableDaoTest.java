@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractTableDaoTest {
 
-    public static final AbstractDao<TableId, Table, Database> DAO = new TableDao();
+    public static final AbstractDao<TableId, Table, Database.DbId> DAO = new TableDao();
 
     private static DataSource dataSource;
 
@@ -44,7 +44,7 @@ public abstract class AbstractTableDaoTest {
         DataType intDataType = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
         DataType varcharDataType = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
 
-        customersId = new TableId(testDb, "Customers", catalog, schema);
+        customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId)
                 .addColumn(new Column.Builder(customersId, "id", intAutoincrementDataType)
                 .autoIncrement(true).build())
@@ -57,12 +57,12 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder(customersId, "rating", intDataType).build())
                 .build();
 
-        tableId2 = new TableId(testDb, "Table2", catalog, schema);
+        tableId2 = new TableId(testDb.getId(), "Table2", catalog, schema);
         table2 = new Table.Builder(tableId2).
                 addColumn(new Column.Builder(tableId2, "id2", intAutoincrementDataType).build()).
                 build();
 
-        tableId3 = new TableId(testDb, "Table3", catalog, schema);
+        tableId3 = new TableId(testDb.getId(), "Table3", catalog, schema);
         table3 = new Table.Builder(tableId3).
                 addColumn(new Column.Builder(tableId3, "id3", intAutoincrementDataType).build()).
                 build();
@@ -83,7 +83,7 @@ public abstract class AbstractTableDaoTest {
 
     @Test
     public void testReadAllTables() throws SQLException{
-        List<Table> tables = DAO.readAll(getTestDatabase());
+        List<Table> tables = DAO.readAll(getTestDatabase().getId());
         assertTrue(tables.contains(customers));
         assertTrue(tables.contains(table2));
         assertTrue(tables.contains(table3));
@@ -93,7 +93,7 @@ public abstract class AbstractTableDaoTest {
     public void testRenameTable() throws SQLException{
         customers.setNewName("table11");
         DAO.update(customers);
-        TableId updateTableId = new TableId(customers.getDb(), customers.getNewName(), customers.getCatalog(),
+        TableId updateTableId = new TableId(customers.getDb().getId(), customers.getNewName(), customers.getCatalog(),
                 customers.getSchema());
         assertTrue(DAO.read(updateTableId).getNewName().equalsIgnoreCase(customers.getNewName()));
     }
@@ -106,13 +106,13 @@ public abstract class AbstractTableDaoTest {
 
     @Test
     public void testDeleteAllTables() throws SQLException {
-        DAO.deleteAll(getTestDatabase());
-        assertTrue(DAO.readAll(getTestDatabase()).size() == 0);
+        DAO.deleteAll(getTestDatabase().getId());
+        assertTrue(DAO.readAll(getTestDatabase().getId()).size() == 0);
     }
 
     @After
     public void tearDown() throws SQLException {
-        DAO.deleteAll(getTestDatabase());
+        DAO.deleteAll(getTestDatabase().getId());
     }
 
     protected static void tearDownClass() throws SQLException {

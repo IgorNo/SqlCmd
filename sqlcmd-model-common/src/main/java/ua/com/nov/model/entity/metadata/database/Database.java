@@ -45,9 +45,9 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
     public abstract SqlStatementSource<DbId,Database,Database> getDatabaseSqlStmtSource();
 
-    public abstract SqlStatementSource<TableId,Table,Database> getTableSqlStmtSource();
+    public abstract SqlStatementSource<TableId,Table,DbId> getTableSqlStmtSource();
 
-    public abstract SqlStatementSource<MetaDataId,Column,Table> getColumnSqlStmtSource();
+    public abstract SqlStatementSource<MetaDataId,Column,TableId> getColumnSqlStmtSource();
 
     public abstract String getFullTableName(TableId id);
 
@@ -59,6 +59,11 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     @Override
     public Database getDb() {
         return this;
+    }
+
+    @Override
+    public String getFullName() {
+        return getDbUrl();
     }
 
     @Override
@@ -187,6 +192,11 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
         public String getName() {
             return DbUtil.getDatabaseName(getDbUrl());
+        }
+
+        @Override
+        public String getFullName() {
+            return Database.this.getFullName();
         }
 
         public String getUserName() {

@@ -42,7 +42,7 @@ public class Table extends AbstractMetaData<TableId> {
             this(id, "TABLE");
         }
 
-        public Builder(Database db, String name, String catalog, String schema) {
+        public Builder(Database.DbId db, String name, String catalog, String schema) {
             this(new TableId(db, name, catalog, schema));
         }
 
@@ -133,7 +133,7 @@ public class Table extends AbstractMetaData<TableId> {
     }
 
     public Database getDb() {
-        return getId().getContainerId();
+        return getId().getDb();
     }
 
     public String getFullName() {

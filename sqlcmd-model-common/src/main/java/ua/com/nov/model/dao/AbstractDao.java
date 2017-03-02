@@ -26,48 +26,9 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
         return this;
     }
 
-    protected abstract void executeUpdateStmt(String createStmt) throws SQLException;
-
-    protected abstract ResultSet getOneResultSet(K key) throws SQLException;
-
-    protected abstract ResultSet getAllResultSet(C container) throws SQLException;
-
-    protected abstract ResultSet getNResultSet(int nStart, int number, C containerId) throws SQLException;
-
-    protected abstract V rowMap(C containerId, ResultSet rs) throws SQLException;
-
-    protected abstract SqlStatementSource<K,V,C> getSqlStmtSource(Database db);
-
     @Override
     public void create(V value) throws SQLException {
         executeUpdateStmt(getSqlStmtSource(value.getId().getDb()).getCreateStmt(value));
-    }
-
-    @Override
-    public V read(K key) throws SQLException {
-        ResultSet rs = getOneResultSet(key);
-        return rowMap(key.getContainerId(), rs);
-    }
-
-    @Override
-    public List<V> readN(int nStart, int number, C container) throws SQLException {
-        ResultSet rs = getNResultSet(nStart, number, container);
-        return getList(rs, container);
-    }
-
-    @Override
-    public List<V> readAll(C containerId) throws SQLException {
-        ResultSet rs = getAllResultSet(containerId);
-        return getList(rs, containerId);
-    }
-
-    private List<V> getList(ResultSet rs, C containerId) throws SQLException {
-        List<V> result = new ArrayList();
-        while (rs.next()) {
-            result.add(rowMap(containerId, rs));
-        }
-        if (rs.getStatement() != null && !rs.getStatement().isClosed()) rs.getStatement().close();
-        return result;
     }
 
     @Override
@@ -78,6 +39,50 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
     @Override
     public void delete(K key) throws SQLException {
         executeUpdateStmt(getSqlStmtSource(key.getDb()).getDeleteStmt(key));
+    }
+
+    protected abstract void executeUpdateStmt(String createStmt) throws SQLException;
+
+    protected abstract SqlStatementSource<K,V,C> getSqlStmtSource(Database db);
+
+    @Override
+    public V read(K key) throws SQLException {
+        ResultSet rs = getResultSet(key);
+        return rowMap(key.getContainerId(), checkResultSet(rs, key));
+    }
+
+    // get one item ResultSet
+    protected abstract ResultSet getResultSet(K key) throws SQLException;
+
+    protected abstract ResultSet checkResultSet(ResultSet rs, K id) throws SQLException;
+
+    protected abstract V rowMap(C containerId, ResultSet rs) throws SQLException;
+
+    @Override
+    public List<V> readN(int nStart, int number, C container) throws SQLException {
+        ResultSet rs = getResultSet(nStart, number, container);
+        return getList(rs, container);
+    }
+
+    // get N items ResultSet
+    protected abstract ResultSet getResultSet(int nStart, int number, C containerId) throws SQLException;
+
+    @Override
+    public List<V> readAll(C containerId) throws SQLException {
+        ResultSet rs = getResultSet(containerId);
+        return getList(rs, containerId);
+    }
+
+    // get all items ResultSet
+    protected abstract ResultSet getResultSet(C container) throws SQLException;
+
+    private List<V> getList(ResultSet rs, C containerId) throws SQLException {
+        List<V> result = new ArrayList();
+        while (rs.next()) {
+            result.add(rowMap(containerId, rs));
+        }
+        if (rs.getStatement() != null && !rs.getStatement().isClosed()) rs.getStatement().close();
+        return result;
     }
 
     @Override

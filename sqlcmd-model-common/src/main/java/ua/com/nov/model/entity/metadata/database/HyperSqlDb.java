@@ -1,9 +1,8 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
-import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -35,7 +34,7 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public SqlStatementSource<MetaDataId, Column, Table> getColumnSqlStmtSource() {
+    public SqlStatementSource<MetaDataId, Column, TableId> getColumnSqlStmtSource() {
         return null;
     }
 

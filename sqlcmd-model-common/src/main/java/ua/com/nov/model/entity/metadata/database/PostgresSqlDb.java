@@ -35,7 +35,7 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    public SqlStatementSource<MetaDataId, Column, Table> getColumnSqlStmtSource() {
+    public SqlStatementSource<MetaDataId, Column, TableId> getColumnSqlStmtSource() {
         return null;
     }
 

@@ -1,8 +1,10 @@
 package ua.com.nov.model.entity.metadata;
 
 import ua.com.nov.model.entity.Child;
+import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.metadata.database.Database;
 
-public abstract class AbstractMetaDataId<C> implements Child<C> {
+public abstract class AbstractMetaDataId<C extends Persistent> implements Child<C>, Persistent{
     private final C containerId;
     private final String name;
 
@@ -20,6 +22,16 @@ public abstract class AbstractMetaDataId<C> implements Child<C> {
     @Override
     public C getContainerId() {
         return containerId;
+    }
+
+    @Override
+    public Database getDb() {
+        return containerId.getDb();
+    }
+    
+    @Override
+    public String getFullName() {
+        return containerId.getFullName() + "." + name;
     }
 
     public String getName() {
