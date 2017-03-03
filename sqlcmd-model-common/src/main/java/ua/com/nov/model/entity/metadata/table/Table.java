@@ -3,12 +3,11 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.Building;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.Check;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.constraint.Check;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
+import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import java.util.*;
 
@@ -39,6 +38,8 @@ public class Table extends AbstractMetaData<TableId> {
 
         private String tableProperties = "";
 
+        private int ordinalPosition = 1;
+
         public Builder(TableId id) {
             this(id, "TABLE");
         }
@@ -62,17 +63,23 @@ public class Table extends AbstractMetaData<TableId> {
             return this;
         }
 
-        public Builder columns(Map<String, Column> columns) {
-            this.columns = columns;
+        public Builder columns(Collection<Column> columns) {
+            for (Column col : columns) {
+                addColumn(col);
+            }
             return this;
         }
 
         public Builder addColumn(Column col) {
-            if (columns.containsKey(col.getOrdinalPosition())) {
-                throw new IllegalArgumentException(String.format("Column with ordinal position %s alredy exists",
-                        col.getOrdinalPosition()));
+            if (!col.getId().getContainerId().equals(this.getId())) {
+                throw new IllegalArgumentException(String.format("Column '%s' doesn't belong table '%s'.",
+                        col.getId().getFullName(), id.getFullName()));
             }
-            columns.put(col.getName(), col);
+            if (columns.put(col.getName(), col) != null) {
+                throw new IllegalArgumentException(String.format("Column with name '%s' alredy exists",
+                        col.getName()));
+            }
+            col.ordinalPosition = this.ordinalPosition++;
             return this;
         }
 
@@ -138,7 +145,7 @@ public class Table extends AbstractMetaData<TableId> {
     }
 
     public String getFullName() {
-        return getDb().getFullTableName(getId());
+        return getId().getFullName();
     }
 
     public String getCatalog() {
@@ -177,7 +184,14 @@ public class Table extends AbstractMetaData<TableId> {
     }
 
     public Collection<Column> getColumnCollection() {
-        return Collections.unmodifiableCollection(columns.values());
+        List<Column> list = new ArrayList<Column>(columns.values());
+        Collections.sort(list, new Comparator<Column>() {
+            @Override
+            public int compare(Column o1, Column o2) {
+                return o1.getOrdinalPosition() - o2.getOrdinalPosition();
+            }
+        });
+        return Collections.unmodifiableCollection(list);
     }
 
     public PrimaryKey getPrimaryKey() {

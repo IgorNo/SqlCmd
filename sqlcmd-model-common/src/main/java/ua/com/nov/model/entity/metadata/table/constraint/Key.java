@@ -1,14 +1,13 @@
-package ua.com.nov.model.entity.metadata.table.metadata.constraint;
+package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
+import ua.com.nov.model.entity.metadata.table.Column;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Key extends Constraint {
-
     private final Map<Integer, Column> key;
 
     protected static class Builder {
@@ -29,10 +28,17 @@ public abstract class Key extends Constraint {
          *
          * @param keySeq - sequence number within primary constraint( a value of 1 represents the first column of
          *               the foreign constraint, a value of 2 would represent the second column within the primary constraint)
-         * @param column
+         * @param col
          */
-        public Builder addColumn(int keySeq, Column column) {
-            if (key.put(keySeq, column) != null) throw new IllegalArgumentException();
+        public Builder addColumn(int keySeq, Column col) {
+            if (!col.getId().getContainerId().equals(id.getContainerId())) {
+                throw new IllegalArgumentException(String.format("Column '%s' doesn't belong table '%s'.",
+                        col.getId().getFullName(), id.getFullName()));
+            }
+            if (key.put(keySeq, col) != null) {
+                throw new IllegalArgumentException(String.format("Column '%s' already exists in  table '%s'.",
+                        col.getId().getFullName(), id.getFullName()));
+            }
             return this;
         }
     }

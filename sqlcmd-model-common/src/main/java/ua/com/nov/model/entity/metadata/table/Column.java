@@ -1,11 +1,12 @@
-package ua.com.nov.model.entity.metadata.table.metadata;
+package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
-import ua.com.nov.model.entity.metadata.table.TableId;
+
+import java.util.Comparator;
 
 public class Column extends AbstractMetaData<TableMdId> {
-    private int ordinalPosition; // index of column in table (starting at 1)
+    int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;
     private final Integer precision;    // the number of fractional digits. Null is returned for data types where
@@ -18,7 +19,7 @@ public class Column extends AbstractMetaData<TableMdId> {
     private final boolean generatedColumn; // Indicates whether this is a generated column
 
     /*
-     * The columnSize attribute specifies the column size for the given column.
+     * The size attribute specifies the column size for the given column.
      * For numeric data, this is the maximum precision.
      * For character data, this is the length in characters.
      * For datetime datatypes, this is the length in characters of the String representation (assuming the
@@ -32,11 +33,11 @@ public class Column extends AbstractMetaData<TableMdId> {
         private final TableMdId id;
         private final DataType dataType;
 
-        private int ordinalPosition; // index of column in table (starting at 1)
+        private int ordinalPosition = 0; // index of column in table (starting at 1)
         private Integer columnSize;
         private Integer precision;  // the number of fractional digits. Null is returned for data types where
                                     // precision is not applicable
-        private int nullable = DataType.TYPE_NULLABLE; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
+        private int nullable = DataType.NULL; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
         private String defaultValue; //default value for the column, which should be interpreted as a string when
                                      // the value is enclosed in single quotes
         private String remarks;      // comment describing column
@@ -60,18 +61,14 @@ public class Column extends AbstractMetaData<TableMdId> {
             this.remarks = col.remarks;
             this.autoIncrement = col.autoIncrement;
             this.generatedColumn = col.generatedColumn;
+            this.ordinalPosition = col.ordinalPosition;
         }
 
         public Builder(TableId tableId, String name, DataType dataType) {
             this(new TableMdId(tableId, name), dataType);
         }
 
-        public Builder ordinalPosition(int ordinalPosition) {
-            this.ordinalPosition = ordinalPosition;
-            return this;
-        }
-
-        public Builder columnSize(Integer columnSize) {
+        public Builder size(Integer columnSize) {
             if (columnSize != null) {
                 int maxColumnSize = dataType.getPrecision();
                 if (maxColumnSize > 0 && columnSize > maxColumnSize) {
@@ -90,7 +87,7 @@ public class Column extends AbstractMetaData<TableMdId> {
         }
 
         public Builder nullable(int nullable) {
-            if (dataType.getNullable() == DataType.TYPE_NO_NULLS && nullable == DataType.TYPE_NULLABLE) {
+            if (dataType.getNullable() == DataType.NO_NULL && nullable == DataType.NULL) {
                 throw new IllegalArgumentException("This column type can not be nullable.");
             }
             this.nullable = nullable;
@@ -181,10 +178,11 @@ public class Column extends AbstractMetaData<TableMdId> {
         return generatedColumn;
     }
 
-    public void setOrdinalPosition(int ordinalPosition) {
-        this.ordinalPosition = ordinalPosition;
+    public static class SIpn implements Comparator<Column> {
+        public int compare(Column col1, Column col2){
+            return col1.ordinalPosition - col2.ordinalPosition;
+        }
     }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(getName());
@@ -195,8 +193,8 @@ public class Column extends AbstractMetaData<TableMdId> {
             sb.append(')');
         }
         if (nullable == 0) sb.append(" NOT NULL");
-        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
         if (defaultValue != null) sb.append(" DEFAULT ").append(defaultValue);
+        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
         return sb.toString();
     }
 

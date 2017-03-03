@@ -1,11 +1,11 @@
 package ua.com.nov.model.statement;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.Check;
+import ua.com.nov.model.entity.metadata.table.constraint.Check;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.Column;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
+import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.TableId;
 
 public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId, Table, Database.DbId> {

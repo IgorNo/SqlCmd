@@ -9,8 +9,8 @@ import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
@@ -117,8 +117,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     public DataType getMostApproximateDataTypes(JdbcDataTypes type) {
         List<DataType> dataTypes = getDataTypes(type.getJdbcDataType());
         if (dataTypes.size() == 0) {
-            throw new IllegalArgumentException(String.format("Data type &s doesn't support this database",
-                    type.toString()));
+            throw new IllegalArgumentException(String.format("Data type %s does not support this database", type));
         }
         for (DataType dataType : dataTypes) {
             if (dataType.getTypeName().equalsIgnoreCase(type.toString())) return dataType;

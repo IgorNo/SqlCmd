@@ -4,13 +4,13 @@ import org.junit.After;
 import org.junit.Test;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -18,6 +18,7 @@ import java.sql.Types;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static ua.com.nov.model.entity.metadata.datatype.DataType.*;
 
 public abstract class AbstractTableDaoTest {
 
@@ -25,8 +26,8 @@ public abstract class AbstractTableDaoTest {
 
     private static DataSource dataSource;
 
-    private static TableId customersId, tableId2, tableId3;
-    private static Table customers, table2, table3;
+    private static TableId customersId, productsId, tableId3;
+    private static Table customers, products, table3;
 
     protected abstract Database getTestDatabase();
 
@@ -41,30 +42,33 @@ public abstract class AbstractTableDaoTest {
             new DatabaseDao().setDataSource(dataSource).read(getTestDatabase().getId());
             DAO.setDataSource(dataSource);
         }
-        DataType intAutoincrementDataType = testDb.getAutoincrementalDataTypes(Types.INTEGER).get(0);
-        DataType intDataType = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
-        DataType varcharDataType = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
+        DataType serial = testDb.getAutoincrementalDataTypes(Types.INTEGER).get(0);
+        DataType integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
+        DataType varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
+//        DataType text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
+        DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
 
         customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
-        Column id = new Column.Builder(customersId, "id", intAutoincrementDataType)
-                .autoIncrement(true).build();
-        customers = new Table.Builder(customersId)
-                .addColumn(id)
-                .addColumn(new Column.Builder(customersId, "name", varcharDataType).columnSize(100).build())
-                .addColumn(new Column.Builder(customersId, "phone", varcharDataType).columnSize(20).build())
-                .addColumn(new Column.Builder(customersId, "address", varcharDataType).columnSize(150).build())
-                .addColumn(new Column.Builder(customersId, "rating", intDataType).build())
-                .primaryKey(new PrimaryKey.Builder(customersId, "customer_id", id).build())
+        Column idColumnCustomers = new Column.Builder(customersId, "id", serial).autoIncrement(true).build();
+        customers = new Table.Builder(customersId).addColumn(idColumnCustomers)
+                .addColumn(new Column.Builder(customersId, "name", varchar).size(100).nullable(NO_NULL).build())
+                .addColumn(new Column.Builder(customersId, "phone", varchar).size(20).build())
+                .addColumn(new Column.Builder(customersId, "address", varchar).size(150).build())
+                .addColumn(new Column.Builder(customersId, "rating", integer).build())
+                .primaryKey(new PrimaryKey.Builder(customersId, "customer_id", idColumnCustomers).build())
                 .build();
 
-        tableId2 = new TableId(testDb.getId(), "Table2", catalog, schema);
-        table2 = new Table.Builder(tableId2).
-                addColumn(new Column.Builder(tableId2, "id2", intAutoincrementDataType).build()).
-                build();
+        productsId = new TableId(testDb.getId(), "Products", catalog, schema);
+        Column idColumnProducts = new Column.Builder(productsId, "id", serial).autoIncrement(true).build();
+        products = new Table.Builder(productsId).addColumn(idColumnProducts)
+                .addColumn(new Column.Builder(productsId, "description", varchar).size(100).nullable(NO_NULL).build())
+                .addColumn(new Column.Builder(productsId, "price", numeric).size(8).precision(2).defaultValue("0").build())
+                .primaryKey(new PrimaryKey.Builder(productsId, "product_id", idColumnProducts).build())
+                .build();
 
         tableId3 = new TableId(testDb.getId(), "Table3", catalog, schema);
         table3 = new Table.Builder(tableId3).
-                addColumn(new Column.Builder(tableId3, "id3", intAutoincrementDataType).build()).
+                addColumn(new Column.Builder(tableId3, "id3", serial).build()).
                 build();
     }
 
@@ -72,7 +76,7 @@ public abstract class AbstractTableDaoTest {
     public void setUp() throws SQLException {
         tearDown();
         DAO.create(customers);
-//        DAO.create(table2);
+        DAO.create(products);
 //        DAO.create(table3);
     }
 
@@ -85,7 +89,7 @@ public abstract class AbstractTableDaoTest {
     public void testReadAllTables() throws SQLException{
         List<Table> tables = DAO.readAll(getTestDatabase().getId());
         assertTrue(tables.contains(customers));
-//        assertTrue(tables.contains(table2));
+        assertTrue(tables.contains(products));
 //        assertTrue(tables.contains(table3));
     }
 

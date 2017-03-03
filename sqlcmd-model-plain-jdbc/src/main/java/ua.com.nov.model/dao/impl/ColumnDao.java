@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
@@ -44,8 +44,8 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
         Column column = new Column.Builder(columnId, dataType)
-                .columnSize(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
-                .nullable(rs.getInt("TYPE_NULLABLE")).remarks(rs.getString("REMARKS"))
+                .size(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
+                .nullable(rs.getInt("NULL")).remarks(rs.getString("REMARKS"))
                 .defaultValue(rs.getString("COLUMN_DEF"))
                 .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"))
                 .generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"))

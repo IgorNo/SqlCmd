@@ -1,8 +1,8 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
 import ua.com.nov.model.statement.SqlStatementSource;

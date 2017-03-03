@@ -2,8 +2,8 @@ package ua.com.nov.model.entity.metadata.datatype;
 
 // Builder Pattern
 public class DataType {
-    public static final int TYPE_NO_NULLS = 0; // does not allow NULL values
-    public static final int TYPE_NULLABLE = 1; // allows NULL values
+    public static final int NO_NULL = 0; // does not allow NULL values
+    public static final int NULL = 1; // allows NULL values
     public static final int TYPE_NULLABLE_UNKNOWN = 2;  // nullability unknown
 
     public static final int TYPE_PRED_NONE = 0;     // No support
@@ -18,7 +18,7 @@ public class DataType {
     private final String literalSuffix;   // suffix used to quote a literal (may be 'null')
     private final String createParams;    // parameters used in creating the type (may be 'null')
     private final int nullable;     // can you use NULL for this type.
-                                    // May be TYPE_NO_NULLS, TYPE_NULLABLE, TYPE_NULLABLE_UNKNOWN
+                                    // May be NO_NULL, NULL, TYPE_NULLABLE_UNKNOWN
     private final boolean caseSensitive;    // is it case sensitive.
     private final int searchable;           // can you use "WHERE" based on this type:
                                             // TYPE_PRED_NONE, TYPE_PRED_CHAR, TYPE_PRED_BASIC, TYPE_SEARCHABLE

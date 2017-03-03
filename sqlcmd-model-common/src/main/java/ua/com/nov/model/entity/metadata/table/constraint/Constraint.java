@@ -1,8 +1,8 @@
-package ua.com.nov.model.entity.metadata.table.metadata.constraint;
+package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public abstract class Constraint extends AbstractMetaData<TableMdId> {
 
@@ -13,7 +13,7 @@ public abstract class Constraint extends AbstractMetaData<TableMdId> {
     public Constraint(TableId id, String name) {
         this(new TableMdId(id, name));
     }
-    
+
     @Override
     public String toString() {
         String result = "";

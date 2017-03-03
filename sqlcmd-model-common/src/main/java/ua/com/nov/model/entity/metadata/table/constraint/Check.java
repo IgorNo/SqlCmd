@@ -1,7 +1,7 @@
-package ua.com.nov.model.entity.metadata.table.metadata.constraint;
+package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class Check extends Constraint{
 
@@ -13,8 +13,7 @@ public class Check extends Constraint{
     }
 
     public Check(TableId tableId, String checkName, String expression) {
-        super(new TableMdId(tableId, checkName));
-        this.expression = expression;
+        this(new TableMdId(tableId, checkName), expression);
     }
 
     public String getExpression() {

@@ -1,7 +1,7 @@
-package ua.com.nov.model.entity.metadata.table.metadata.constraint;
+package ua.com.nov.model.entity.metadata.table.constraint;
 
 import javafx.util.Pair;
-import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.Column;
 
 import java.util.Map;
 
