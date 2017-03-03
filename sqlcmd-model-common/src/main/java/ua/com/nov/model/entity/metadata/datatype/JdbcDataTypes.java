@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.metadata.table.metadata.column;
+package ua.com.nov.model.entity.metadata.datatype;
 
 import java.sql.Types;
 

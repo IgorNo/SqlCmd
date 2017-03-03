@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.datatype;
 
 // Builder Pattern
 public class DataType {

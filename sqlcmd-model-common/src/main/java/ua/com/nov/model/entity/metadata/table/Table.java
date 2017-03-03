@@ -3,11 +3,12 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.Building;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
-import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.Column;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.Check;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.metadata.constraint.PrimaryKey;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class Table extends AbstractMetaData<TableId> {
     private final String remarks;  // explanatory comment on the table
 
     private final Map<String, Column> columns; // all table column
-    private final Key primaryKey; // table primary id column
+    private final PrimaryKey primaryKey; // table primary id column
     private final List<Key> uniqueKeyList; // table unique id list
     private final List<ForeignKey> foreignKeyList; // table foreign id list
     private final List<Check> checkExpressionList; // table check expression list
@@ -31,7 +32,7 @@ public class Table extends AbstractMetaData<TableId> {
         private String remarks;  // explanatory comment on the table
 
         private Map<String, Column> columns = new HashMap<>(); // all table column
-        private Key primaryKey; // table primary id column
+        private PrimaryKey primaryKey; // table primary id column
         private List<Key> uniqueKeyList = new LinkedList<>(); // table unique id list
         private List<ForeignKey> foreignKeyList = new LinkedList<>(); // table foreign id list
         private List<Check> checkExpressionList = new LinkedList<>(); // table check expression list
@@ -75,7 +76,7 @@ public class Table extends AbstractMetaData<TableId> {
             return this;
         }
 
-        public Builder primaryKey(Key primaryKey) {
+        public Builder primaryKey(PrimaryKey primaryKey) {
             this.primaryKey = primaryKey;
             return this;
         }
@@ -179,7 +180,7 @@ public class Table extends AbstractMetaData<TableId> {
         return Collections.unmodifiableCollection(columns.values());
     }
 
-    public Key getPrimaryKey() {
+    public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 

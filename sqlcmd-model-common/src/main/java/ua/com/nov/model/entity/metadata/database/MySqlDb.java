@@ -1,8 +1,7 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
+import ua.com.nov.model.entity.metadata.table.metadata.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractSqlDbStatements;
 import ua.com.nov.model.statement.AbstractSqlTableStatements;
@@ -11,6 +10,7 @@ import ua.com.nov.model.statement.SqlStatementSource;
 public final class MySqlDb extends Database {
     private static final MySqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new MySqlDbStmts();
     private static final MySqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new MySqlTableStmts();
+
 
     public MySqlDb(String dbUrl, String userName) {
         super(dbUrl, userName);
@@ -25,6 +25,11 @@ public final class MySqlDb extends Database {
     }
 
     @Override
+    public String getAutoIncrementDefinition() {
+        return " AUTO_INCREMENT";
+    }
+
+    @Override
     public MySqlDbStmts getDatabaseSqlStmtSource() {
         return DATABASE_SQL_STATEMENT_SOURCE;
     }
@@ -35,7 +40,7 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public SqlStatementSource<MetaDataId, Column, TableId> getColumnSqlStmtSource() {
+    public SqlStatementSource<TableMdId, Column, TableId> getColumnSqlStmtSource() {
         return null;
     }
 
@@ -61,15 +66,7 @@ public final class MySqlDb extends Database {
     }
 
     private static class MySqlTableStmts extends AbstractSqlTableStatements {
-        @Override
-        protected void addFullTypeName(Column col, StringBuilder result) {
-            result.append(col.getDataType().getTypeName());
-            addSizeAndPrecision(col, result);
-            if (col.isAutoIncrement()) {
-                if (col.getDataType().isAutoIncrement()) result.append(" AUTO_INCREMENT");
-                else throw new IllegalArgumentException("This type can't be autoincrement");
-            }
-        }
+
     }
 }
 

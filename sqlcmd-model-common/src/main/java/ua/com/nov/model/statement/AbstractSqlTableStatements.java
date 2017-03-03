@@ -3,7 +3,7 @@ package ua.com.nov.model.statement;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.Check;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.Column;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.metadata.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.TableId;
@@ -37,12 +37,11 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
 
             String s = "";
             for (Column column : table.getColumnCollection()) {
-                result.append(s);
-                addColumnDefinition(column, result);
-                if (s.isEmpty()) s = ", ";
+                result.append(s).append(column.toString());
+                if (s.isEmpty()) s = ",\n";
             }
 
-            addKey(table.getPrimaryKey(), ", PRIMARY KEY", result);
+            result.append(",\n").append(table.getPrimaryKey().toString());
 
             for (Key key : table.getUniqueKeyCollection()) {
                 addKey(key, ", UNIQUE", result);
@@ -57,37 +56,6 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             }
 
             return result.toString();
-        }
-
-        private void addColumnDefinition(Column col, StringBuilder result) {
-            if (col.getName().trim().isEmpty() || col.getDataType().getTypeName().trim().isEmpty()) {
-                throw new IllegalArgumentException();
-            }
-            result.append(col.getName()).append(' ');
-            addFullTypeName(col, result);
-            addNotNull(col, result);
-            addDefaultValue(col, result);
-        }
-
-        protected abstract void addFullTypeName(Column col, StringBuilder result);
-
-        protected void addSizeAndPrecision(Column col, StringBuilder result) {
-            if (col.getColumnSize() != null) {
-                result.append('(').append(col.getColumnSize());
-                if (col.getPrecision() != null) result.append(',').append(col.getPrecision());
-                result.append(')');
-            }
-        }
-
-        private void addNotNull(Column col, StringBuilder result) {
-            if (col.getNullable() == 2) throw new IllegalArgumentException();
-            if (col.getNullable() == 0) result.append(" NOT NULL");
-        }
-
-        private void addDefaultValue(Column col, StringBuilder result) {
-            if (col.getDefaultValue() != null && !col.getDefaultValue().trim().isEmpty()) {
-                result.append(" DEFAULT ").append(col.getDefaultValue());
-            }
         }
 
         private void addKey(Key key, String keyType, StringBuilder result) {

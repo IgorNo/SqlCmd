@@ -1,19 +1,19 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
+import ua.com.nov.model.entity.metadata.table.metadata.Column;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ColumnDao extends DataDefinitionDao<MetaDataId, Column, TableId> {
+public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
 
     @Override
-    protected ResultSet getResultSet(MetaDataId id) throws SQLException {
+    protected ResultSet getResultSet(TableMdId id) throws SQLException {
         ResultSet rs = getDbMetaData().getColumns(id.getContainerId().getDb().getName(), id.getContainerId().getSchema(),
                 id.getContainerId().getName(), id.getName());
         return rs;
@@ -40,7 +40,7 @@ public class ColumnDao extends DataDefinitionDao<MetaDataId, Column, TableId> {
 
     @Override
     public Column rowMap(TableId key, ResultSet rs) throws SQLException {
-        MetaDataId columnId = new MetaDataId(key, rs.getString("COLUMN_NAME"));
+        TableMdId columnId = new TableMdId(key, rs.getString("COLUMN_NAME"));
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
         Column column = new Column.Builder(columnId, dataType)
@@ -54,7 +54,7 @@ public class ColumnDao extends DataDefinitionDao<MetaDataId, Column, TableId> {
     }
 
     @Override
-    protected SqlStatementSource<MetaDataId, Column, TableId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableMdId, Column, TableId> getSqlStmtSource(Database db) {
         return db.getColumnSqlStmtSource();
     }
 }

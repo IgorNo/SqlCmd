@@ -1,22 +1,27 @@
 package ua.com.nov.model.entity.metadata.table.metadata.constraint;
 
-import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.table.metadata.column.Column;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.metadata.Column;
+import ua.com.nov.model.entity.metadata.table.metadata.TableMdId;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Key implements Unique<MetaDataId> {
-    private final MetaDataId id;
+public abstract class Key extends Constraint {
+
     private final Map<Integer, Column> key;
 
-    public static class Builder {
-        private final MetaDataId id;
+    protected static class Builder {
+        private final TableMdId id;
         private final Map<Integer, Column> key = new HashMap<>();
 
-        public Builder(MetaDataId id) {
+        public Builder(TableMdId id) {
             this.id = id;
+        }
+
+        public Builder(TableId tableId, String keyName, Column col) {
+            this(new TableMdId(tableId, keyName));
+            addColumn(1, col);
         }
 
         /**
@@ -32,14 +37,9 @@ public class Key implements Unique<MetaDataId> {
         }
     }
 
-    public Key(Builder builder) {
-        this.id = builder.id;
+    protected Key(Builder builder) {
+        super(builder.id);
         this.key = builder.key;
-    }
-
-    @Override
-    public MetaDataId getId() {
-        return id;
     }
 
     public int getNumberOfColumns() {
@@ -54,10 +54,12 @@ public class Key implements Unique<MetaDataId> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        if (id.getName() != null) sb.append("CONSTRAINT ").append(id.getName());
-        sb.append("key=").append(key);
-        sb.append('}');
-        return sb.toString();
+        final StringBuilder sb = new StringBuilder(super.toString()).append(" %s(");
+        String s = "";
+        for (Column column : key.values()) {
+            sb.append(s).append(column.getName());
+            if (s.isEmpty()) s = ",";
+        }
+        return sb.append(')').toString();
     }
 }

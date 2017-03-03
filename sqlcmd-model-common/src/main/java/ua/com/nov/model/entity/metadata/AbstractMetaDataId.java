@@ -12,9 +12,6 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
         if (containerId == null) {
             throw new IllegalArgumentException("Meta data containerId can't be 'null'.");
         }
-        if (name == null || "".equals(name)) {
-            throw new IllegalArgumentException("Meta data name can't be 'null' or empty.");
-        }
         this.containerId = containerId;
         this.name = name;
     }
@@ -28,7 +25,7 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
     public Database getDb() {
         return containerId.getDb();
     }
-    
+
     @Override
     public String getFullName() {
         return containerId.getFullName() + "." + name;

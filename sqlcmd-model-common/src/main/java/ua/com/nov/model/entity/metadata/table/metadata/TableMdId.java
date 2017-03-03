@@ -5,9 +5,9 @@ import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.TableId;
 
-public class MetaDataId extends AbstractMetaDataId<TableId> implements Persistent{
+public class TableMdId extends AbstractMetaDataId<TableId> implements Persistent{
 
-    public MetaDataId(TableId containerId, String name) {
+    public TableMdId(TableId containerId, String name) {
         super(containerId, name);
     }
 

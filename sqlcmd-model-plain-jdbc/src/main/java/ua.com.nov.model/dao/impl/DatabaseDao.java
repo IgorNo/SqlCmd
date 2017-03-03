@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.Database.DbId;
 import ua.com.nov.model.statement.SqlStatementSource;

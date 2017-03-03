@@ -1,16 +1,15 @@
-package ua.com.nov.model.entity.metadata.table.metadata.column;
+package ua.com.nov.model.entity.metadata.table.metadata;
 
-import ua.com.nov.model.entity.metadata.database.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.metadata.MetaDataId;
 
-public class Column extends AbstractMetaData<MetaDataId> {
+public class Column extends AbstractMetaData<TableMdId> {
     private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;
-    private final Integer precision;  // the number of fractional digits. Null is returned for data types where
-    // precision is not applicable
+    private final Integer precision;    // the number of fractional digits. Null is returned for data types where
+                                        // precision is not applicable
     private final int nullable;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
     private final String defaultValue; //default value for the column, which should be interpreted as a string when
     // the value is enclosed in single quotes
@@ -30,7 +29,7 @@ public class Column extends AbstractMetaData<MetaDataId> {
     */
 
     public static class Builder {
-        private final MetaDataId id;
+        private final TableMdId id;
         private final DataType dataType;
 
         private int ordinalPosition; // index of column in table (starting at 1)
@@ -44,7 +43,10 @@ public class Column extends AbstractMetaData<MetaDataId> {
         private boolean autoIncrement;   // Indicates whether this column is auto incremented
         private boolean generatedColumn; // Indicates whether this is a generated column
 
-        public Builder(MetaDataId id, DataType dataType) {
+        public Builder(TableMdId id, DataType dataType) {
+            if (id.getName() == null || "".equals(id.getName())) {
+                throw new IllegalArgumentException("Column name can't be 'null' or empty.");
+            }
             this.id = id;
             this.dataType = dataType;
         }
@@ -61,7 +63,7 @@ public class Column extends AbstractMetaData<MetaDataId> {
         }
 
         public Builder(TableId tableId, String name, DataType dataType) {
-            this(new MetaDataId(tableId, name), dataType);
+            this(new TableMdId(tableId, name), dataType);
         }
 
         public Builder ordinalPosition(int ordinalPosition) {
@@ -123,7 +125,7 @@ public class Column extends AbstractMetaData<MetaDataId> {
         }
     }
 
-    public Column(Builder builder) {
+    private Column(Builder builder) {
         super(builder.id);
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
@@ -182,4 +184,20 @@ public class Column extends AbstractMetaData<MetaDataId> {
     public void setOrdinalPosition(int ordinalPosition) {
         this.ordinalPosition = ordinalPosition;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getName());
+        sb.append(" ").append(dataType.getTypeName());
+        if (columnSize != null) {
+            sb.append('(').append(columnSize);
+            if (precision != null) sb.append(',').append(precision);
+            sb.append(')');
+        }
+        if (nullable == 0) sb.append(" NOT NULL");
+        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
+        if (defaultValue != null) sb.append(" DEFAULT ").append(defaultValue);
+        return sb.toString();
+    }
+
 }
