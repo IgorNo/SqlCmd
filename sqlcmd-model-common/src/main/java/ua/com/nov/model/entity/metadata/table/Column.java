@@ -1,11 +1,10 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.AbstractMetaData;
 
 import java.util.Comparator;
 
-public class Column extends AbstractMetaData<TableMdId> {
+public class Column extends TableMd {
     int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;

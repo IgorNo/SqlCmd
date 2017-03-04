@@ -14,12 +14,8 @@ public abstract class Key extends Constraint {
         private final TableMdId id;
         private final Map<Integer, Column> key = new HashMap<>();
 
-        public Builder(TableMdId id) {
-            this.id = id;
-        }
-
         public Builder(TableId tableId, String keyName, Column col) {
-            this(new TableMdId(tableId, keyName));
+            id = new TableMdId(tableId, keyName);
             addColumn(1, col);
         }
 
@@ -31,13 +27,9 @@ public abstract class Key extends Constraint {
          * @param col
          */
         public Builder addColumn(int keySeq, Column col) {
-            if (!col.getId().getContainerId().equals(id.getContainerId())) {
-                throw new IllegalArgumentException(String.format("Column '%s' doesn't belong table '%s'.",
-                        col.getId().getFullName(), id.getFullName()));
-            }
             if (key.put(keySeq, col) != null) {
-                throw new IllegalArgumentException(String.format("Column '%s' already exists in  table '%s'.",
-                        col.getId().getFullName(), id.getFullName()));
+                throw new IllegalArgumentException(String.format("Column '%s' already belongs in this key.",
+                        col.getId().getFullName()));
             }
             return this;
         }

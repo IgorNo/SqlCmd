@@ -1,12 +1,9 @@
 package ua.com.nov.model.statement;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.constraint.Check;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.Column;
-import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 
 public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<TableId, Table, Database.DbId> {
         public static final String CREATE_TABLE_SQL = "CREATE TABLE %s (%s) %s";
@@ -36,61 +33,11 @@ public abstract class AbstractSqlTableStatements extends BaseSqlStmtSource<Table
             StringBuilder result = new StringBuilder();
 
             String s = "";
-            for (Column column : table.getColumnCollection()) {
-                result.append(s).append(column.toString());
+            for (TableMd md : table.getMetaData()) {
+                result.append(s).append(md.toString());
                 if (s.isEmpty()) s = ",\n";
-            }
-
-            result.append(",\n").append(table.getPrimaryKey().toString());
-
-            for (Key key : table.getUniqueKeyCollection()) {
-                addKey(key, ", UNIQUE", result);
-            }
-
-            for (ForeignKey key : table.getForeignKeyCollection()) {
-                addForeignKey(key, result);
-            }
-
-            for (Check chekExpr : table.getCheckExpressionCollecttion()) {
-                result.append(", CHECK(").append(chekExpr).append(')');
             }
 
             return result.toString();
         }
-
-        private void addKey(Key key, String keyType, StringBuilder result) {
-            int numberOfKeyColumns = key.getNumberOfColumns();
-            if (numberOfKeyColumns > 0) {
-                result.append(keyType).append(" (");
-                for (int i = 1; i <= numberOfKeyColumns; i++) {
-                    result.append(key.getColumn(i));
-                    if (i != numberOfKeyColumns) result.append(',');
-                }
-                result.append(')');
-            }
-        }
-
-        private void addForeignKey(ForeignKey key, StringBuilder result) {
-            int numberOfKeyColumns = key.getNumberOfColumns();
-            if (numberOfKeyColumns > 0) {
-                result.append(", FOREIGN KEY").append(" (");
-                for (int i = 1; i <= numberOfKeyColumns; i++) {
-                    result.append(key.getFkColumn(i));
-                    if (i != numberOfKeyColumns) result.append(',');
-                }
-                result.append(')');
-                result.append(" REFERENCES ").append(key.getPkColumn(0).getId().getContainerId().getName()).append(" (");
-                for (int i = 1; i <= numberOfKeyColumns; i++) {
-                    result.append(key.getPkColumn(i));
-                    if (i != numberOfKeyColumns) result.append(',');
-                }
-                result.append(')');
-            }
-            if (key.getDeleteRule() != null) {
-                result.append(" ON DELETE ").append(key.getDeleteRule().getAction());
-            }
-            if (key.getUpdateRule() != null) {
-                result.append(" ON UPDATE ").append(key.getUpdateRule().getAction());
-            }
-        }
-    }
+ }

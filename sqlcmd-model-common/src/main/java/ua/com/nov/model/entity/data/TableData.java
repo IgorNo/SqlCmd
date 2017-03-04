@@ -1,6 +1,6 @@
-package ua.com.nov.model.entity.metadata.table;
+package ua.com.nov.model.entity.data;
 
-import ua.com.nov.model.entity.row.RowData;
+import ua.com.nov.model.entity.metadata.table.Table;
 
 import java.util.ArrayList;
 import java.util.List;

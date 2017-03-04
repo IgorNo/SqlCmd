@@ -3,11 +3,8 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.Building;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
-import ua.com.nov.model.entity.metadata.table.constraint.Check;
-import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.constraint.*;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import java.util.*;
 
@@ -16,11 +13,12 @@ public class Table extends AbstractMetaData<TableId> {
                             //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private final String remarks;  // explanatory comment on the table
 
-    private final Map<String, Column> columns; // all table column
-    private final PrimaryKey primaryKey; // table primary id column
-    private final List<Key> uniqueKeyList; // table unique id list
-    private final List<ForeignKey> foreignKeyList; // table foreign id list
-    private final List<Check> checkExpressionList; // table check expression list
+    private final Map<String, Column> columns; // all table columns
+    private final PrimaryKey primaryKey; // table primary key
+    private final List<UniqueKey> uniqueKeys; // table unique keys list
+    private final List<ForeignKey> foreignKeys; // table foreign keys list
+    private final List<Check> checkExpressions; // table check expressions list
+    private final List<Index> indices; // table indices list
 
     private String tableProperties = "";
 
@@ -30,11 +28,12 @@ public class Table extends AbstractMetaData<TableId> {
         //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
         private String remarks;  // explanatory comment on the table
 
-        private Map<String, Column> columns = new HashMap<>(); // all table column
-        private PrimaryKey primaryKey; // table primary id column
-        private List<Key> uniqueKeyList = new LinkedList<>(); // table unique id list
-        private List<ForeignKey> foreignKeyList = new LinkedList<>(); // table foreign id list
-        private List<Check> checkExpressionList = new LinkedList<>(); // table check expression list
+        private Map<String, Column> columns = new HashMap<>(); // all table columns
+        private PrimaryKey primaryKey; // table primary key column
+        private List<UniqueKey> uniqueKeys = new LinkedList<>(); // table unique keys list
+        private List<ForeignKey> foreignKeys = new LinkedList<>(); // table foreign keys list
+        private List<Check> checkExpressions = new LinkedList<>(); // table check expressions list
+        private List<Index> indices; // table indices list
 
         private String tableProperties = "";
 
@@ -88,33 +87,43 @@ public class Table extends AbstractMetaData<TableId> {
             return this;
         }
 
-        public Builder uniqueKeyList(List<Key> uniqueKeyList) {
-            this.uniqueKeyList = uniqueKeyList;
+        public Builder uniqueKeyList(List<UniqueKey> uniqueKeyList) {
+            this.uniqueKeys = uniqueKeyList;
             return this;
         }
 
-        public Builder addUniqueKey(Key uniqueKey) {
-            this.uniqueKeyList.add(uniqueKey);
+        public Builder addUniqueKey(UniqueKey uniqueKey) {
+            this.uniqueKeys.add(uniqueKey);
             return this;
         }
 
-        public Builder foreignKeyList(List<ForeignKey> foreignKeyList) {
-            this.foreignKeyList = foreignKeyList;
+        public Builder foreignKeys(List<ForeignKey> foreignKeyList) {
+            this.foreignKeys = foreignKeyList;
             return this;
         }
 
         public Builder addForeignKey(ForeignKey foreignKey) {
-            this.foreignKeyList.add(foreignKey);
+            this.foreignKeys.add(foreignKey);
             return this;
         }
 
         public Builder checkExpressionList(List<Check> checkExpressionList) {
-            this.checkExpressionList = checkExpressionList;
+            this.checkExpressions = checkExpressionList;
             return this;
         }
 
         public Builder addCheckExpression(Check checkExpression) {
-            checkExpressionList.add(checkExpression);
+            checkExpressions.add(checkExpression);
+            return this;
+        }
+
+        public Builder indexList(List<Index> indexList) {
+            this.indices = indexList;
+            return this;
+        }
+
+        public Builder addIndex(Index index) {
+            indices.add(index);
             return this;
         }
 
@@ -134,9 +143,10 @@ public class Table extends AbstractMetaData<TableId> {
         this.remarks = builder.remarks;
         this.columns = builder.columns;
         this.primaryKey = builder.primaryKey;
-        this.uniqueKeyList = builder.uniqueKeyList;
-        this.foreignKeyList = builder.foreignKeyList;
-        this.checkExpressionList = builder.checkExpressionList;
+        this.uniqueKeys = builder.uniqueKeys;
+        this.foreignKeys = builder.foreignKeys;
+        this.checkExpressions = builder.checkExpressions;
+        this.indices = builder.indices;
         this.tableProperties = builder.tableProperties;
     }
 
@@ -183,31 +193,46 @@ public class Table extends AbstractMetaData<TableId> {
         return getColumn(columnName).getOrdinalPosition();
     }
 
-    public Collection<Column> getColumnCollection() {
-        List<Column> list = new ArrayList<Column>(columns.values());
-        Collections.sort(list, new Comparator<Column>() {
+    public Collection<Column> getColumns() {
+        List<Column> result = new ArrayList<Column>(columns.values());
+        Collections.sort(result, new Comparator<Column>() {
             @Override
             public int compare(Column o1, Column o2) {
                 return o1.getOrdinalPosition() - o2.getOrdinalPosition();
             }
         });
-        return Collections.unmodifiableCollection(list);
+        return Collections.unmodifiableCollection(result);
     }
 
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 
-    public Collection<Key> getUniqueKeyCollection() {
-        return Collections.unmodifiableCollection(uniqueKeyList);
+    public Collection<Constraint> getConstrains() {
+        List<Constraint> result = new LinkedList<>();
+        result.add(primaryKey);
+        result.addAll(foreignKeys);
+        result.addAll(uniqueKeys);
+        return Collections.unmodifiableCollection(result);
+    }
+
+    public Collection<TableMd> getMetaData() {
+        List<TableMd> result = new LinkedList<>();
+        result.addAll(getColumns());
+        result.addAll(getConstrains());
+        return Collections.unmodifiableCollection(result);
+    }
+
+    public Collection<UniqueKey> getUniqueKeyCollection() {
+        return Collections.unmodifiableCollection(uniqueKeys);
     }
 
     public Collection<ForeignKey> getForeignKeyCollection() {
-        return Collections.unmodifiableCollection(foreignKeyList);
+        return Collections.unmodifiableCollection(foreignKeys);
     }
 
     public Collection<Check> getCheckExpressionCollecttion() {
-        return Collections.unmodifiableCollection(checkExpressionList);
+        return Collections.unmodifiableCollection(checkExpressions);
     }
 
     public String getTableProperties() {

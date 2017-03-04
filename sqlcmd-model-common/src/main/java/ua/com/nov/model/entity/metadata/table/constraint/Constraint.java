@@ -2,9 +2,10 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 
-public abstract class Constraint extends AbstractMetaData<TableMdId> {
+public abstract class Constraint extends TableMd {
 
     public Constraint(TableMdId id) {
         super(id);
