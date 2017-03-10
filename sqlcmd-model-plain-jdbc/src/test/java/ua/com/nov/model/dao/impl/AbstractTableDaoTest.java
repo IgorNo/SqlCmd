@@ -11,6 +11,7 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -49,27 +50,28 @@ public abstract class AbstractTableDaoTest {
         DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
 
         customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
-        Column idColumnCustomers = new Column.Builder(customersId, "id", serial).autoIncrement(true).build();
-        customers = new Table.Builder(customersId).addColumn(idColumnCustomers)
-                .addColumn(new Column.Builder(customersId, "name", varchar).size(100).nullable(NO_NULL).build())
-                .addColumn(new Column.Builder(customersId, "phone", varchar).size(20).build())
-                .addColumn(new Column.Builder(customersId, "address", varchar).size(150).build())
-                .addColumn(new Column.Builder(customersId, "rating", integer).build())
-                .primaryKey(new PrimaryKey.Builder(customersId, "customer_id", idColumnCustomers).build())
+        customers = new Table.Builder(customersId)
+                .addColumn(new Column.Builder("id", serial).autoIncrement(true))
+                .addColumn(new Column.Builder("name", varchar).size(100).nullable(NO_NULL))
+                .addColumn(new Column.Builder("phone", varchar).size(20))
+                .addColumn(new Column.Builder("address", varchar).size(150))
+                .addColumn(new Column.Builder("rating", integer))
+                .primaryKey(new PrimaryKey.Builder("id"))
+                .addUniqueKey(new UniqueKey.Builder("name", "phone"))
                 .build();
 
         productsId = new TableId(testDb.getId(), "Products", catalog, schema);
-        Column idColumnProducts = new Column.Builder(productsId, "id", serial).autoIncrement(true).build();
-        products = new Table.Builder(productsId).addColumn(idColumnProducts)
-                .addColumn(new Column.Builder(productsId, "description", varchar).size(100).nullable(NO_NULL).build())
-                .addColumn(new Column.Builder(productsId, "price", numeric).size(8).precision(2).defaultValue("0").build())
-                .primaryKey(new PrimaryKey.Builder(productsId, "product_id", idColumnProducts).build())
+        products = new Table.Builder(productsId)
+                .addColumn(new Column.Builder("id", serial).autoIncrement(true))
+                .addColumn(new Column.Builder("description", varchar).size(100).nullable(NO_NULL))
+                .addColumn(new Column.Builder("price", numeric).size(8).precision(2).defaultValue("0"))
+                .primaryKey(new PrimaryKey.Builder("id"))
                 .build();
-
-        tableId3 = new TableId(testDb.getId(), "Table3", catalog, schema);
-        table3 = new Table.Builder(tableId3).
-                addColumn(new Column.Builder(tableId3, "id3", serial).build()).
-                build();
+//
+//        tableId3 = new TableId(testDb.getId(), "Table3", catalog, schema);
+//        table3 = new Table.Builder(tableId3).
+//                addColumn(new Column.Builder("id3", serial)).
+//                build();
     }
 
 

@@ -1,19 +1,31 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 
-public class Check extends Constraint{
-
+public class Check extends Constraint {
     private final String expression;
 
-    public Check(TableMdId id, String expression) {
-        super(id);
-        this.expression = expression;
+    public static class Builder extends TableMd.Builder {
+        private final String expression;
+
+        public Builder(TableId tableId, String name, String expression) {
+            super(tableId, name);
+            this.expression = expression;
+        }
+
+        public Builder(String name, String expression) {
+            this(null, name, expression);
+        }
+
+        public Check build() {
+            return new Check(this);
+        }
     }
 
-    public Check(TableId tableId, String checkName, String expression) {
-        this(new TableMdId(tableId, checkName), expression);
+    public Check(Builder builder) {
+        super(builder);
+        this.expression = builder.expression;
     }
 
     public String getExpression() {

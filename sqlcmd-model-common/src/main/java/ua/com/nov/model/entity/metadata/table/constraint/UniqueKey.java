@@ -1,20 +1,22 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 
 public class UniqueKey extends Key {
 
-    public static class Builder extends Key.Builder {
+    public final static class Builder extends Key.Builder {
 
-        public Builder(TableId tableId, String keyName, Column col) {
+        public Builder(TableId tableId, String keyName, String... col) {
             super(tableId, keyName, col);
+        }
+        
+        public Builder(String... col) {
+            this(null, null, col);
         }
 
         public UniqueKey build() {
             return new UniqueKey(this);
         }
-
     }
 
     public UniqueKey(Builder builder) {
@@ -23,6 +25,6 @@ public class UniqueKey extends Key {
 
     @Override
     public String toString() {
-        return String.format(super.toString(), "UNIQUE KEY");
+        return String.format(super.toString(), "UNIQUE");
     }
 }

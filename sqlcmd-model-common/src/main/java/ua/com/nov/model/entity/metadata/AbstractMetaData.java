@@ -16,6 +16,10 @@ public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements 
         return id;
     }
 
+    public String getName() {
+        return getId().getName();
+    }
+
     public String getNewName() {
         return newName;
     }

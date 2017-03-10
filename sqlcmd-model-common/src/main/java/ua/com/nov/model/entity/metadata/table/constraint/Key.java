@@ -1,22 +1,25 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.Column;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Key extends Constraint {
-    private final Map<Integer, Column> key;
+    private final Map<Integer, String> columnList;
 
-    protected static class Builder {
-        private final TableMdId id;
-        private final Map<Integer, Column> key = new HashMap<>();
+    public static class Builder extends TableMd.Builder {
+        private final Map<Integer, String> columnList = new HashMap<>();
+        private int keySeq = 1;
 
-        public Builder(TableId tableId, String keyName, Column col) {
-            id = new TableMdId(tableId, keyName);
-            addColumn(1, col);
+        public Builder(TableId tableId, String keyName, String... columnNames) {
+            super(tableId, keyName);
+            for (String columnName : columnNames) {
+                addColumn(columnName);
+            }
         }
 
         /**
@@ -24,38 +27,54 @@ public abstract class Key extends Constraint {
          *
          * @param keySeq - sequence number within primary constraint( a value of 1 represents the first column of
          *               the foreign constraint, a value of 2 would represent the second column within the primary constraint)
-         * @param col
+         * @param columnName
          */
-        public Builder addColumn(int keySeq, Column col) {
-            if (key.put(keySeq, col) != null) {
-                throw new IllegalArgumentException(String.format("Column '%s' already belongs in this key.",
-                        col.getId().getFullName()));
+        public Builder addColumn(int keySeq, String columnName) {
+            if (columnList.put(keySeq, columnName) != null) {
+                throw new IllegalArgumentException(String.format("Column '%s' already belongs this key.", columnName));
             }
             return this;
+        }
+
+        public Builder addColumn(String columnName) {
+            addColumn(keySeq++, columnName);
+            return this;
+        }
+
+        public Collection<String> getColumnNameList() {
+            return Collections.unmodifiableCollection(columnList.values());
+        }
+
+        protected Map<Integer,String> getColumnMap() {
+            return columnList;
         }
     }
 
     protected Key(Builder builder) {
-        super(builder.id);
-        this.key = builder.key;
+        super(builder);
+        this.columnList = builder.columnList;
     }
 
     public int getNumberOfColumns() {
-        return key.size();
+        return columnList.size();
     }
 
-    public Column getColumn(int keySeq) {
-        Column result = key.get(keySeq);
+    public String getColumnName(int keySeq) {
+        String result = columnList.get(keySeq);
         if (result == null) throw new IllegalArgumentException();
         return result;
+    }
+
+    public Collection<String> getColumnNames() {
+        return columnList.values();
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(super.toString()).append(" %s(");
         String s = "";
-        for (Column column : key.values()) {
-            sb.append(s).append(column.getName());
+        for (String column : columnList.values()) {
+            sb.append(s).append(column);
             if (s.isEmpty()) s = ",";
         }
         return sb.append(')').toString();

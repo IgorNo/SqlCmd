@@ -40,16 +40,16 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
 
     @Override
     public Column rowMap(TableId key, ResultSet rs) throws SQLException {
-        TableMdId columnId = new TableMdId(key, rs.getString("COLUMN_NAME"));
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
-        Column column = new Column.Builder(columnId, dataType)
+        Column column = new Column.Builder(key, rs.getString("COLUMN_NAME"), dataType)
                 .size(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
                 .nullable(rs.getInt("NULL")).remarks(rs.getString("REMARKS"))
                 .defaultValue(rs.getString("COLUMN_DEF"))
                 .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"))
                 .generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"))
                 .build();
+
         return column;
     }
 

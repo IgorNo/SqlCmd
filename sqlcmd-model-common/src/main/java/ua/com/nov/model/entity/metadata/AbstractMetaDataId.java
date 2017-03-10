@@ -8,9 +8,13 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
     private final C containerId;
     private final String name;
 
+
     public AbstractMetaDataId(C containerId, String name) {
         if (containerId == null) {
             throw new IllegalArgumentException("Meta data containerId can't be 'null'.");
+        }
+        if (name == null || "".equals(name)) {
+            throw new IllegalArgumentException("Meta data name can't be 'null' or empty.");
         }
         this.containerId = containerId;
         this.name = name;
@@ -38,12 +42,12 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractMetaDataId)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        AbstractMetaDataId abstractMetaDataId = (AbstractMetaDataId) o;
+        AbstractMetaDataId<?> that = (AbstractMetaDataId<?>) o;
 
-        if (!this.containerId.equals(abstractMetaDataId.containerId)) return false;
-        return name.equalsIgnoreCase(abstractMetaDataId.name);
+        if (!containerId.equals(that.containerId)) return false;
+        return name.equalsIgnoreCase(that.name);
     }
 
     @Override

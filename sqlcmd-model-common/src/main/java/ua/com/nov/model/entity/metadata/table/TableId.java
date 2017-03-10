@@ -9,9 +9,6 @@ public class TableId extends AbstractMetaDataId<Database.DbId> {
 
     public TableId(Database.DbId db, String name, String catalog, String schema) {
         super(db, name);
-        if (name == null || "".equals(name)) {
-            throw new IllegalArgumentException("Table name can't be 'null' or empty.");
-        }
         this.catalog = catalog;
         this.schema = schema;
     }

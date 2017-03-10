@@ -5,10 +5,14 @@ import ua.com.nov.model.entity.metadata.table.TableId;
 
 public class PrimaryKey extends Key {
 
-    public static class Builder extends Key.Builder {
+    public final static class Builder extends Key.Builder {
 
-        public Builder(TableId tableId, String keyName, Column col) {
-            super(tableId, keyName, col);
+        public Builder(TableId tableId, String keyName, String columnName) {
+            super(tableId, keyName, columnName);
+        }
+        
+        public Builder(String columnName) {
+            this(null, null, columnName);
         }
 
         public PrimaryKey build() {

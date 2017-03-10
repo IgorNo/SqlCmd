@@ -5,7 +5,7 @@ import ua.com.nov.model.entity.metadata.datatype.DataType;
 import java.util.Comparator;
 
 public class Column extends TableMd {
-    int ordinalPosition; // index of column in table (starting at 1)
+    private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;
     private final Integer precision;    // the number of fractional digits. Null is returned for data types where
@@ -28,11 +28,10 @@ public class Column extends TableMd {
      * Null is returned for data types where the column size is not applicable.
     */
 
-    public static class Builder {
-        private final TableMdId id;
+    public static class Builder extends TableMd.Builder {
         private final DataType dataType;
 
-        private int ordinalPosition = 0; // index of column in table (starting at 1)
+        private int ordinalPosition ; // index of column in table (starting at 1)
         private Integer columnSize;
         private Integer precision;  // the number of fractional digits. Null is returned for data types where
                                     // precision is not applicable
@@ -43,16 +42,18 @@ public class Column extends TableMd {
         private boolean autoIncrement;   // Indicates whether this column is auto incremented
         private boolean generatedColumn; // Indicates whether this is a generated column
 
-        public Builder(TableMdId id, DataType dataType) {
-            if (id.getName() == null || "".equals(id.getName())) {
-                throw new IllegalArgumentException("Column name can't be 'null' or empty.");
-            }
-            this.id = id;
+
+        public Builder(TableId tableId, String name, DataType dataType) {
+            super(tableId, name);
             this.dataType = dataType;
         }
 
+        public Builder(String name, DataType dataType) {
+            this(null, name, dataType);
+        }
+
         public Builder(Column col) {
-            this(col.getId(), col.dataType);
+            this(col.getId().getTableId(), col.getName(), col.dataType);
             this.columnSize = col.columnSize;
             this.precision = col.precision;
             this.nullable = col.nullable;
@@ -61,10 +62,6 @@ public class Column extends TableMd {
             this.autoIncrement = col.autoIncrement;
             this.generatedColumn = col.generatedColumn;
             this.ordinalPosition = col.ordinalPosition;
-        }
-
-        public Builder(TableId tableId, String name, DataType dataType) {
-            this(new TableMdId(tableId, name), dataType);
         }
 
         public Builder size(Integer columnSize) {
@@ -116,13 +113,25 @@ public class Column extends TableMd {
             return this;
         }
 
+        public Builder ordinalPosition(int ordinalPosition) {
+            this.ordinalPosition = ordinalPosition;
+            return this;
+        }
+
         public Column build() {
             return new Column(this);
         }
     }
 
+    // вложенный класс создатся для обеспечения уникальности ключей
+    private static class ColumnId extends TableMdId {
+        public ColumnId(TableId containerId, String name) {
+            super(containerId, name);
+        }
+    }
+
     private Column(Builder builder) {
-        super(builder.id);
+        super(new ColumnId(builder.getTableId(), builder.getName()));
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
         }
@@ -182,6 +191,7 @@ public class Column extends TableMd {
             return col1.ordinalPosition - col2.ordinalPosition;
         }
     }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(getName());
