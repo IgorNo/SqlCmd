@@ -10,6 +10,7 @@ import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
@@ -27,8 +28,8 @@ public abstract class AbstractTableDaoTest {
 
     private static DataSource dataSource;
 
-    private static TableId customersId, productsId, tableId3;
-    private static Table customers, products, table3;
+    private static TableId customersId, productsId, ordersId;
+    private static Table customers, products, orders;
 
     protected abstract Database getTestDatabase();
 
@@ -48,12 +49,13 @@ public abstract class AbstractTableDaoTest {
         DataType varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
 //        DataType text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
         DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
+        DataType date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
 
         customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true))
-                .addColumn(new Column.Builder("name", varchar).size(100).nullable(NO_NULL))
-                .addColumn(new Column.Builder("phone", varchar).size(20))
+                .addColumn(new Column.Builder("name", varchar).size(100).nullable(NOT_NULL))
+                .addColumn(new Column.Builder("phone", varchar).size(20).defaultValue(""))
                 .addColumn(new Column.Builder("address", varchar).size(150))
                 .addColumn(new Column.Builder("rating", integer))
                 .primaryKey(new PrimaryKey.Builder("id"))
@@ -63,15 +65,25 @@ public abstract class AbstractTableDaoTest {
         productsId = new TableId(testDb.getId(), "Products", catalog, schema);
         products = new Table.Builder(productsId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true))
-                .addColumn(new Column.Builder("description", varchar).size(100).nullable(NO_NULL))
+                .addColumn(new Column.Builder("description", varchar).size(100).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("price", numeric).size(8).precision(2).defaultValue("0"))
                 .primaryKey(new PrimaryKey.Builder("id"))
                 .build();
-//
-//        tableId3 = new TableId(testDb.getId(), "Table3", catalog, schema);
-//        table3 = new Table.Builder(tableId3).
-//                addColumn(new Column.Builder("id3", serial)).
-//                build();
+
+        ordersId = new TableId(testDb.getId(), "Orders", catalog, schema);
+        orders = new Table.Builder(ordersId)
+                .addColumn(new Column.Builder("id", serial).autoIncrement(true))
+                .addColumn(new Column.Builder("date", date))
+                .addColumn(new Column.Builder("product_id", integer).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("qty", integer))
+                .addColumn(new Column.Builder("amount", numeric).size(10).precision(2))
+                .addColumn(new Column.Builder("customer_id", integer))
+                .primaryKey(new PrimaryKey.Builder("id"))
+                .addForeignKey(new ForeignKey.Builder("product_id", products.getColumn("id"))
+                        .deleteRule(ForeignKey.Rule.RESTRICT).updateRule(ForeignKey.Rule.CASCADE))
+                .addForeignKey(new ForeignKey.Builder("customer_id", customers.getColumn("id"))
+                        .deleteRule(ForeignKey.Rule.RESTRICT).updateRule(ForeignKey.Rule.CASCADE))
+                .build();
     }
 
 
@@ -79,7 +91,7 @@ public abstract class AbstractTableDaoTest {
         tearDown();
         DAO.create(customers);
         DAO.create(products);
-//        DAO.create(table3);
+        DAO.create(orders);
     }
 
     @Test
@@ -92,7 +104,7 @@ public abstract class AbstractTableDaoTest {
         List<Table> tables = DAO.readAll(getTestDatabase().getId());
         assertTrue(tables.contains(customers));
         assertTrue(tables.contains(products));
-//        assertTrue(tables.contains(table3));
+        assertTrue(tables.contains(orders));
     }
 
     @Test

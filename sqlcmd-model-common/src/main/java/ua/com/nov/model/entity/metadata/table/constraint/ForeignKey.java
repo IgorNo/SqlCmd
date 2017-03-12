@@ -72,7 +72,7 @@ public class ForeignKey extends Key {
 
         public Builder(TableId tableId, String keyName, String fkColumm, Column pkColumn) {
             super(tableId, keyName, fkColumm);
-            addColumn(1, fkColumm, pkColumn);
+            addPkColumn(1, pkColumn);
         }
 
         public Builder(String fkColumm, Column pkColumn) {
@@ -86,6 +86,17 @@ public class ForeignKey extends Key {
        */
         public Builder addColumn(int keySeq, String fkColumm, Column pkColumn) {
             super.addColumn(keySeq, fkColumm);
+            addPkColumn(keySeq, pkColumn);
+            return this;
+        }
+
+        public Builder addColumn(String fkColumm, Column pkColumn) {
+            super.addColumn(fkColumm);
+            addPkColumn(getKeySeq(), pkColumn);
+            return this;
+        }
+
+        private Builder addPkColumn(int keySeq, Column pkColumn) {
             if ( pkKey.put(keySeq, pkColumn) != null) {
                 throw new IllegalArgumentException(String.format("Column '%s' already exists in  in this foreign key.",
                         pkColumn));

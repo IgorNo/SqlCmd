@@ -48,6 +48,10 @@ public abstract class Key extends Constraint {
         protected Map<Integer,String> getColumnMap() {
             return columnList;
         }
+
+        protected int getKeySeq() {
+            return keySeq;
+        }
     }
 
     protected Key(Builder builder) {

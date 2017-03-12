@@ -83,7 +83,7 @@ public class Column extends TableMd {
         }
 
         public Builder nullable(int nullable) {
-            if (dataType.getNullable() == DataType.NO_NULL && nullable == DataType.NULL) {
+            if (dataType.getNullable() == DataType.NOT_NULL && nullable == DataType.NULL) {
                 throw new IllegalArgumentException("This column type can not be nullable.");
             }
             this.nullable = nullable;
@@ -202,7 +202,7 @@ public class Column extends TableMd {
             sb.append(')');
         }
         if (nullable == 0) sb.append(" NOT NULL");
-        if (defaultValue != null) sb.append(" DEFAULT ").append(defaultValue);
+        if (defaultValue != null) sb.append(" DEFAULT '").append(defaultValue).append("'");
         if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
         return sb.toString();
     }
