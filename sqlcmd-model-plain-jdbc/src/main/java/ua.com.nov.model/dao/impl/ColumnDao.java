@@ -20,16 +20,9 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
     }
 
     @Override
-    protected ResultSet getResultSet(TableId id) throws SQLException {
-        return getDbMetaData().getColumns(id.getDb().getName(), id.getSchema(), id.getName(), null);
+    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+        return getDbMetaData().getColumns(id.getCatalog(), id.getSchema(), id.getName(), null);
     }
-
-    @Override
-    protected ResultSet getResultSet(int nStart, int number, TableId id) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    public static final String CREATE_COLUMN_SQL = "ALTER TABLE %s ADD COLUMN %s";
 
     private static String getColumnDefinition(Column col) {
         StringBuilder result = new StringBuilder(col.getName());
@@ -42,15 +35,17 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
     public Column rowMap(TableId key, ResultSet rs) throws SQLException {
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
-        Column column = new Column.Builder(key, rs.getString("COLUMN_NAME"), dataType)
+        Column.Builder column = new Column.Builder(key, rs.getString("COLUMN_NAME"), dataType)
+                .ordinalPosition(rs.getInt("ORDINAL_POSITION"))
                 .size(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
-                .nullable(rs.getInt("NULL")).remarks(rs.getString("REMARKS"))
+                .nullable(rs.getInt("NULLABLE")).remarks(rs.getString("REMARKS"))
                 .defaultValue(rs.getString("COLUMN_DEF"))
-                .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"))
-                .generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"))
-                .build();
+                .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
+                try {
+                    column.generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"));
+                } catch (SQLException e) {/*NOP*/}
 
-        return column;
+        return  column.build();
     }
 
     @Override

@@ -16,7 +16,8 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
 
     private DataSource dataSource;
 
-    protected DataSource getDataSource() {
+    @Override
+    public DataSource getDataSource() {
         return dataSource;
     }
 
@@ -60,21 +61,21 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
 
     @Override
     public List<V> readN(int nStart, int number, C container) throws SQLException {
-        ResultSet rs = getResultSet(nStart, number, container);
+        ResultSet rs = getResultSetN(nStart, number, container);
         return getList(rs, container);
     }
 
     // get N items ResultSet
-    protected abstract ResultSet getResultSet(int nStart, int number, C containerId) throws SQLException;
+    protected abstract ResultSet getResultSetN(int nStart, int number, C containerId) throws SQLException;
 
     @Override
     public List<V> readAll(C containerId) throws SQLException {
-        ResultSet rs = getResultSet(containerId);
+        ResultSet rs = getResultSetAll(containerId);
         return getList(rs, containerId);
     }
 
     // get all items ResultSet
-    protected abstract ResultSet getResultSet(C container) throws SQLException;
+    protected abstract ResultSet getResultSetAll(C container) throws SQLException;
 
     private List<V> getList(ResultSet rs, C containerId) throws SQLException {
         List<V> result = new ArrayList();

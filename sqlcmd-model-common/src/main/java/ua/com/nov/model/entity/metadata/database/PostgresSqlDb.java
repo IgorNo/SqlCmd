@@ -1,46 +1,30 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.statement.AbstractSqlDbStatements;
-import ua.com.nov.model.statement.AbstractSqlTableStatements;
-import ua.com.nov.model.statement.SqlStatementSource;
+import ua.com.nov.model.statement.AbstractDbSqlStatements;
+import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractTableSqlStatements;
 
 public class PostgresSqlDb extends Database {
-    private static final PostgreSqlDbStmts DATABASE_SQL_STATEMENT_SOURCE = new PostgreSqlDbStmts();
-    private static final PostgreSqlTableStmts TABLE_SQL_STATEMENT_SOURCE = new PostgreSqlTableStmts();
 
     public PostgresSqlDb(String dbUrl, String userName) {
-        super(dbUrl, userName);
+        this(dbUrl, userName, null);
     }
 
     public PostgresSqlDb(String dbUrl, String userName, String password) {
-        super(dbUrl, userName, password);
+        this(dbUrl, userName, password, "");
     }
 
     public PostgresSqlDb(String dbUrl, String userName, String password, String dbProperties) {
         super(dbUrl, userName, password, dbProperties);
+        getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "text");
     }
 
     @Override
     public String getAutoIncrementDefinition() {
         return "";
-    }
-
-    @Override
-    public PostgreSqlDbStmts getDatabaseSqlStmtSource() {
-        return DATABASE_SQL_STATEMENT_SOURCE;
-    }
-
-    @Override
-    public PostgreSqlTableStmts getTableSqlStmtSource() {
-        return TABLE_SQL_STATEMENT_SOURCE;
-    }
-
-    @Override
-    public SqlStatementSource<TableMdId, Column, TableId> getColumnSqlStmtSource() {
-        return null;
     }
 
     @Override
@@ -56,14 +40,39 @@ public class PostgresSqlDb extends Database {
         return parameter;
     }
 
-    private static class PostgreSqlDbStmts extends AbstractSqlDbStatements {
+    @Override
+    public AbstractDbSqlStatements getDatabaseSqlStmtSource() {
+        return new DbSqlStmts();
+    }
+
+    private static class DbSqlStmts extends AbstractDbSqlStatements {
+
         @Override
         public String getReadAllStmt(Database db) {
             return "SELECT datname FROM pg_database WHERE datistemplate = false";
         }
     }
 
-    private static class PostgreSqlTableStmts extends AbstractSqlTableStatements {
+    @Override
+    public AbstractTableSqlStatements getTableSqlStmtSource() {
+        return new TableSqlStmts();
     }
 
+    private static class TableSqlStmts extends AbstractTableSqlStatements {
+
+    }
+
+    @Override
+    public AbstractlColumnSqlStatements getColumnSqlStmtSource() {
+        return new ColumnSqlStatements();
+    }
+
+    private static class ColumnSqlStatements extends AbstractlColumnSqlStatements {
+        @Override
+        public String getUpdateStmt(Column col) {
+            return String.format("ALTER TABLE %s RENAME COLUMN %s TO %s",
+                    col.getTableId().getFullName(), col.getName(), col.getNewName());
+
+        }
+    }
 }

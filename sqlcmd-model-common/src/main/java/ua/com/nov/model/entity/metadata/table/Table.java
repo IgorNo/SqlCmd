@@ -69,7 +69,7 @@ public class Table extends AbstractMetaData<TableId> {
 
         public Builder addColumn(Column col) {
             checkTableId(col);
-            if (columns.put(col.getName(), col) != null) {
+            if (columns.put(col.getName().toLowerCase(), col) != null) {
                 throw new IllegalArgumentException(String.format("Column with name '%s' already exists", col.getName()));
             }
             return this;
@@ -290,7 +290,7 @@ public class Table extends AbstractMetaData<TableId> {
     }
 
     public Column getColumn(String columnName) {
-        Column col = columns.get(columnName);
+        Column col = columns.get(columnName.toLowerCase());
         if (col != null) return col;
         throw new IllegalArgumentException(String.format("Column %s doesn't exist in table %s",
                 columnName, getId().getFullName()));

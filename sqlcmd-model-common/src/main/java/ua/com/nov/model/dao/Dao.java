@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface Dao<K,V,C> {
 
+    DataSource getDataSource();
+
     Dao<K,V,C> setDataSource(DataSource dataSource);
 
     //Create

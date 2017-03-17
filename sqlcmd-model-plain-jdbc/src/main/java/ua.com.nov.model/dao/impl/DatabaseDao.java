@@ -20,7 +20,7 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
     @Override
     public Database read(DbId dbId) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        dbId.getDatabase().setDataTypes(getDataTypes(conn));
+        dbId.getDatabase().addDataTypes(getDataTypes(conn));
         return dbId.getDatabase();
     }
 
@@ -65,12 +65,12 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
     }
 
     @Override
-    protected ResultSet getResultSet(int nStart, int number, Database db) throws SQLException {
+    protected ResultSet getResultSetN(int nStart, int number, Database db) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected ResultSet getResultSet(Database db) throws SQLException {
+    protected ResultSet getResultSetAll(Database db) throws SQLException {
         Connection conn = getDataSource().getConnection();
         SqlStatementSource source = getSqlStmtSource(db);
         Statement stmt = conn.createStatement();

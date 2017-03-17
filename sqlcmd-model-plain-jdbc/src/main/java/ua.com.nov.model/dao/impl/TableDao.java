@@ -1,12 +1,14 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
 public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
 
@@ -19,7 +21,7 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
     }
 
     @Override
-    protected ResultSet getResultSet(Database.DbId dbId) throws SQLException {
+    protected ResultSet getResultSetAll(Database.DbId dbId) throws SQLException {
         return getDbMetaData().getTables(null, null, null, new String[] {"TABLE"});
     }
 
@@ -28,7 +30,8 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
         TableId tableId = new TableId(dbId, rs.getString("TABLE_NAME"),
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
         Table.Builder builder = new Table.Builder(tableId, rs.getString("TABLE_TYPE"));
-
+        Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
+        builder.columns(columns);
         return builder.build();
     }
 

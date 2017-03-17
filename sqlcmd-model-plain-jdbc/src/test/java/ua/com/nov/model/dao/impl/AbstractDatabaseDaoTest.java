@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.Database.DbId;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
-    public static final AbstractDao<DbId, Database, Database> DAO = new DatabaseDao();
+    public static final Dao<DbId, Database, Database> DAO = new DatabaseDao();
 
     private static DataSource dataSource;
 

@@ -219,4 +219,19 @@ public class DataType {
     public int getNumPrecRadix() {
         return numPrecRadix;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DataType dataType = (DataType) o;
+
+        return typeName.equals(dataType.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return typeName.hashCode();
+    }
 }

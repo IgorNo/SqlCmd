@@ -35,7 +35,7 @@ public abstract class DataDefinitionDao<K extends AbstractMetaDataId<C>, V exten
     }
 
     @Override
-    protected ResultSet getResultSet(int nStart, int number, C containerId) throws SQLException {
+    protected ResultSet getResultSetN(int nStart, int number, C containerId) throws SQLException {
         throw new UnsupportedOperationException();
     }
 

@@ -7,12 +7,11 @@ import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.statement.SqlStatementSource;
+import ua.com.nov.model.statement.AbstractDbSqlStatements;
+import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractTableSqlStatements;
 import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
@@ -21,22 +20,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public abstract class Database extends BaseDataSource implements Unique<Database.DbId>, Child<Database>, Persistent {
     private final DbId id;
     private final String password;
-    private List<DataType> dataTypes;
+    private Map<String,DataType> dataTypes = new HashMap<>();
     private final String dbProperties;
 
-    public Database(String dbUrl, String userName) {
-        this(dbUrl, userName, null, "");
-    }
-
-    public Database(String dbUrl, String userName, String password) {
-        this(dbUrl, userName, password, "");
-    }
+    private final Map<JdbcDataTypes, String> typesMap = new HashMap<>();
 
     public Database(String dbUrl, String userName, String password, String dbProperties) {
         this.id = new DbId(dbUrl, userName);
@@ -44,11 +36,15 @@ public abstract class Database extends BaseDataSource implements Unique<Database
         this.dbProperties = dbProperties;
     }
 
-    public abstract SqlStatementSource<DbId,Database,Database> getDatabaseSqlStmtSource();
+    protected Map<JdbcDataTypes, String> getTypesMap() {
+        return typesMap;
+    }
 
-    public abstract SqlStatementSource<TableId,Table,DbId> getTableSqlStmtSource();
+    public abstract AbstractDbSqlStatements getDatabaseSqlStmtSource();
 
-    public abstract SqlStatementSource<TableMdId,Column,TableId> getColumnSqlStmtSource();
+    public abstract AbstractTableSqlStatements getTableSqlStmtSource();
+
+    public abstract AbstractlColumnSqlStatements getColumnSqlStmtSource();
 
     public abstract String getFullTableName(TableId id);
 
@@ -77,15 +73,17 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     // convert 'parameter' to database format (to upper or lower case)
     public abstract String convert(String parameter);
 
-    public void setDataTypes(List<DataType> dataTypes) {
-        this.dataTypes = dataTypes;
+    public void addDataTypes(Collection<DataType> dataTypeList) {
+        for (DataType dataType : dataTypeList) {
+            dataTypes.put(dataType.getTypeName(), dataType);
+        }
     }
 
     public DataType getDataType(String typeName) {
-        for (DataType dataType : dataTypes) {
-            if (dataType.getTypeName().equalsIgnoreCase(typeName)) return dataType;
-        }
-        throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
+        DataType dataType = dataTypes.get(typeName);
+        if (dataType == null)
+            throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
+        return dataType;
     }
 
     /**
@@ -95,7 +93,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
      */
     public List<DataType> getDataTypes(int jdbcDataType) {
         List<DataType> result = new LinkedList<>();
-        for (DataType dataType : dataTypes) {
+        for (DataType dataType : dataTypes.values()) {
             if (jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
         }
         return result;
@@ -108,21 +106,26 @@ public abstract class Database extends BaseDataSource implements Unique<Database
      */
     public List<DataType> getAutoincrementalDataTypes(int jdbcDataType) {
         List<DataType> result = new LinkedList<>();
-        for (DataType dataType : dataTypes) {
+        for (DataType dataType : dataTypes.values()) {
             if (dataType.isAutoIncrement() && jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
         }
         return result;
     }
 
     public DataType getMostApproximateDataTypes(JdbcDataTypes type) {
-        List<DataType> dataTypes = getDataTypes(type.getJdbcDataType());
-        if (dataTypes.size() == 0) {
-            throw new IllegalArgumentException(String.format("Data type %s does not support this database", type));
+        String dataTypeName = getTypesMap().get(type);
+        if (dataTypeName != null)
+            return getDataType(dataTypeName);
+        else {
+            List<DataType> dataTypes = getDataTypes(type.getJdbcDataType());
+            if (dataTypes.size() == 0) {
+                throw new IllegalArgumentException(String.format("Data type %s does not support this database", type));
+            }
+            for (DataType dataType : dataTypes) {
+                if (dataType.getTypeName().equalsIgnoreCase(type.toString())) return dataType;
+            }
+            return dataTypes.get(0);
         }
-        for (DataType dataType : dataTypes) {
-            if (dataType.getTypeName().equalsIgnoreCase(type.toString())) return dataType;
-        }
-        return dataTypes.get(0);
     }
 
     public String getDbProperties() {

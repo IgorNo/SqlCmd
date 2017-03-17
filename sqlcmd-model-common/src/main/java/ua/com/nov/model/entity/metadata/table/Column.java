@@ -101,7 +101,7 @@ public class Column extends TableMd {
         }
 
         public Builder autoIncrement(boolean autoIncrement) {
-            if (!dataType.isAutoIncrement()) {
+            if (autoIncrement && !dataType.isAutoIncrement()) {
                 throw new IllegalArgumentException("This column type can not be autoincrement.");
             }
             this.autoIncrement = autoIncrement;
@@ -124,14 +124,14 @@ public class Column extends TableMd {
     }
 
     // вложенный класс создатся для обеспечения уникальности ключей
-    private static class ColumnId extends TableMdId {
-        public ColumnId(TableId containerId, String name) {
+    private static class TableMdId extends ua.com.nov.model.entity.metadata.table.TableMdId {
+        public TableMdId(TableId containerId, String name) {
             super(containerId, name);
         }
     }
 
     private Column(Builder builder) {
-        super(new ColumnId(builder.getTableId(), builder.getName()));
+        super(new TableMdId(builder.getTableId(), builder.getName()));
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
         }
@@ -186,19 +186,13 @@ public class Column extends TableMd {
         return generatedColumn;
     }
 
-    public static class SIpn implements Comparator<Column> {
-        public int compare(Column col1, Column col2){
-            return col1.ordinalPosition - col2.ordinalPosition;
-        }
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(getName());
         sb.append(" ").append(dataType.getTypeName());
         if (columnSize != null) {
             sb.append('(').append(columnSize);
-            if (precision != null) sb.append(',').append(precision);
+            if (precision != null && precision > 0) sb.append(',').append(precision);
             sb.append(')');
         }
         if (nullable == 0) sb.append(" NOT NULL");
