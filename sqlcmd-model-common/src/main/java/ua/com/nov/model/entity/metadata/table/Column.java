@@ -189,15 +189,21 @@ public class Column extends TableMd {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(getName());
-        sb.append(" ").append(dataType.getTypeName());
+        sb.append(" ");
+        sb.append(getFullTypeDeclaration());
+        if (nullable == 0) sb.append(" NOT NULL");
+        if (defaultValue != null) sb.append(" DEFAULT '").append(defaultValue).append("'");
+        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
+        return sb.toString();
+    }
+
+    public String getFullTypeDeclaration() {
+        StringBuilder sb = new StringBuilder(dataType.getTypeName());
         if (columnSize != null) {
             sb.append('(').append(columnSize);
             if (precision != null && precision > 0) sb.append(',').append(precision);
             sb.append(')');
         }
-        if (nullable == 0) sb.append(" NOT NULL");
-        if (defaultValue != null) sb.append(" DEFAULT '").append(defaultValue).append("'");
-        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
         return sb.toString();
     }
 

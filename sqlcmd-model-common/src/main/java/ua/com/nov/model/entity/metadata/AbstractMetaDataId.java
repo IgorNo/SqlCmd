@@ -32,11 +32,11 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
 
     @Override
     public String getFullName() {
-        return containerId.getFullName() + "." + name;
+        return getDb().convert(containerId.getFullName() + "." + name);
     }
 
     public String getName() {
-        return name;
+        return getDb().convert(name);
     }
 
     @Override

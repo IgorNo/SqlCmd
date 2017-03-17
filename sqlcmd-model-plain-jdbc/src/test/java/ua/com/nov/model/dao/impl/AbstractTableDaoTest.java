@@ -169,13 +169,34 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
+    public void testAddColumn() throws SQLException {
+        Column testCol = new Column.Builder(customersId, "test", integer).build();
+        COLUMN_DAO.create(testCol);
+        Column readCol = COLUMN_DAO.read(testCol.getId());
+        assertTrue(testCol.equals(readCol));
+    }
+
+    @Test
     public void testReadColumn() throws SQLException {
         Column testCol = customers.getColumn("name");
         Column readCol = COLUMN_DAO.read(testCol.getId());
         assertTrue(testCol.equals(readCol));
     }
 
+    @Test
+    public void testUpdateColumn() throws SQLException {
+        Column testCol = customers.getColumn("name");
+        testCol.setNewName("test");
+        COLUMN_DAO.update(testCol);
+        Column readCol = COLUMN_DAO.read(new TableMdId(customersId, "test"));
+        assertTrue(testCol.getNewName().equalsIgnoreCase(readCol.getName()));
+    }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void  testDeleteColumn() throws SQLException {
+        COLUMN_DAO.delete(customers.getColumn("name").getId());
+        COLUMN_DAO.read(customers.getColumn("name").getId());
+    }
 
     @After
     public void tearDown() throws SQLException {

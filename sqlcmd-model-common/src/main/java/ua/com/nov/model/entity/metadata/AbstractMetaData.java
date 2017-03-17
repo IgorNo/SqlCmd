@@ -21,7 +21,7 @@ public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements 
     }
 
     public String getNewName() {
-        return newName;
+        return getId().getDb().convert(newName);
     }
 
     public void setNewName(String newName) {

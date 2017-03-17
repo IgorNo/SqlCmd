@@ -13,9 +13,14 @@ import java.sql.SQLException;
 public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
 
     @Override
+    public void deleteAll(TableId container) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     protected ResultSet getResultSet(TableMdId id) throws SQLException {
-        ResultSet rs = getDbMetaData().getColumns(id.getContainerId().getDb().getName(), id.getContainerId().getSchema(),
-                id.getContainerId().getName(), id.getName());
+        ResultSet rs = getDbMetaData().getColumns(id.getTableId().getCatalog(), id.getTableId().getSchema(),
+                id.getTableId().getName(), id.getName());
         return rs;
     }
 

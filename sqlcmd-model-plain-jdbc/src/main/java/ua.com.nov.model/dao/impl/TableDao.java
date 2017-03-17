@@ -14,9 +14,7 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
 
     @Override
     public ResultSet getResultSet(TableId id) throws SQLException {
-        ResultSet rs = getDbMetaData().getTables(id.getDb().convert(id.getCatalog()),
-                id.getDb().convert(id.getSchema()), id.getDb().convert(id.getName()),
-                new String[] {"TABLE"});
+        ResultSet rs = getDbMetaData().getTables(id.getCatalog(), id.getSchema(), id.getName(), new String[] {"TABLE"});
         return rs;
     }
 

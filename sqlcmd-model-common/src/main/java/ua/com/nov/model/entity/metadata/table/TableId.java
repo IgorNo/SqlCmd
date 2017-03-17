@@ -23,11 +23,11 @@ public class TableId extends AbstractMetaDataId<Database.DbId> {
     }
 
     public String getCatalog() {
-        return catalog;
+        return getDb().convert(catalog);
     }
 
     public String getSchema() {
-        return schema;
+        return getDb().convert(schema);
     }
 
     @Override

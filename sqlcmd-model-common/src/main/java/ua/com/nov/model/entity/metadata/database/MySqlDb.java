@@ -1,14 +1,11 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
 import ua.com.nov.model.statement.AbstractTableSqlStatements;
 import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
-
-import java.sql.Types;
 
 public final class MySqlDb extends Database {
 
@@ -74,8 +71,8 @@ public final class MySqlDb extends Database {
     private static class ColumnSqlStatements extends AbstractlColumnSqlStatements {
         @Override
         public String getUpdateStmt(Column col) {
-            return String.format("ALTER TABLE %s CHANGE COLUMN %s %s",
-                    col.getTableId().getFullName(), col.getName(), col.getNewName());
+            return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
+                    col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
         }
     }
 }
