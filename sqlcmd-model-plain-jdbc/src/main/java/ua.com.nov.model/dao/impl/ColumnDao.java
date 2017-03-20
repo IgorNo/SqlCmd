@@ -19,22 +19,14 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
 
     @Override
     protected ResultSet getResultSet(TableMdId id) throws SQLException {
-        ResultSet rs = getDbMetaData().getColumns(id.getTableId().getCatalog(), id.getTableId().getSchema(),
+        return getDbMetaData().getColumns(id.getTableId().getCatalog(), id.getTableId().getSchema(),
                 id.getTableId().getName(), id.getName());
-        return rs;
     }
 
     @Override
     protected ResultSet getResultSetAll(TableId id) throws SQLException {
         return getDbMetaData().getColumns(id.getCatalog(), id.getSchema(), id.getName(), null);
     }
-
-    private static String getColumnDefinition(Column col) {
-        StringBuilder result = new StringBuilder(col.getName());
-        result.append(' ').append(col.getDataType().getTypeName()).append(' ');
-        return result.toString();
-    }
-
 
     @Override
     public Column rowMap(TableId key, ResultSet rs) throws SQLException {

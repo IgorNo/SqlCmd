@@ -3,9 +3,13 @@ package ua.com.nov.model.entity.metadata.database;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
 import ua.com.nov.model.statement.AbstractTableSqlStatements;
-import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
 
 public final class MySqlDb extends Database {
 
@@ -44,35 +48,50 @@ public final class MySqlDb extends Database {
 
     @Override
     public AbstractDbSqlStatements getDatabaseSqlStmtSource() {
-        return new DbSqlStmts();
-    }
-
-    private static class DbSqlStmts extends AbstractDbSqlStatements {
-        @Override
-        public String getReadAllStmt(Database db) {
-            return "SHOW DATABASES";
-        }
+        return new AbstractDbSqlStatements() {
+            @Override
+            public String getReadAllStmt(Database db) {
+                return "SHOW DATABASES";
+            }
+        };
     }
 
     @Override
     public AbstractTableSqlStatements getTableSqlStmtSource() {
-        return new TableSqlStmts();
+        return new AbstractTableSqlStatements() { };
     }
-
-    private static class TableSqlStmts extends AbstractTableSqlStatements {
-    }
-
 
     @Override
-    public AbstractlColumnSqlStatements getColumnSqlStmtSource() {
-        return new ColumnSqlStatements();
+    public AbstractColumnSqlStatements getColumnSqlStmtSource() {
+        return new AbstractColumnSqlStatements() {
+            @Override
+            public String getUpdateStmt(Column col) {
+                return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
+                        col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
+            }
+        };
     }
 
-    private static class ColumnSqlStatements extends AbstractlColumnSqlStatements {
+    @Override
+    public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
+        return new KeySqlStatements<PrimaryKey>() {
+            @Override
+            public String getDeleteStmt(TableMdId id) {
+                return String.format("ALTER TABLE %s DROP PRIMARY KEY", id.getTableId().getFullName());
+            }
+
+            @Override
+            public String getUpdateStmt(Key pk) {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    private abstract static class KeySqlStatements<V extends Key> extends AbstractConstraintSqlStatements<V> {
         @Override
-        public String getUpdateStmt(Column col) {
-            return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
-                    col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
+        public String getUpdateStmt(Key pk) {
+            return String.format("ALTER TABLE %s RENAME KEY %s TO %s", pk.getTableId().getFullName(),
+                    pk.getName(), pk.getNewName());
         }
     }
 }

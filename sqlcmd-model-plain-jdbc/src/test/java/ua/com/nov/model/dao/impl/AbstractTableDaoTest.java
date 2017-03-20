@@ -26,12 +26,13 @@ import static ua.com.nov.model.entity.metadata.datatype.DataType.NOT_NULL;
 public abstract class AbstractTableDaoTest {
 
     protected static final Dao<TableId, Table, Database.DbId> TABLE_DAO = new TableDao();
-    private  static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
+    protected   static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
+    protected   static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
 
     private static DataSource dataSource;
 
-    private static TableId customersId, productsId, ordersId;
-    private static Table customers, products, orders;
+    protected static TableId customersId, productsId, ordersId, usersId;
+    protected static Table customers, products, orders, users;
 
     private DataType serial, integer, varchar, text, numeric, date;
 
@@ -48,6 +49,7 @@ public abstract class AbstractTableDaoTest {
             new DatabaseDao().setDataSource(dataSource).read(getTestDatabase().getId());
             TABLE_DAO.setDataSource(dataSource);
             COLUMN_DAO.setDataSource(dataSource);
+            PRIMARY_KEY_DAO.setDataSource(dataSource);
         }
         serial = testDb.getAutoincrementalDataTypes(Types.INTEGER).get(0);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
@@ -90,6 +92,13 @@ public abstract class AbstractTableDaoTest {
                 .addForeignKey(new ForeignKey.Builder("customer_id", customers.getColumn("id"))
                         .deleteRule(ForeignKey.Rule.RESTRICT).updateRule(ForeignKey.Rule.CASCADE))
                 .build();
+
+        usersId = new TableId(testDb.getId(), "Users", catalog, schema);
+        users = new Table.Builder(usersId)
+                .addColumn(new Column.Builder("login", varchar).size(25))
+                .addColumn(new Column.Builder("password",varchar).size(25))
+                .primaryKey(new PrimaryKey.Builder("login"))
+                .build();
     }
 
     public void setUp() throws SQLException {
@@ -97,12 +106,14 @@ public abstract class AbstractTableDaoTest {
         TABLE_DAO.create(customers);
         TABLE_DAO.create(products);
         TABLE_DAO.create(orders);
+        TABLE_DAO.create(users);
     }
 
     @Test
     public void testReadTableMetaData() throws SQLException {
         Table table = TABLE_DAO.read(customers.getId());
         assertTrue(table.equals(customers));
+        assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));
         assertTrue(table.getColumns().size() == customers.getColumns().size());
         compareColumns(table, customers);
         table = TABLE_DAO.read(products.getId());
@@ -160,6 +171,7 @@ public abstract class AbstractTableDaoTest {
     public void  testDeleteTable() throws SQLException {
         TABLE_DAO.delete(customers.getId());
         TABLE_DAO.read(customers.getId());
+        assertTrue(false);
     }
 
     @Test
@@ -184,18 +196,37 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testUpdateColumn() throws SQLException {
+    public void testRenameColumn() throws SQLException {
         Column testCol = customers.getColumn("name");
         testCol.setNewName("test");
         COLUMN_DAO.update(testCol);
         Column readCol = COLUMN_DAO.read(new TableMdId(customersId, "test"));
-        assertTrue(testCol.getNewName().equalsIgnoreCase(readCol.getName()));
+        assertTrue(readCol.getNewName().equalsIgnoreCase(testCol.getNewName()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void  testDeleteColumn() throws SQLException {
         COLUMN_DAO.delete(customers.getColumn("name").getId());
         COLUMN_DAO.read(customers.getColumn("name").getId());
+        assertTrue(false);
+    }
+
+    @Test
+    public void testDeleteAddReadPrimaryKey() throws SQLException {
+        PRIMARY_KEY_DAO.delete(users.getPrimaryKey().getId());
+        PrimaryKey pkTest = new PrimaryKey.Builder(usersId, "password").build();
+        PRIMARY_KEY_DAO.create(pkTest);
+        PrimaryKey pkRead = PRIMARY_KEY_DAO.read(pkTest.getId());
+        assertTrue(pkRead.equals(pkTest));
+    }
+
+    @Test
+    public void testRenamePrimaryKey() throws SQLException {
+        PrimaryKey testPk = customers.getPrimaryKey();
+        testPk.setNewName("test");
+        PRIMARY_KEY_DAO.update(testPk);
+        PrimaryKey readPk = PRIMARY_KEY_DAO.read(testPk.getId());
+        assertTrue(readPk.equals(testPk));
     }
 
     @After

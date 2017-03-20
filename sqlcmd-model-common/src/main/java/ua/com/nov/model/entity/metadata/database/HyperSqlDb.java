@@ -4,9 +4,10 @@ import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
-import ua.com.nov.model.statement.AbstractDbSqlStatements;
-import ua.com.nov.model.statement.AbstractTableSqlStatements;
-import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.statement.*;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -54,42 +55,45 @@ public class HyperSqlDb extends Database {
 
     @Override
     public AbstractDbSqlStatements getDatabaseSqlStmtSource() {
-        return new DbSqlStmts();
-    }
+        return new AbstractDbSqlStatements() {
+            @Override
+            public String getCreateStmt(Database db) {
+                throw new UnsupportedOperationException();
+            }
 
-    private static class DbSqlStmts extends AbstractDbSqlStatements {
-        @Override
-        public String getCreateStmt(Database db) {
-           throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getDeleteStmt(DbId dbId) {
-            throw new UnsupportedOperationException();
-        }
+            @Override
+            public String getDeleteStmt(DbId dbId) {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Override
     public AbstractTableSqlStatements getTableSqlStmtSource() {
-        return new TableSqlStmts();
-    }
-
-    private static class TableSqlStmts extends AbstractTableSqlStatements {
-
+        return new AbstractTableSqlStatements() {
+        };
     }
 
     @Override
-    public AbstractlColumnSqlStatements getColumnSqlStmtSource() {
-        return new ColumnSqlStatements();
+    public AbstractColumnSqlStatements getColumnSqlStmtSource() {
+        return new AbstractColumnSqlStatements() {
+            @Override
+            public String getUpdateStmt(Column col) {
+                return String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
+                        col.getTableId().getFullName(), col.getName(), col.getNewName());
+            }
+        };
     }
 
-    private static class ColumnSqlStatements extends AbstractlColumnSqlStatements {
-        @Override
-        public String getUpdateStmt(Column col) {
-            return String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
-                    col.getTableId().getFullName(), col.getName(), col.getNewName());
+    @Override
+    public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
+        return new ConstraintSqlStatements<>();
+    }
 
+    private static class ConstraintSqlStatements<V extends Constraint> extends AbstractConstraintSqlStatements<V> {
+        @Override
+        public String getUpdateStmt(V value) {
+            throw new UnsupportedOperationException();
         }
     }
-
 }

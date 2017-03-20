@@ -3,19 +3,16 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Key extends Constraint {
     private final Map<Integer, String> columnList;
 
     public static class Builder extends TableMd.Builder {
-        private final Map<Integer, String> columnList = new HashMap<>();
+        private final Map<Integer, String> columnList = new TreeMap<>();
         private int keySeq = 1;
 
-        public Builder(TableId tableId, String keyName, String... columnNames) {
+        public Builder(String keyName, TableId tableId, String... columnNames) {
             super(tableId, keyName);
             for (String columnName : columnNames) {
                 addColumn(columnName);
@@ -30,7 +27,7 @@ public abstract class Key extends Constraint {
          * @param columnName
          */
         public Builder addColumn(int keySeq, String columnName) {
-            if (columnList.put(keySeq, columnName) != null) {
+            if (columnList.put(keySeq, columnName.toLowerCase()) != null) {
                 throw new IllegalArgumentException(String.format("Column '%s' already belongs this key.", columnName));
             }
             return this;
@@ -45,6 +42,16 @@ public abstract class Key extends Constraint {
             return Collections.unmodifiableCollection(columnList.values());
         }
 
+        public void setName(String postfix) {
+            if (getName() == null) {
+                StringBuilder sb = new StringBuilder(getTableId().getName()).append("_");
+                for (String s : getColumnNameList()) {
+                    sb.append(s);
+                }
+                super.setName(sb.append(postfix).toString());
+            }
+        }
+
         protected Map<Integer,String> getColumnMap() {
             return columnList;
         }
@@ -57,6 +64,10 @@ public abstract class Key extends Constraint {
     protected Key(Builder builder) {
         super(builder);
         this.columnList = builder.columnList;
+        for (int i = 1; i <= columnList.size(); i++) {
+            if (columnList.get(i) == null)
+                throw new IllegalArgumentException("Invalid key's structure");
+        }
     }
 
     public int getNumberOfColumns() {
@@ -71,6 +82,24 @@ public abstract class Key extends Constraint {
 
     public Collection<String> getColumnNames() {
         return columnList.values();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Key key = (Key) o;
+
+        if (!getTableId().equals(key.getTableId())) return false;
+        return columnList.equals(key.columnList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getTableId().hashCode();
+        result = 31 * result + columnList.hashCode();
+        return result;
     }
 
     @Override

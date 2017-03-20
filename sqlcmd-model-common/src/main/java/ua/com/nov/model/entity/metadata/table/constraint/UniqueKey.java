@@ -7,7 +7,7 @@ public class UniqueKey extends Key {
     public final static class Builder extends Key.Builder {
 
         public Builder(TableId tableId, String keyName, String... col) {
-            super(tableId, keyName, col);
+            super(keyName, tableId, col);
         }
         
         public Builder(String... col) {

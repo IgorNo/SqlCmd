@@ -10,7 +10,7 @@ public class Index extends TableMd {
 
     public final static class Builder extends Key.Builder {
         public Builder(TableId tableId, String keyName, String... columnName) {
-            super(tableId, keyName, columnName);
+            super(keyName, tableId, columnName);
         }
 
         public Builder(String... col) {

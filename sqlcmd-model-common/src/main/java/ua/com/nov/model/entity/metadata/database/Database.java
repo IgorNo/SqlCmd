@@ -9,9 +9,11 @@ import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.statement.AbstractDbSqlStatements;
-import ua.com.nov.model.statement.AbstractlColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractTableSqlStatements;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.statement.*;
 import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
@@ -44,7 +46,9 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
     public abstract AbstractTableSqlStatements getTableSqlStmtSource();
 
-    public abstract AbstractlColumnSqlStatements getColumnSqlStmtSource();
+    public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
+
+    public abstract AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource();
 
     public abstract String getFullTableName(TableId id);
 
@@ -167,8 +171,6 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     public int hashCode() {
         return id.hashCode();
     }
-
-
 
     public class DbId extends AbstractMetaDataId<Database> implements Persistent{
         private final String dbUrl;

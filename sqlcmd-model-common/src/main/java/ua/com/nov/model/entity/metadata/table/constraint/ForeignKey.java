@@ -5,6 +5,7 @@ import ua.com.nov.model.entity.metadata.table.TableId;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ForeignKey extends Key {
     private final Map<Integer, Column> pkKey;
@@ -62,16 +63,15 @@ public class ForeignKey extends Key {
         }
     }
 
-
     public final static class Builder extends Key.Builder {
-        private Map<Integer, Column> pkKey  = new HashMap<>();
+        private Map<Integer, Column> pkKey  = new TreeMap<>();
         private Rule updateRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
                                                            when the primary constraint is updated */
         private Rule deleteRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
                                                            when the primary constraint is deleted */
 
-        public Builder(TableId tableId, String keyName, String fkColumm, Column pkColumn) {
-            super(tableId, keyName, fkColumm);
+        public Builder(String keyName, TableId tableId, String fkColumm, Column pkColumn) {
+            super(keyName, tableId, fkColumm);
             addPkColumn(1, pkColumn);
         }
 

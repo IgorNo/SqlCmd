@@ -116,33 +116,17 @@ public class Table extends AbstractMetaData<TableId> {
 
         private void checkColumnsInKey(Collection<String> columnNames) {
             for (String s : columnNames) {
-                if (columns.get(s) == null)
+                if (columns.get(s.toLowerCase()) == null)
                     throw new IllegalArgumentException(String.format("Column with name '%s' doesn't exists in table '%s'",
                             s, getId().getFullName()));
             }
         }
 
         public Builder primaryKey(PrimaryKey.Builder builder) {
-            setTableId(builder);
-            setName(builder, "_pkey");
+            builder.setTableId(getId());
+            builder.setName("_pkey");
             primaryKey(builder.build());
             return this;
-        }
-
-        private void setTableId(Constraint.Builder builder) {
-            if (builder.getTableId() == null) {
-                builder.setTableId(getId());
-            }
-        }
-
-        private void setName(Key.Builder builder, String postfix) {
-            if (builder.getName() == null) {
-                StringBuilder sb = new StringBuilder(id.getName()).append("_");
-                for (String s : builder.getColumnNameList()) {
-                    sb.append(s);
-                }
-                builder.setName( sb.append(postfix).toString());
-            }
         }
 
         public Builder addUniqueKey(UniqueKey key) {
@@ -154,8 +138,8 @@ public class Table extends AbstractMetaData<TableId> {
         }
 
         public Builder addUniqueKey(UniqueKey.Builder builder) {
-            setTableId(builder);
-            setName(builder, "_unique");
+            builder.setTableId(getId());
+            builder.setName("_unique");
             addUniqueKey(builder.build());
             return this;
         }
@@ -176,8 +160,8 @@ public class Table extends AbstractMetaData<TableId> {
         }
 
         public Builder addForeignKey(ForeignKey.Builder builder) {
-            setTableId(builder);
-            setName(builder, "_fkey");
+            builder.setTableId(getId());
+            builder.setName("_fkey");
             addForeignKey(builder.build());
             return this;
         }
@@ -198,7 +182,7 @@ public class Table extends AbstractMetaData<TableId> {
         }
 
         public Builder addCheckExpression(Check.Builder builder) {
-            setTableId(builder);
+            builder.setTableId(getId());
             addCheckExpression(builder.build());
             return this;
         }
@@ -220,10 +204,10 @@ public class Table extends AbstractMetaData<TableId> {
             return this;
         }
 
-        public Builder addIndex(Index.Builder index) {
-            setTableId(index);
-            setName(index, "_idx");
-            addIndex(index.build());
+        public Builder addIndex(Index.Builder builder) {
+            builder.setTableId(getId());
+            builder.setName("_idx");
+            addIndex(builder.build());
             return this;
         }
 
