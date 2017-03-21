@@ -11,13 +11,13 @@ import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -28,10 +28,10 @@ public abstract class AbstractTableDaoTest {
     protected static final Dao<TableId, Table, Database.DbId> TABLE_DAO = new TableDao();
     protected   static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
     protected   static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
+    protected   static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
 
     private static DataSource dataSource;
 
-    protected static TableId customersId, productsId, ordersId, usersId;
     protected static Table customers, products, orders, users;
 
     private DataType serial, integer, varchar, text, numeric, date;
@@ -42,7 +42,7 @@ public abstract class AbstractTableDaoTest {
         return dataSource;
     }
 
-    protected void createTestData(String catalog, String schema) throws SQLException {
+    protected void createTestData(String catalog, String schema, String aiTypeName) throws SQLException {
         Database testDb = getTestDatabase();
         if (dataSource == null) {
             dataSource = new SingleConnectionDataSource(testDb);
@@ -50,15 +50,16 @@ public abstract class AbstractTableDaoTest {
             TABLE_DAO.setDataSource(dataSource);
             COLUMN_DAO.setDataSource(dataSource);
             PRIMARY_KEY_DAO.setDataSource(dataSource);
+            FOREIGN_KEY_DAO.setDataSource(dataSource);
         }
-        serial = testDb.getAutoincrementalDataTypes(Types.INTEGER).get(0);
+        serial = testDb.getDataType(aiTypeName);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
         varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
         text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
         numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
         date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
 
-        customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
+        TableId customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("name", varchar).size(100).nullable(NOT_NULL))
@@ -69,7 +70,7 @@ public abstract class AbstractTableDaoTest {
                 .addUniqueKey(new UniqueKey.Builder("name", "phone"))
                 .build();
 
-        productsId = new TableId(testDb.getId(), "Products", catalog, schema);
+        TableId productsId = new TableId(testDb.getId(), "Products", catalog, schema);
         products = new Table.Builder(productsId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("description", varchar).size(100).nullable(NOT_NULL))
@@ -78,7 +79,7 @@ public abstract class AbstractTableDaoTest {
                 .primaryKey(new PrimaryKey.Builder("id"))
                 .build();
 
-        ordersId = new TableId(testDb.getId(), "Orders", catalog, schema);
+        TableId ordersId = new TableId(testDb.getId(), "Orders", catalog, schema);
         orders = new Table.Builder(ordersId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("date", date))
@@ -87,13 +88,13 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("amount", numeric).size(10).precision(2))
                 .addColumn(new Column.Builder("customer_id", integer))
                 .primaryKey(new PrimaryKey.Builder("id"))
-                .addForeignKey(new ForeignKey.Builder("product_id", products.getColumn("id"))
-                        .deleteRule(ForeignKey.Rule.RESTRICT).updateRule(ForeignKey.Rule.CASCADE))
-                .addForeignKey(new ForeignKey.Builder("customer_id", customers.getColumn("id"))
-                        .deleteRule(ForeignKey.Rule.RESTRICT).updateRule(ForeignKey.Rule.CASCADE))
+                .addForeignKey(new ForeignKey.Builder("product_id", products.getColumn("id").getId())
+                        .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
+                .addForeignKey(new ForeignKey.Builder("customer_id", customers.getColumn("id").getId())
+                        .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
                 .build();
 
-        usersId = new TableId(testDb.getId(), "Users", catalog, schema);
+        TableId usersId = new TableId(testDb.getId(), "Users", catalog, schema);
         users = new Table.Builder(usersId)
                 .addColumn(new Column.Builder("login", varchar).size(25))
                 .addColumn(new Column.Builder("password",varchar).size(25))
@@ -122,8 +123,12 @@ public abstract class AbstractTableDaoTest {
         compareColumns(table, products);
         table = TABLE_DAO.read(orders.getId());
         assertTrue(table.equals(orders));
-        assertTrue(table.getColumns().size() == orders.getColumns().size());
         compareColumns(table, orders);
+        assertTrue(table.getColumns().size() == orders.getColumns().size());
+        assertTrue(orders.getForeignKeyList().size() == table.getForeignKeyList().size());
+        for (ForeignKey key : orders.getForeignKeyList()) {
+            assertTrue(table.getForeignKeyList().contains(key));
+        }
     }
 
     private void compareColumns(Table table1, Table table2) {
@@ -169,20 +174,21 @@ public abstract class AbstractTableDaoTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void  testDeleteTable() throws SQLException {
-        TABLE_DAO.delete(customers.getId());
-        TABLE_DAO.read(customers.getId());
+        TABLE_DAO.delete(orders.getId());
+        TABLE_DAO.read(orders.getId());
         assertTrue(false);
     }
 
     @Test
     public void testDeleteAllTables() throws SQLException {
+        TABLE_DAO.delete(orders.getId());
         TABLE_DAO.deleteAll(getTestDatabase().getId());
         assertTrue(TABLE_DAO.readAll(getTestDatabase().getId()).size() == 0);
     }
 
     @Test
     public void testAddColumn() throws SQLException {
-        Column testCol = new Column.Builder(customersId, "test", integer).build();
+        Column testCol = new Column.Builder(customers.getId(), "test", integer).build();
         COLUMN_DAO.create(testCol);
         Column readCol = COLUMN_DAO.read(testCol.getId());
         assertTrue(testCol.equals(readCol));
@@ -200,21 +206,21 @@ public abstract class AbstractTableDaoTest {
         Column testCol = customers.getColumn("name");
         testCol.setNewName("test");
         COLUMN_DAO.update(testCol);
-        Column readCol = COLUMN_DAO.read(new TableMdId(customersId, "test"));
+        Column readCol = COLUMN_DAO.read(new TableMdId(customers.getId(), "test"));
         assertTrue(readCol.getNewName().equalsIgnoreCase(testCol.getNewName()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void  testDeleteColumn() throws SQLException {
-        COLUMN_DAO.delete(customers.getColumn("name").getId());
-        COLUMN_DAO.read(customers.getColumn("name").getId());
+        COLUMN_DAO.delete(customers.getColumn("address").getId());
+        COLUMN_DAO.read(customers.getColumn("address").getId());
         assertTrue(false);
     }
 
     @Test
     public void testDeleteAddReadPrimaryKey() throws SQLException {
         PRIMARY_KEY_DAO.delete(users.getPrimaryKey().getId());
-        PrimaryKey pkTest = new PrimaryKey.Builder(usersId, "password").build();
+        PrimaryKey pkTest = new PrimaryKey.Builder(users.getId(), "password").build();
         PRIMARY_KEY_DAO.create(pkTest);
         PrimaryKey pkRead = PRIMARY_KEY_DAO.read(pkTest.getId());
         assertTrue(pkRead.equals(pkTest));
@@ -229,8 +235,34 @@ public abstract class AbstractTableDaoTest {
         assertTrue(readPk.equals(testPk));
     }
 
+    @Test
+    public void testDeleteAddReadForeignKey() throws SQLException {
+        ForeignKey fk = orders.getForeignKeyList().get(0);
+        FOREIGN_KEY_DAO.delete(fk.getId());
+        try {
+            FOREIGN_KEY_DAO.read(fk.getId());
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {/*NOP*/}
+        FOREIGN_KEY_DAO.create(fk);
+        Table readTable = TABLE_DAO.read(orders.getId());
+        assertTrue(fk.equals(readTable.getForeignKey(fk.getName())));
+    }
+
+    @Test
+    public void testRenameForeignKey() throws SQLException {
+        ForeignKey testFk = orders.getForeignKeyList().get(0);
+        testFk.setNewName("test");
+        FOREIGN_KEY_DAO.update(testFk);
+        ForeignKey readFk = FOREIGN_KEY_DAO.read(new Constraint.ConstraintId(orders.getId(), "test"));
+        assertTrue(readFk.equals(testFk));
+        assertTrue(readFk.getName().equalsIgnoreCase(testFk.getNewName()));
+    }
+
     @After
     public void tearDown() throws SQLException {
+        List<Table> tables = TABLE_DAO.readAll(getTestDatabase().getId());
+        if (tables.contains(orders))
+            TABLE_DAO.delete(orders.getId());
         TABLE_DAO.deleteAll(getTestDatabase().getId());
     }
 

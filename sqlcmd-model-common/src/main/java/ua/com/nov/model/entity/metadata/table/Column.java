@@ -2,8 +2,6 @@ package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 
-import java.util.Comparator;
-
 public class Column extends TableMd {
     private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
@@ -124,14 +122,14 @@ public class Column extends TableMd {
     }
 
     // вложенный класс создатся для обеспечения уникальности ключей
-    private static class TableMdId extends ua.com.nov.model.entity.metadata.table.TableMdId {
-        public TableMdId(TableId containerId, String name) {
+    private static class ColumnId extends TableMdId {
+        public ColumnId(TableId containerId, String name) {
             super(containerId, name);
         }
     }
 
     private Column(Builder builder) {
-        super(new TableMdId(builder.getTableId(), builder.getName()));
+        super(new ColumnId(builder.getTableId(), builder.getName()));
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
         }

@@ -1,8 +1,8 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.Database.DbId;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.statement.SqlStatementSource;
 import ua.com.nov.model.util.DbUtil;
 
@@ -50,22 +50,7 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
     }
 
     @Override
-    public List<Database> readN(int nStart, int number, Database db) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void deleteAll(Database db) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected ResultSet getResultSet(DbId key) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected ResultSet getResultSetN(int nStart, int number, Database db) throws SQLException {
         throw new UnsupportedOperationException();
     }
 

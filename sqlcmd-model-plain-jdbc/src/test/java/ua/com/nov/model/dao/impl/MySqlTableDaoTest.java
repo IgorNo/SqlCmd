@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import java.sql.SQLException;
@@ -27,7 +28,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
     @Before
     @Override
     public void setUp() throws SQLException {
-        createTestData(getTestDatabase().getName(), null);
+        createTestData(getTestDatabase().getName(), null, "INT");
         super.setUp();
     }
 
@@ -39,6 +40,16 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         PRIMARY_KEY_DAO.update(testPk);
         assertTrue(false);
     }
+
+    @Override
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRenameForeignKey() throws SQLException {
+        ForeignKey testPk = orders.getForeignKeyList().get(0);
+        testPk.setNewName("test");
+        FOREIGN_KEY_DAO.update(testPk);
+        assertTrue(false);
+    }
+
 
     @AfterClass
     public static void tearDownClass() throws SQLException {

@@ -6,7 +6,7 @@ import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public abstract class Constraint extends TableMd {
 
-    private static class ConstraintId extends TableMdId {
+    public static class ConstraintId extends TableMdId {
         public ConstraintId(TableId containerId, String name) {
             super(containerId, name);
         }

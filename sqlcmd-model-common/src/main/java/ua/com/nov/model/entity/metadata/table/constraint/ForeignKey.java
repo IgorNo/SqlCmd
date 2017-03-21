@@ -1,14 +1,13 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class ForeignKey extends Key {
-    private final Map<Integer, Column> pkKey;
+    private final Map<Integer, TableMdId> pkKey;
     private final Rule updateRule; // to action what happens to a foreign constraint when the primary constraint is updated
     private final Rule deleteRule; // to action what happens to a foreign constraint when the primary constraint is deleted
 
@@ -55,27 +54,37 @@ public class ForeignKey extends Key {
             return action;
         }
 
-        public Rule getRule(int n) {
+        public static Rule getRule(int n) {
             for (Rule rule : values()) {
                 if (rule.ordinalNumber == n) return rule;
             }
             throw new IllegalArgumentException();
         }
+
+        @Override
+        public String toString() {
+            return action;
+        }
     }
 
     public final static class Builder extends Key.Builder {
-        private Map<Integer, Column> pkKey  = new TreeMap<>();
+        private Map<Integer, TableMdId> pkKey  = new TreeMap<>();
         private Rule updateRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
                                                            when the primary constraint is updated */
         private Rule deleteRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
                                                            when the primary constraint is deleted */
 
-        public Builder(String keyName, TableId tableId, String fkColumm, Column pkColumn) {
+
+        public Builder(String keyName, TableId tableId) {
+            super(keyName, tableId);
+        }
+
+        public Builder(String keyName, TableId tableId, String fkColumm, TableMdId pkColumn) {
             super(keyName, tableId, fkColumm);
             addPkColumn(1, pkColumn);
         }
 
-        public Builder(String fkColumm, Column pkColumn) {
+        public Builder(String fkColumm, TableMdId pkColumn) {
             this(null, null, fkColumm, pkColumn);
         }
 
@@ -84,19 +93,19 @@ public class ForeignKey extends Key {
             fkColumm - foreign constraint column
             pkColumn - primary constraint column ID that are referenced by the given table's foreign constraint column
        */
-        public Builder addColumn(int keySeq, String fkColumm, Column pkColumn) {
+        public Builder addColumnPair(int keySeq, String fkColumm, TableMdId pkColumn) {
             super.addColumn(keySeq, fkColumm);
             addPkColumn(keySeq, pkColumn);
             return this;
         }
 
-        public Builder addColumn(String fkColumm, Column pkColumn) {
+        public Builder addColumnPair(String fkColumm, TableMdId pkColumn) {
             super.addColumn(fkColumm);
             addPkColumn(getKeySeq(), pkColumn);
             return this;
         }
 
-        private Builder addPkColumn(int keySeq, Column pkColumn) {
+        private Builder addPkColumn(int keySeq, TableMdId pkColumn) {
             if ( pkKey.put(keySeq, pkColumn) != null) {
                 throw new IllegalArgumentException(String.format("Column '%s' already exists in  in this foreign key.",
                         pkColumn));
@@ -109,8 +118,18 @@ public class ForeignKey extends Key {
             return this;
         }
 
+        public Builder updateRule(int updateRule) {
+            this.updateRule = Rule.getRule(updateRule);
+            return this;
+        }
+
         public Builder deleteRule(Rule deleteRule) {
             this.deleteRule = deleteRule;
+            return this;
+        }
+
+        public Builder deleteRule(int deleteRule) {
+            this.deleteRule = Rule.getRule(deleteRule);
             return this;
         }
 
@@ -134,8 +153,8 @@ public class ForeignKey extends Key {
         return super.getColumnName(keySeq);
     }
 
-    public Column getPkColumn(int keySeq) {
-        Column result = pkKey.get(keySeq);
+    public TableMdId getPkColumn(int keySeq) {
+        TableMdId result = pkKey.get(keySeq);
         if (result == null) throw new IllegalArgumentException();
         return result;
     }
@@ -150,15 +169,15 @@ public class ForeignKey extends Key {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(String.format(super.toString(), "FOREIGN KEY"));
-        sb.append(" REFERENCES ").append(pkKey.get(1).getId().getFullName());
-        String s = "  (";
-        for (Column col : pkKey.values()) {
+        final StringBuilder sb = new StringBuilder(String.format(super.toString(), "FOREIGN KEY "));
+        sb.append(" REFERENCES ").append(pkKey.get(1).getTableId().getFullName());
+        String s = " (";
+        for (TableMdId col : pkKey.values()) {
             sb.append(s).append(col.getName());
             if (s.isEmpty()) s = ",";
         }
 
-        sb.append(") ON DELETE ").append(deleteRule).append(" ON UPDATE ").append(updateRule);
+        sb.append(") ON DELETE ").append(deleteRule.toString()).append(" ON UPDATE ").append(updateRule);
 
         return sb.toString();
     }

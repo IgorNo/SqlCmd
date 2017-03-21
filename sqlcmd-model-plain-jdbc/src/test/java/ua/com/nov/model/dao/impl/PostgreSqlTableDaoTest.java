@@ -23,7 +23,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     @Before
     @Override
     public void setUp() throws SQLException{
-        createTestData(null, "public");
+        createTestData(null, "public", "serial");
         super.setUp();
     }
 

@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import java.sql.SQLException;
@@ -21,7 +22,7 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     @Before
     @Override
     public void setUp() throws SQLException {
-        createTestData(null, "PUBLIC");
+        createTestData(null, "PUBLIC", "INTEGER");
         super.setUp();
     }
 
@@ -31,6 +32,15 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         PrimaryKey testPk = customers.getPrimaryKey();
         testPk.setNewName("test");
         PRIMARY_KEY_DAO.update(testPk);
+        assertTrue(false);
+    }
+
+    @Override
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRenameForeignKey() throws SQLException {
+        ForeignKey testPk = orders.getForeignKeyList().get(0);
+        testPk.setNewName("test");
+        FOREIGN_KEY_DAO.update(testPk);
         assertTrue(false);
     }
 

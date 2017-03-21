@@ -4,12 +4,14 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
 
@@ -32,6 +34,8 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
         builder.columns(columns);
         PrimaryKey pk = new PrimaryKeyDao().setDataSource(getDataSource()).readAll(tableId).get(0);
         builder.primaryKey(pk);
+        List<ForeignKey> foreignKeys = new ForeignKeyDao().setDataSource(getDataSource()).readAll(tableId);
+        builder.foreignKeys(foreignKeys);
         return builder.build();
     }
 

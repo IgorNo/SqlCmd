@@ -7,13 +7,14 @@ import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
-import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
-import ua.com.nov.model.entity.metadata.table.constraint.Key;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.statement.*;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
+import ua.com.nov.model.statement.AbstractDbSqlStatements;
+import ua.com.nov.model.statement.AbstractTableSqlStatements;
 import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
@@ -49,6 +50,8 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
 
     public abstract AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource();
+
+    public abstract AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource();
 
     public abstract String getFullTableName(TableId id);
 

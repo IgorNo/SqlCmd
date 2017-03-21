@@ -1,18 +1,19 @@
 package ua.com.nov.model.dao;
 
-import ua.com.nov.model.entity.Child;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
+import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import javax.sql.DataSource;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Unique<K>, C> implements Dao<K,V,C> {
+public abstract class AbstractDao<K extends AbstractMetaDataId<C>, V extends Unique<K>, C extends Persistent> implements Dao<K,V,C> {
 
     private DataSource dataSource;
 
@@ -53,11 +54,18 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
     }
 
     // get one item ResultSet
-    protected abstract ResultSet getResultSet(K key) throws SQLException;
-
-    protected abstract ResultSet checkResultSet(ResultSet rs, K id) throws SQLException;
+    protected ResultSet getResultSet(K key) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
     protected abstract V rowMap(C containerId, ResultSet rs) throws SQLException;
+
+    private ResultSet checkResultSet(ResultSet rs, K id) throws SQLException {
+        if (!rs.next()) throw new IllegalArgumentException(String.format("%s '%s' doesn't exist in %s '%s'.",
+                id.getClass().getSimpleName(), id.getName(),
+                id.getContainerId().getFullName(), id.getContainerId().getClass().getSimpleName()));
+        return rs;
+    }
 
     @Override
     public List<V> readN(int nStart, int number, C container) throws SQLException {
@@ -66,7 +74,9 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
     }
 
     // get N items ResultSet
-    protected abstract ResultSet getResultSetN(int nStart, int number, C containerId) throws SQLException;
+    protected ResultSet getResultSetN(int nStart, int number, C containerId) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public List<V> readAll(C containerId) throws SQLException {
@@ -75,7 +85,9 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
     }
 
     // get all items ResultSet
-    protected abstract ResultSet getResultSetAll(C container) throws SQLException;
+    protected ResultSet getResultSetAll(C container) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
     private List<V> getList(ResultSet rs, C containerId) throws SQLException {
         List<V> result = new ArrayList();
@@ -95,4 +107,9 @@ public abstract class AbstractDao<K extends Persistent & Child<C>, V extends Uni
     public int count(C containerId) throws SQLException {
         throw new UnsupportedOperationException();
     }
+
+    protected DatabaseMetaData getDbMetaData() throws SQLException {
+        return getDataSource().getConnection().getMetaData();
+    }
+
 }

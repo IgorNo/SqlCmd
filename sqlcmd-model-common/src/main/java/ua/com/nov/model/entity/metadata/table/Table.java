@@ -3,8 +3,8 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.Building;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
-import ua.com.nov.model.entity.metadata.table.constraint.*;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.table.constraint.*;
 
 import java.util.*;
 
@@ -132,7 +132,10 @@ public class Table extends AbstractMetaData<TableId> {
         public Builder addUniqueKey(UniqueKey key) {
             checkKey(key);
             Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
-            if (uniqueKeys == null) uniqueKeys = new LinkedHashSet<>();
+            if (uniqueKeys == null) {
+                uniqueKeys = new LinkedHashSet<>();
+                constraints.put(UniqueKey.class, uniqueKeys);
+            }
             uniqueKeys.add(key);
             return this;
         }
@@ -154,7 +157,10 @@ public class Table extends AbstractMetaData<TableId> {
         public Builder addForeignKey(ForeignKey key) {
             checkKey(key);
             Set<ForeignKey> foreignKeys = (Set<ForeignKey>) constraints.get(ForeignKey.class);
-            if (foreignKeys == null) foreignKeys = new LinkedHashSet<>();
+            if (foreignKeys == null) {
+                foreignKeys = new LinkedHashSet<>();
+                constraints.put(ForeignKey.class, foreignKeys);
+            }
             foreignKeys.add(key);
             return this;
         }
@@ -176,7 +182,10 @@ public class Table extends AbstractMetaData<TableId> {
         public Builder addCheckExpression(Check check) {
             checkConstraint(check);
             Set<Check> checkExpressions = (Set<Check>) constraints.get(Check.class);
-            if (checkExpressions == null) checkExpressions = new LinkedHashSet<>();
+            if (checkExpressions == null) {
+                checkExpressions = new LinkedHashSet<>();
+                constraints.put(Check.class, checkExpressions);
+            }
             checkExpressions.add(check);
             return this;
         }
@@ -224,9 +233,6 @@ public class Table extends AbstractMetaData<TableId> {
     public Table(Builder builder) {
         super(builder.id);
         this.constraints = builder.constraints;
-//        if (getPrimaryKey() == null) {
-//            throw new IllegalArgumentException("The table must have primary key.");
-//        }
         this.columns = builder.columns;
         this.type = builder.type;
         this.remarks = builder.remarks;
@@ -302,16 +308,16 @@ public class Table extends AbstractMetaData<TableId> {
         return null;
     }
 
-    public Collection<Constraint> getAllConstrains() {
-        Collection<Constraint> result = new LinkedList<>();
+    public List<Constraint> getAllConstrains() {
+        List<Constraint> result = new LinkedList<>();
         for (Collection<? extends Constraint> set : constraints.values()) {
-            result.addAll((set));
+            result.addAll(set);
         }
         return result;
     }
 
-    public Collection<TableMd> getMetaData() {
-        Collection<TableMd> result = new LinkedList<>();
+    public List<TableMd> getMetaData() {
+        List<TableMd> result = new LinkedList<>();
         result.addAll(getColumns());
         result.addAll(getAllConstrains());
         return result;
@@ -321,8 +327,18 @@ public class Table extends AbstractMetaData<TableId> {
         return (Set<UniqueKey>) constraints.get(UniqueKey.class);
     }
 
-    public Collection<ForeignKey> getForeignKeyCollection() {
-        return (Set<ForeignKey>) constraints.get(ForeignKey.class);
+    public List<ForeignKey> getForeignKeyList() {
+        List<ForeignKey> result = new LinkedList<>();
+        result.addAll((Set<ForeignKey>) constraints.get(ForeignKey.class));
+        return result;
+    }
+
+    public ForeignKey getForeignKey(String name) {
+        for (ForeignKey key : getForeignKeyList()) {
+            if (key.getName().equalsIgnoreCase(name)) return key;
+        }
+        throw new IllegalArgumentException(String.format("Foreign key with name '%s' doesn't exist in table '%s'.",
+                name, getFullName()));
     }
 
     public Collection<Check> getCheckExpressionCollecttion() {

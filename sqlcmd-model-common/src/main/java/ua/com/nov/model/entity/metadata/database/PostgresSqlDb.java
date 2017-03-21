@@ -4,10 +4,11 @@ import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractTableSqlStatements;
 
 public class PostgresSqlDb extends Database {
@@ -81,5 +82,10 @@ public class PostgresSqlDb extends Database {
             return String.format("ALTER TABLE %s RENAME CONSTRAINT %s TO %s", value.getTableId().getFullName(),
                     value.getName(), value.getNewName());
         }
+    }
+
+    @Override
+    public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
+        return new ConstraintSqlStatements<>();
     }
 }

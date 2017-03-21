@@ -4,6 +4,7 @@ import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
@@ -74,15 +75,20 @@ public final class MySqlDb extends Database {
 
     @Override
     public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
-        return new KeySqlStatements<PrimaryKey>() {
+        return new AbstractConstraintSqlStatements<PrimaryKey>() {
             @Override
             public String getDeleteStmt(TableMdId id) {
                 return String.format("ALTER TABLE %s DROP PRIMARY KEY", id.getTableId().getFullName());
             }
+        };
+    }
 
+    @Override
+    public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<ForeignKey>() {
             @Override
-            public String getUpdateStmt(Key pk) {
-                throw new UnsupportedOperationException();
+            public String getDeleteStmt(TableMdId id) {
+                return String.format("ALTER TABLE %s DROP FOREIGN KEY %s", id.getTableId().getFullName(), id.getName());
             }
         };
     }
@@ -90,7 +96,7 @@ public final class MySqlDb extends Database {
     private abstract static class KeySqlStatements<V extends Key> extends AbstractConstraintSqlStatements<V> {
         @Override
         public String getUpdateStmt(Key pk) {
-            return String.format("ALTER TABLE %s RENAME KEY %s TO %s", pk.getTableId().getFullName(),
+            return String.format("ALTER TABLE %s RENAME INDEX %s TO %s", pk.getTableId().getFullName(),
                     pk.getName(), pk.getNewName());
         }
     }
