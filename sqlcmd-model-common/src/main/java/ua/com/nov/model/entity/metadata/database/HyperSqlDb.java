@@ -6,6 +6,7 @@ import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
@@ -95,5 +96,10 @@ public class HyperSqlDb extends Database {
     @Override
     public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<ForeignKey>(){};
+    }
+
+    @Override
+    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<UniqueKey>() {};
     }
 }

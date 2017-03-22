@@ -6,6 +6,7 @@ import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
@@ -36,6 +37,8 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
         builder.primaryKey(pk);
         List<ForeignKey> foreignKeys = new ForeignKeyDao().setDataSource(getDataSource()).readAll(tableId);
         builder.foreignKeys(foreignKeys);
+        List<UniqueKey> uniqueKeys = new UniqueKeyDao().setDataSource(getDataSource()).readAll(tableId);
+        builder.uniqueKeys(uniqueKeys);
         return builder.build();
     }
 

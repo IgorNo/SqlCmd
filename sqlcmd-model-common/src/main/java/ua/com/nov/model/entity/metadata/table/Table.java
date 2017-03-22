@@ -95,6 +95,10 @@ public class Table extends AbstractMetaData<TableId> {
                 throw new IllegalArgumentException("The table must contain only one primary key");
             }
             primaryKey.add(key);
+            Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
+            if (uniqueKeys != null && uniqueKeys.contains(key)) {
+                uniqueKeys.remove(key);
+            }
             return this;
         }
 
@@ -124,32 +128,41 @@ public class Table extends AbstractMetaData<TableId> {
 
         public Builder primaryKey(PrimaryKey.Builder builder) {
             builder.setTableId(getId());
-            builder.setName("_pkey");
+            builder.setName("pkey");
             primaryKey(builder.build());
             return this;
         }
 
-        public Builder addUniqueKey(UniqueKey key) {
-            checkKey(key);
-            Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
-            if (uniqueKeys == null) {
-                uniqueKeys = new LinkedHashSet<>();
-                constraints.put(UniqueKey.class, uniqueKeys);
+        public Builder uniqueKeys(List<UniqueKey> uniqueKeyList) {
+            for (UniqueKey key : uniqueKeyList) {
+                addUniqueKey(key);
             }
-            uniqueKeys.add(key);
+            return this;
+        }
+
+        public Builder addUniqueKey(UniqueKey key) {
+            if (!constraints.get(PrimaryKey.class).contains(key)) {
+                checkKey(key);
+                Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
+                if (uniqueKeys == null) {
+                    uniqueKeys = new LinkedHashSet<>();
+                    constraints.put(UniqueKey.class, uniqueKeys);
+                }
+                uniqueKeys.add(key);
+            }
             return this;
         }
 
         public Builder addUniqueKey(UniqueKey.Builder builder) {
             builder.setTableId(getId());
-            builder.setName("_unique");
+            builder.setName("unique");
             addUniqueKey(builder.build());
             return this;
         }
 
         public Builder foreignKeys(List<ForeignKey> foreignKeyList) {
-            for (ForeignKey foreignKey : foreignKeyList) {
-                addForeignKey(foreignKey);
+            for (ForeignKey key : foreignKeyList) {
+                addForeignKey(key);
             }
             return this;
         }
@@ -167,7 +180,7 @@ public class Table extends AbstractMetaData<TableId> {
 
         public Builder addForeignKey(ForeignKey.Builder builder) {
             builder.setTableId(getId());
-            builder.setName("_fkey");
+            builder.setName("fkey");
             addForeignKey(builder.build());
             return this;
         }
@@ -215,7 +228,7 @@ public class Table extends AbstractMetaData<TableId> {
 
         public Builder addIndex(Index.Builder builder) {
             builder.setTableId(getId());
-            builder.setName("_idx");
+            builder.setName("idx");
             addIndex(builder.build());
             return this;
         }
@@ -323,8 +336,18 @@ public class Table extends AbstractMetaData<TableId> {
         return result;
     }
 
-    public Collection<UniqueKey> getUniqueKeyCollection() {
-        return (Set<UniqueKey>) constraints.get(UniqueKey.class);
+    public List<UniqueKey> getUniqueKeyList() {
+        List<UniqueKey> result = new LinkedList<>();
+        result.addAll((Set<UniqueKey>) constraints.get(UniqueKey.class));
+        return result;
+    }
+
+    public UniqueKey getUniqueKey(String name) {
+        for (UniqueKey key : getUniqueKeyList()) {
+            if (key.getName().equalsIgnoreCase(name)) return key;
+        }
+        throw new IllegalArgumentException(String.format("Unique key with name '%s' doesn't exist in table '%s'.",
+                name, getFullName()));
     }
 
     public List<ForeignKey> getForeignKeyList() {

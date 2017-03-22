@@ -24,12 +24,11 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
 
     @Override
     protected ResultSet getResultSetAll(TableId id) throws SQLException {
-        return  getDbMetaData().getImportedKeys(id.getCatalog(), id.getSchema(),
-                id.getName());
+        return  getDbMetaData().getImportedKeys(id.getCatalog(), id.getSchema(), id.getName());
     }
 
     @Override
-    public ForeignKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected ForeignKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
         ForeignKey.Builder fk = new ForeignKey.Builder(rs.getString("FK_NAME"), tableId);
         do {
             if (!rs.getString("FK_NAME").equalsIgnoreCase(fk.getName())) {

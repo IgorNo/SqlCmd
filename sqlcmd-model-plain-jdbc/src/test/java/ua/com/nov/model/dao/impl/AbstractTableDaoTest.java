@@ -29,6 +29,7 @@ public abstract class AbstractTableDaoTest {
     protected   static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
     protected   static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
     protected   static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
+    protected   static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
 
     private static DataSource dataSource;
 
@@ -51,6 +52,7 @@ public abstract class AbstractTableDaoTest {
             COLUMN_DAO.setDataSource(dataSource);
             PRIMARY_KEY_DAO.setDataSource(dataSource);
             FOREIGN_KEY_DAO.setDataSource(dataSource);
+            UNIQUE_KEY_DAO.setDataSource(dataSource);
         }
         serial = testDb.getDataType(aiTypeName);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
@@ -117,6 +119,10 @@ public abstract class AbstractTableDaoTest {
         assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));
         assertTrue(table.getColumns().size() == customers.getColumns().size());
         compareColumns(table, customers);
+        assertTrue(customers.getUniqueKeyList().size() == table.getUniqueKeyList().size());
+        for (UniqueKey key : customers.getUniqueKeyList()) {
+            assertTrue(table.getUniqueKeyList().contains(key));
+        }
         table = TABLE_DAO.read(products.getId());
         assertTrue(table.equals(products));
         assertTrue(table.getColumns().size() == products.getColumns().size());
@@ -245,7 +251,7 @@ public abstract class AbstractTableDaoTest {
         } catch (IllegalArgumentException e) {/*NOP*/}
         FOREIGN_KEY_DAO.create(fk);
         Table readTable = TABLE_DAO.read(orders.getId());
-        assertTrue(fk.equals(readTable.getForeignKey(fk.getName())));
+        assertTrue(readTable.getForeignKeyList().contains(fk));
     }
 
     @Test
@@ -256,6 +262,29 @@ public abstract class AbstractTableDaoTest {
         ForeignKey readFk = FOREIGN_KEY_DAO.read(new Constraint.ConstraintId(orders.getId(), "test"));
         assertTrue(readFk.equals(testFk));
         assertTrue(readFk.getName().equalsIgnoreCase(testFk.getNewName()));
+    }
+
+    @Test
+    public void testDeleteAddReadUniqueKey() throws SQLException {
+        UniqueKey uk = customers.getUniqueKeyList().get(0);
+        UNIQUE_KEY_DAO.delete(uk.getId());
+        try {
+            UNIQUE_KEY_DAO.read(uk.getId());
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {/*NOP*/}
+        UNIQUE_KEY_DAO.create(uk);
+        Table readTable = TABLE_DAO.read(customers.getId());
+        assertTrue(readTable.getUniqueKeyList().contains(uk));
+    }
+
+    @Test
+    public void testRenameUniqueKey() throws SQLException {
+        UniqueKey testUk = customers.getUniqueKeyList().get(0);
+        testUk.setNewName("test");
+        UNIQUE_KEY_DAO.update(testUk);
+        UniqueKey readUk = UNIQUE_KEY_DAO.read(new Constraint.ConstraintId(customers.getId(), "test"));
+        assertTrue(readUk.equals(testUk));
+        assertTrue(readUk.getName().equalsIgnoreCase(testUk.getNewName()));
     }
 
     @After

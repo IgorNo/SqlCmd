@@ -11,6 +11,7 @@ import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
@@ -43,6 +44,10 @@ public abstract class Database extends BaseDataSource implements Unique<Database
         return typesMap;
     }
 
+    public abstract String getFullTableName(TableId id);
+
+    public abstract String getAutoIncrementDefinition();
+
     public abstract AbstractDbSqlStatements getDatabaseSqlStmtSource();
 
     public abstract AbstractTableSqlStatements getTableSqlStmtSource();
@@ -53,9 +58,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
     public abstract AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource();
 
-    public abstract String getFullTableName(TableId id);
-
-    public abstract String getAutoIncrementDefinition();
+    public abstract AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource();
 
     @Override
     public Database getContainerId() {

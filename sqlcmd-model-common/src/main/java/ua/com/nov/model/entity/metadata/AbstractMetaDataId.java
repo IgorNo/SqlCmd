@@ -53,6 +53,7 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
     @Override
     public int hashCode() {
         int result = containerId.hashCode();
+        
         result = 31 * result + name.toLowerCase().hashCode();
         return result;
     }

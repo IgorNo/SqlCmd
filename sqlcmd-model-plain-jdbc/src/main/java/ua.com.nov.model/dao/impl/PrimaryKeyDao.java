@@ -23,7 +23,7 @@ public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Tabl
     }
 
     @Override
-    public PrimaryKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected PrimaryKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
         PrimaryKey.Builder pk = new PrimaryKey.Builder(rs.getString("PK_NAME"), tableId);
         pk.addColumn(rs.getInt("KEY_SEQ"), rs.getString("COLUMN_NAME"));
         while (rs.next()) {

@@ -12,7 +12,7 @@ public class PrimaryKey extends Key {
         
         public Builder(TableId tableId, String... columnName) {
             this( null, tableId,columnName);
-            setName("_pkey");
+            setName("pkey");
         }
 
         public Builder(String... columnName) {
@@ -32,4 +32,6 @@ public class PrimaryKey extends Key {
     public String toString() {
         return String.format(super.toString(), "PRIMARY KEY");
     }
+
+
 }

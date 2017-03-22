@@ -7,6 +7,7 @@ import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
@@ -99,6 +100,17 @@ public final class MySqlDb extends Database {
             return String.format("ALTER TABLE %s RENAME INDEX %s TO %s", pk.getTableId().getFullName(),
                     pk.getName(), pk.getNewName());
         }
+
+        @Override
+        public String getDeleteStmt(TableMdId id) {
+            return String.format("ALTER TABLE %s DROP INDEX %s", id.getTableId().getFullName(), id.getName());
+        }
+
+    }
+
+    @Override
+    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
+        return new KeySqlStatements<UniqueKey>() {};
     }
 }
 

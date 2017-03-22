@@ -6,6 +6,7 @@ import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractDbSqlStatements;
@@ -86,6 +87,11 @@ public class PostgresSqlDb extends Database {
 
     @Override
     public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
+        return new ConstraintSqlStatements<>();
+    }
+
+    @Override
+    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
         return new ConstraintSqlStatements<>();
     }
 }

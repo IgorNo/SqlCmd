@@ -1,10 +1,10 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
@@ -29,7 +29,7 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
     }
 
     @Override
-    public Column rowMap(TableId key, ResultSet rs) throws SQLException {
+    protected Column rowMap(TableId key, ResultSet rs) throws SQLException {
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
         Column.Builder column = new Column.Builder(key, rs.getString("COLUMN_NAME"), dataType)

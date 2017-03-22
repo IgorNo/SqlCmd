@@ -6,7 +6,7 @@ public class UniqueKey extends Key {
 
     public final static class Builder extends Key.Builder {
 
-        public Builder(TableId tableId, String keyName, String... col) {
+        public Builder(String keyName, TableId tableId, String... col) {
             super(keyName, tableId, col);
         }
         

@@ -3,7 +3,10 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 public abstract class Key extends Constraint {
     private final Map<Integer, String> columnList;
@@ -46,7 +49,7 @@ public abstract class Key extends Constraint {
             if (getName() == null) {
                 StringBuilder sb = new StringBuilder(getTableId().getName()).append("_");
                 for (String s : getColumnNameList()) {
-                    sb.append(s);
+                    sb.append(s).append('_');
                 }
                 super.setName(sb.append(postfix).toString());
             }
@@ -87,7 +90,7 @@ public abstract class Key extends Constraint {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Key)) return false;
 
         Key key = (Key) o;
 
