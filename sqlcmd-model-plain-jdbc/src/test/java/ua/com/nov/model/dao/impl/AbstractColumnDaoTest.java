@@ -1,9 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.Dao;
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 
 import java.sql.SQLException;
 

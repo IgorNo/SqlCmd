@@ -3,6 +3,7 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.statement.SqlStatementSource;
 
@@ -39,7 +40,7 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
                     rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_SCHEM"));
             TableId tableIdFk = new TableId(tableId.getDb().getId(), rs.getString("FKTABLE_NAME"),
                     rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_SCHEM"));
-            TableMdId pkColumn = new TableMdId(tableIdPk, rs.getString("PKCOLUMN_NAME"));
+            TableMdId pkColumn = new Column.Id(tableIdPk, rs.getString("PKCOLUMN_NAME"));
             fk.addColumnPair(rs.getInt("KEY_SEQ"), rs.getString("FKCOLUMN_NAME"), pkColumn);
             fk.deleteRule(rs.getInt("DELETE_RULE")).updateRule(rs.getInt("UPDATE_RULE"));
         } while (rs.next());

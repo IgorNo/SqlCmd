@@ -1,9 +1,12 @@
 package ua.com.nov.model.dao.impl;
 
+import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.Column;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -15,6 +18,15 @@ import java.util.Collection;
 import java.util.List;
 
 public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
+
+    @Override
+    public void create(Table value) throws SQLException {
+        super.create(value);
+        Dao<TableMdId, Index, TableId> dao = new IndexDao().setDataSource(getDataSource());
+        for (Index index : value.getIndexList()) {
+            dao.create(index);
+        }
+    }
 
     @Override
     public ResultSet getResultSet(TableId id) throws SQLException {
@@ -39,6 +51,8 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
         builder.foreignKeys(foreignKeys);
         List<UniqueKey> uniqueKeys = new UniqueKeyDao().setDataSource(getDataSource()).readAll(tableId);
         builder.uniqueKeys(uniqueKeys);
+        List<Index> indices = new IndexDao().setDataSource(getDataSource()).readAll(tableId);
+        builder.indexList(indices);
         return builder.build();
     }
 

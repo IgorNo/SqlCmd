@@ -10,6 +10,11 @@ public class ForeignKey extends Key {
     private final Map<Integer, TableMdId> pkKey;
     private final Rule updateRule; // to action what happens to a foreign constraint when the primary constraint is updated
     private final Rule deleteRule; // to action what happens to a foreign constraint when the primary constraint is deleted
+    private final Match match;
+
+    public enum Match {
+        FULL, PARTIAL, SIMPLE
+    }
 
     public enum Rule {
         /**
@@ -69,11 +74,11 @@ public class ForeignKey extends Key {
 
     public final static class Builder extends Key.Builder {
         private Map<Integer, TableMdId> pkKey  = new TreeMap<>();
-        private Rule updateRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
+        private Rule updateRule; /* to action what happens to a foreign constraint
                                                            when the primary constraint is updated */
-        private Rule deleteRule = Rule.NO_ACTION; /* to action what happens to a foreign constraint
+        private Rule deleteRule; /* to action what happens to a foreign constraint
                                                            when the primary constraint is deleted */
-
+        private Match match;
 
         public Builder(String keyName, TableId tableId) {
             super(keyName, tableId);
@@ -133,16 +138,34 @@ public class ForeignKey extends Key {
             return this;
         }
 
+        public Builder match(Match match) {
+            this.match = match;
+            return this;
+        }
+
         public ForeignKey build() {
             return new ForeignKey(this);
         }
     }
 
-    protected ForeignKey(Builder builder) {
-        super(builder);
+    // вложенный класс создатся для обеспечения уникальности ключей
+    public static class Id extends TableMdId {
+        public Id(TableId containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMetaDataName() {
+            return "FOREIGN KEY";
+        }
+    }
+
+    public ForeignKey(Builder builder) {
+        super(builder, new Id(builder.getTableId(), builder.getName()));
         this.pkKey = builder.pkKey;
         this.updateRule = builder.updateRule;
         this.deleteRule = builder.deleteRule;
+        this.match = builder.match;
     }
 
     public int getNumberOfColumns() {
@@ -150,7 +173,7 @@ public class ForeignKey extends Key {
     }
 
     public String getFkColumn(int keySeq) {
-        return super.getColumnName(keySeq);
+        return super.getColumn(keySeq).getName();
     }
 
     public TableMdId getPkColumn(int keySeq) {
@@ -169,15 +192,22 @@ public class ForeignKey extends Key {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(String.format(super.toString(), "FOREIGN KEY "));
+        final StringBuilder sb = new StringBuilder(super.toString());
         sb.append(" REFERENCES ").append(pkKey.get(1).getTableId().getFullName());
+
         String s = " (";
         for (TableMdId col : pkKey.values()) {
             sb.append(s).append(col.getName());
             if (s.isEmpty()) s = ",";
         }
+        sb.append(')');
 
-        sb.append(") ON DELETE ").append(deleteRule.toString()).append(" ON UPDATE ").append(updateRule);
+        if (match != null)
+            sb.append(" MATCH").append(match);
+        if (deleteRule != null)
+            sb.append(" ON DELETE ").append(deleteRule);
+        if (updateRule != null)
+            sb.append(" ON UPDATE ").append(updateRule);
 
         return sb.toString();
     }

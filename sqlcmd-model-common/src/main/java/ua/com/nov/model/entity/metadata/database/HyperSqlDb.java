@@ -2,15 +2,12 @@ package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.Column;
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
-import ua.com.nov.model.statement.AbstractDbSqlStatements;
-import ua.com.nov.model.statement.AbstractTableSqlStatements;
+import ua.com.nov.model.statement.*;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -101,5 +98,10 @@ public class HyperSqlDb extends Database {
     @Override
     public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<UniqueKey>() {};
+    }
+
+    @Override
+    public AbstractIndexSqlStatements getIndexSqlStmtSource() {
+        return new AbstractIndexSqlStatements(){};
     }
 }

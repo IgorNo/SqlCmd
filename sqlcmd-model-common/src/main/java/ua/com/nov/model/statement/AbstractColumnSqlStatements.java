@@ -1,6 +1,8 @@
 package ua.com.nov.model.statement;
 
-import ua.com.nov.model.entity.metadata.table.*;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 
 public abstract class AbstractColumnSqlStatements extends BaseSqlStmtSource<TableMdId, Column, TableId> {
     public static final String CREATE_SQL = "ALTER TABLE %s ADD COLUMN %s";

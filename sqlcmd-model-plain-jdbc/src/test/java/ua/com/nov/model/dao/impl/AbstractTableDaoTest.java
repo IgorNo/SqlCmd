@@ -7,11 +7,11 @@ import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.Column;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
-import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -26,10 +26,11 @@ import static ua.com.nov.model.entity.metadata.datatype.DataType.NOT_NULL;
 public abstract class AbstractTableDaoTest {
 
     protected static final Dao<TableId, Table, Database.DbId> TABLE_DAO = new TableDao();
-    protected   static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
-    protected   static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
-    protected   static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
-    protected   static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
+    protected  static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
+    protected  static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
+    protected  static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
+    protected  static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
+    protected  static final Dao<TableMdId, Index, TableId> INDEX_DAO = new IndexDao();
 
     private static DataSource dataSource;
 
@@ -53,6 +54,7 @@ public abstract class AbstractTableDaoTest {
             PRIMARY_KEY_DAO.setDataSource(dataSource);
             FOREIGN_KEY_DAO.setDataSource(dataSource);
             UNIQUE_KEY_DAO.setDataSource(dataSource);
+            INDEX_DAO.setDataSource(dataSource);
         }
         serial = testDb.getDataType(aiTypeName);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
@@ -70,6 +72,7 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("rating", integer))
                 .primaryKey(new PrimaryKey.Builder("id"))
                 .addUniqueKey(new UniqueKey.Builder("name", "phone"))
+                .addIndex(new Index.Builder("address"))
                 .build();
 
         TableId productsId = new TableId(testDb.getId(), "Products", catalog, schema);
@@ -123,6 +126,11 @@ public abstract class AbstractTableDaoTest {
         for (UniqueKey key : customers.getUniqueKeyList()) {
             assertTrue(table.getUniqueKeyList().contains(key));
         }
+        assertTrue(customers.getIndexList().size() == table.getIndexList().size());
+        for (Index key : customers.getIndexList()) {
+            assertTrue(table.getIndexList().contains(key));
+        }
+
         table = TABLE_DAO.read(products.getId());
         assertTrue(table.equals(products));
         assertTrue(table.getColumns().size() == products.getColumns().size());
@@ -212,7 +220,7 @@ public abstract class AbstractTableDaoTest {
         Column testCol = customers.getColumn("name");
         testCol.setNewName("test");
         COLUMN_DAO.update(testCol);
-        Column readCol = COLUMN_DAO.read(new TableMdId(customers.getId(), "test"));
+        Column readCol = COLUMN_DAO.read(new Column.Id(customers.getId(), "test"));
         assertTrue(readCol.getNewName().equalsIgnoreCase(testCol.getNewName()));
     }
 
@@ -259,7 +267,7 @@ public abstract class AbstractTableDaoTest {
         ForeignKey testFk = orders.getForeignKeyList().get(0);
         testFk.setNewName("test");
         FOREIGN_KEY_DAO.update(testFk);
-        ForeignKey readFk = FOREIGN_KEY_DAO.read(new Constraint.ConstraintId(orders.getId(), "test"));
+        ForeignKey readFk = FOREIGN_KEY_DAO.read(new ForeignKey.Id(orders.getId(), "test"));
         assertTrue(readFk.equals(testFk));
         assertTrue(readFk.getName().equalsIgnoreCase(testFk.getNewName()));
     }
@@ -282,10 +290,24 @@ public abstract class AbstractTableDaoTest {
         UniqueKey testUk = customers.getUniqueKeyList().get(0);
         testUk.setNewName("test");
         UNIQUE_KEY_DAO.update(testUk);
-        UniqueKey readUk = UNIQUE_KEY_DAO.read(new Constraint.ConstraintId(customers.getId(), "test"));
+        UniqueKey readUk = UNIQUE_KEY_DAO.read(new UniqueKey.Id(customers.getId(), "test"));
         assertTrue(readUk.equals(testUk));
         assertTrue(readUk.getName().equalsIgnoreCase(testUk.getNewName()));
     }
+
+    @Test
+    public void testDeleteAddReadIndex() throws SQLException {
+        Index index = customers.getIndexList().get(0);
+        INDEX_DAO.delete(index.getId());
+        try {
+            INDEX_DAO.read(index.getId());
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {/*NOP*/}
+        INDEX_DAO.create(index);
+        Table readTable = TABLE_DAO.read(customers.getId());
+        assertTrue(readTable.getIndexList().contains(index));
+    }
+
 
     @After
     public void tearDown() throws SQLException {

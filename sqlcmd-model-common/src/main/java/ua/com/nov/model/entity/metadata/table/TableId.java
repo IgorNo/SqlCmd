@@ -4,6 +4,7 @@ import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 
 public class TableId extends AbstractMetaDataId<Database.DbId> {
+    public static final String META_DATA_NAME = "TABLE";
     private final String catalog; // table catalog
     private final String schema;  // table schema
 
@@ -15,6 +16,11 @@ public class TableId extends AbstractMetaDataId<Database.DbId> {
 
     public TableId(Database.DbId db, String name) {
         this(db, name, null, null);
+    }
+
+    @Override
+    public String getMetaDataName() {
+        return META_DATA_NAME;
     }
 
     @Override

@@ -8,7 +8,7 @@ public abstract class TableMd extends AbstractMetaData<TableMdId> {
         private TableId tableId;
         private String name;
 
-        public Builder(TableId tableId, String name) {
+        public Builder(String name, TableId tableId) {
             this.tableId = tableId;
             this.name = name;
         }

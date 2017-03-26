@@ -1,30 +1,50 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class UniqueKey extends Key {
 
     public final static class Builder extends Key.Builder {
 
-        public Builder(String keyName, TableId tableId, String... col) {
-            super(keyName, tableId, col);
+        public Builder(String keyName, TableId tableId) {
+            super(keyName, tableId);
         }
-        
+
         public Builder(String... col) {
-            this(null, null, col);
+            super(null, null, col);
+        }
+
+        @Override
+        public Builder options(String options) {
+            super.options(options);
+            return this;
         }
 
         public UniqueKey build() {
+            unique(true);
             return new UniqueKey(this);
         }
     }
 
-    public UniqueKey(Builder builder) {
-        super(builder);
+    // вложенный класс создатся для обеспечения уникальности ключей
+    public static class Id extends TableMdId {
+        public Id(TableId containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMetaDataName() {
+            return "UNIQUE";
+        }
     }
 
-    @Override
-    public String toString() {
-        return String.format(super.toString(), "UNIQUE");
+    public UniqueKey(Builder builder) {
+        super(builder, new Id(builder.getTableId(), builder.getName()));
     }
+
+    protected UniqueKey(Key.Builder builder, TableMdId id) {
+        super(builder, id);
+    }
+
 }

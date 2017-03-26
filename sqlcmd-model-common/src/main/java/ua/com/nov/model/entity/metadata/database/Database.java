@@ -12,10 +12,7 @@ import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
-import ua.com.nov.model.statement.AbstractDbSqlStatements;
-import ua.com.nov.model.statement.AbstractTableSqlStatements;
+import ua.com.nov.model.statement.*;
 import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
@@ -59,6 +56,8 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     public abstract AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource();
 
     public abstract AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource();
+
+    public abstract AbstractIndexSqlStatements getIndexSqlStmtSource();
 
     @Override
     public Database getContainerId() {
@@ -179,6 +178,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     }
 
     public class DbId extends AbstractMetaDataId<Database> implements Persistent{
+        public static final String META_DATA_NAME = "DATABASE";
         private final String dbUrl;
         private final String userName;
         private final DbRowMapper rowMapper = new DbRowMapper();
@@ -188,6 +188,11 @@ public abstract class Database extends BaseDataSource implements Unique<Database
             if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
             this.dbUrl = dbUrl;
             this.userName = userName;
+        }
+
+        @Override
+        public String getMetaDataName() {
+            return META_DATA_NAME;
         }
 
         @Override

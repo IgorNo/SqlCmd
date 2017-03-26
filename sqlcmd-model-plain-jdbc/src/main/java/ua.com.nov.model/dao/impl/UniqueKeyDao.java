@@ -44,6 +44,5 @@ public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, TableI
     protected SqlStatementSource<TableMdId, UniqueKey, TableId> getSqlStmtSource(Database db) {
         return db.getUniqueKeySqlStmtSource();
     }
-
-
+    
 }

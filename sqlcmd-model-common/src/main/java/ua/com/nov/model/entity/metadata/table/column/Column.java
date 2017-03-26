@@ -1,6 +1,9 @@
-package ua.com.nov.model.entity.metadata.table;
+package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class Column extends TableMd {
     private int ordinalPosition; // index of column in table (starting at 1)
@@ -42,7 +45,7 @@ public class Column extends TableMd {
 
 
         public Builder(TableId tableId, String name, DataType dataType) {
-            super(tableId, name);
+            super(name, tableId);
             this.dataType = dataType;
         }
 
@@ -122,14 +125,19 @@ public class Column extends TableMd {
     }
 
     // вложенный класс создатся для обеспечения уникальности ключей
-    private static class ColumnId extends TableMdId {
-        public ColumnId(TableId containerId, String name) {
+    public static class Id extends TableMdId {
+         public Id(TableId containerId, String name) {
             super(containerId, name);
+        }
+
+        @Override
+        public String getMetaDataName() {
+            return "COLUMN";
         }
     }
 
     private Column(Builder builder) {
-        super(new ColumnId(builder.getTableId(), builder.getName()));
+        super(new Id(builder.getTableId(), builder.getName()));
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
         }

@@ -2,23 +2,37 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public abstract class Key extends Constraint {
-    private final Map<Integer, String> columnList;
+    private final Map<Integer, KeyCol> columnList;
+    private final boolean unique;
+    private final String options;
 
-    public static class Builder extends TableMd.Builder {
-        private final Map<Integer, String> columnList = new TreeMap<>();
+    public abstract static class Builder extends TableMd.Builder {
+        private final Map<Integer, KeyCol> columnList = new TreeMap<>();
         private int keySeq = 1;
+        private boolean unique = true;
+        private String options;
 
-        public Builder(String keyName, TableId tableId, String... columnNames) {
-            super(tableId, keyName);
-            for (String columnName : columnNames) {
-                addColumn(columnName);
+        public Builder(String keyName, TableId tableId) {
+            super(keyName, tableId);
+       }
+
+        public Builder(String keyName, TableId tableId, KeyCol... columns) {
+            this(keyName, tableId);
+            for (KeyCol column : columns) {
+                addColumn(column);
+            }
+        }
+
+        public Builder(String keyName, TableId tableId, String... columns) {
+            this(keyName, tableId);
+            for (String column : columns) {
+                addColumn(column);
             }
         }
 
@@ -27,64 +41,102 @@ public abstract class Key extends Constraint {
          *
          * @param keySeq - sequence number within primary constraint( a value of 1 represents the first column of
          *               the foreign constraint, a value of 2 would represent the second column within the primary constraint)
-         * @param columnName
+         * @param column
          */
-        public Builder addColumn(int keySeq, String columnName) {
-            if (columnList.put(keySeq, columnName.toLowerCase()) != null) {
-                throw new IllegalArgumentException(String.format("Column '%s' already belongs this key.", columnName));
+        public Builder addColumn(int keySeq, KeyCol column) {
+            if (columnList.put(keySeq, column) != null) {
+                throw new IllegalArgumentException(String.format("Column '%s' already belongs this key.", column));
             }
             return this;
         }
 
-        public Builder addColumn(String columnName) {
-            addColumn(keySeq++, columnName);
+        public Builder addColumn(int keySeq, String column) {
+            if (columnList.put(keySeq, new KeyCol(column)) != null) {
+                throw new IllegalArgumentException(String.format("Column '%s' already belongs this key.", column));
+            }
             return this;
         }
 
-        public Collection<String> getColumnNameList() {
+        public Builder addColumn(KeyCol column) {
+            addColumn(keySeq++, column);
+            return this;
+        }
+
+        public Builder addColumn(String column) {
+            addColumn(keySeq++, new KeyCol(column));
+            return this;
+        }
+
+        public Collection<KeyCol> getColumnList() {
             return Collections.unmodifiableCollection(columnList.values());
         }
 
         public void setName(String postfix) {
             if (getName() == null) {
                 StringBuilder sb = new StringBuilder(getTableId().getName()).append("_");
-                for (String s : getColumnNameList()) {
-                    sb.append(s).append('_');
+                for (KeyCol s : getColumnList()) {
+                    sb.append(s.getName()).append('_');
                 }
                 super.setName(sb.append(postfix).toString());
             }
         }
 
-        protected Map<Integer,String> getColumnMap() {
+        protected Map<Integer, KeyCol> getColumnMap() {
             return columnList;
         }
 
         protected int getKeySeq() {
             return keySeq;
         }
+
+        protected Builder unique(boolean unique) {
+            this.unique = unique;
+            return this;
+        }
+
+        public Builder options(String options) {
+            this.options = options;
+            return this;
+        }
+
+        public abstract Key build();
     }
 
-    protected Key(Builder builder) {
-        super(builder);
+    protected Key(Builder builder, TableMdId id) {
+        super(id);
         this.columnList = builder.columnList;
         for (int i = 1; i <= columnList.size(); i++) {
             if (columnList.get(i) == null)
                 throw new IllegalArgumentException("Invalid key's structure");
         }
+        this.unique = builder.unique;
+        this.options = builder.options;
     }
 
     public int getNumberOfColumns() {
         return columnList.size();
     }
 
-    public String getColumnName(int keySeq) {
-        String result = columnList.get(keySeq);
+    public KeyCol getColumn(int keySeq) {
+        KeyCol result = columnList.get(keySeq);
         if (result == null) throw new IllegalArgumentException();
         return result;
     }
 
-    public Collection<String> getColumnNames() {
-        return columnList.values();
+    public List<String> getColumnsList() {
+        List<String> result = new ArrayList<>();
+        for (KeyCol col : columnList.values()) {
+            result.add(col.getName());
+        }
+        return result;
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public String getOptions() {
+        return options;
     }
 
     @Override
@@ -107,12 +159,24 @@ public abstract class Key extends Constraint {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(super.toString()).append(" %s(");
+        final StringBuilder sb = new StringBuilder(super.toString());
+
+        sb.append(getColumnNames());
+
+        if (options != null)
+            sb.append(' ').append(options);
+
+        return sb.toString();
+    }
+
+    public String getColumnNames() {
+        StringBuilder sb = new StringBuilder("(");
         String s = "";
-        for (String column : columnList.values()) {
+        for (KeyCol column : columnList.values()) {
             sb.append(s).append(column);
             if (s.isEmpty()) s = ",";
         }
-        return sb.append(')').toString();
+        sb.append(')');
+        return sb.toString();
     }
 }

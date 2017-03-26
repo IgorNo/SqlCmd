@@ -2,6 +2,7 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class Check extends Constraint {
     private final String expression;
@@ -10,7 +11,7 @@ public class Check extends Constraint {
         private final String expression;
 
         public Builder(TableId tableId, String name, String expression) {
-            super(tableId, name);
+            super(name, tableId);
             this.expression = expression;
         }
 
@@ -24,7 +25,12 @@ public class Check extends Constraint {
     }
 
     public Check(Builder builder) {
-        super(builder);
+        super(new TableMdId(builder.getTableId(), builder.getName()) {
+            @Override
+            public String getMetaDataName() {
+                return "CHECK";
+            }
+        });
         this.expression = builder.expression;
     }
 

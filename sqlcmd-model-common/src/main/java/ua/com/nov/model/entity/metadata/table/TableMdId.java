@@ -4,7 +4,7 @@ import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 
-public class TableMdId extends AbstractMetaDataId<TableId> implements Persistent{
+public abstract class TableMdId extends AbstractMetaDataId<TableId> implements Persistent{
 
     public TableMdId(TableId containerId, String name) {
         super(containerId, name);

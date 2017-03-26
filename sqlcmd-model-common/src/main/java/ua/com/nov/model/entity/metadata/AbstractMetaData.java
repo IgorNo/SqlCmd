@@ -4,6 +4,7 @@ import ua.com.nov.model.entity.Unique;
 
 public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements Unique<K> {
     private final K id;
+    private String alterExpression;
     private String newName; // This field uses for renaming metadata
 
     public AbstractMetaData(K id) {
@@ -18,6 +19,14 @@ public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements 
 
     public String getName() {
         return getId().getName();
+    }
+
+    public String getAlterExpression() {
+        return alterExpression;
+    }
+
+    public void setAlterExpression(String alterExpression) {
+        this.alterExpression = alterExpression;
     }
 
     public String getNewName() {

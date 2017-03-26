@@ -20,6 +20,8 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
         this.name = name;
     }
 
+    public abstract String getMetaDataName();
+
     @Override
     public C getContainerId() {
         return containerId;

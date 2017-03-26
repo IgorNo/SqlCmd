@@ -2,64 +2,100 @@ package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 
-import java.util.Collection;
-import java.util.Map;
-
-public class Index extends TableMd {
-    private final Map<Integer, String> columnList;
+public class Index extends Key {
+    private final String indexType;
+    private final String using;
 
     public final static class Builder extends Key.Builder {
-        public Builder(TableId tableId, String keyName, String... columnName) {
-            super(keyName, tableId, columnName);
+        private String indexType;
+        private String using;
+
+        public Builder(String keyName, TableId tableId) {
+            super(keyName, tableId);
+            unique(false);
+        }
+
+        public Builder(String keyName, TableId tableId, String... col) {
+            super(keyName, tableId, col);
+            unique(false);
         }
 
         public Builder(String... col) {
             this(null, null, col);
         }
 
+        public Builder indexType(String indexType) {
+            this.indexType = indexType;
+            return this;
+        }
+
+        public Builder using(String using) {
+            this.using = using;
+            return this;
+        }
+
+        @Override
+        public Builder unique(boolean unique) {
+            super.unique(unique);
+            return this;
+        }
+
+        @Override
+        public Builder options(String options) {
+            super.options(options);
+            return this;
+        }
+
         public Index build() {
             return new Index(this);
         }
 
-        protected Map<Integer, String> getColumnMap() {
-            return super.getColumnMap();
-        }
-    }
-
-    // вложенный класс создатся для обеспечения уникальности ключей
-    private static class IndexId extends TableMdId {
-        public IndexId(TableId containerId, String name) {
-            super(containerId, name);
-        }
     }
 
     public Index(Builder builder) {
-        super(new IndexId(builder.getTableId(), builder.getName()));
-        this.columnList = builder.getColumnMap();
+        super(builder, new TableMdId(builder.getTableId(), builder.getName()) {
+            @Override
+            public String getMetaDataName() {
+                return "INDEX";
+            }
+        });
+        this.indexType = builder.indexType;
+        this.using = builder.using;
     }
 
-    public int getNumberOfColumns() {
-        return columnList.size();
+    public String getIndexType() {
+        return indexType;
     }
 
-    public String getColumnName(int keySeq) {
-        String result = columnList.get(keySeq);
-        if (result == null) throw new IllegalArgumentException();
-        return result;
-    }
-
-    public Collection<String> getColumnNames() {
-        return columnList.values();
+    public String getUsing() {
+        return using;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("INDEX ").append(getId().getName()).append(" (");
+        final StringBuilder sb = new StringBuilder();
+
+        if (indexType != null) {
+            sb.append(indexType).append(' ');
+        } else if (isUnique()) {
+            sb.append("UNIQUE ");
+        }
+
+        sb.append("INDEX ").append(getId().getName()).append(" ON ").append(getTableId().getFullName()).append(" (");
+
         String s = "";
         for (int i = 1; i <= getNumberOfColumns(); i++) {
-            sb.append(s).append(getColumnName(i));
+            sb.append(s).append(getColumn(i));
             if (s.isEmpty()) s = ",";
         }
-        return sb.append(')').toString();
+        sb.append(')');
+
+        if (using != null)
+            sb.append(" USING ").append(using);
+        if (getOptions() != null)
+            sb.append(' ').append(getOptions());
+
+        return sb.toString();
     }
+
 }
