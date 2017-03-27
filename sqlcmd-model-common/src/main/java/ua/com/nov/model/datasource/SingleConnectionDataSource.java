@@ -7,8 +7,8 @@ import java.sql.SQLException;
 public class SingleConnectionDataSource extends BaseDataSource {
     private final Connection conn;
 
-    public SingleConnectionDataSource(DataSource dataSource) throws SQLException {
-        this.conn = dataSource.getConnection();
+    public SingleConnectionDataSource(DataSource dataSource, String userName, String password) throws SQLException {
+        this.conn = dataSource.getConnection(userName, password);
     }
 
     @Override

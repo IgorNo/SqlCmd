@@ -185,7 +185,7 @@ public class Table extends AbstractMetaData<TableId> {
             this(id, "TABLE");
         }
 
-        public Builder(Database.DbId db, String name, String catalog, String schema) {
+        public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new TableId(db, name, catalog, schema));
         }
 

@@ -1,9 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.Dao;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -25,43 +25,35 @@ import static ua.com.nov.model.entity.metadata.datatype.DataType.NOT_NULL;
 
 public abstract class AbstractTableDaoTest {
 
-    protected static final Dao<TableId, Table, Database.DbId> TABLE_DAO = new TableDao();
-    protected  static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
-    protected  static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
-    protected  static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
-    protected  static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
-    protected  static final Dao<TableMdId, Index, TableId> INDEX_DAO = new IndexDao();
+    protected static Database testDb;
+    protected static DataSource dataSource;
 
-    private static DataSource dataSource;
+    protected static final Dao<TableId, Table, Database.Id> TABLE_DAO = new TableDao();
+    protected static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
+    protected static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
+    protected static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
+    protected static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
+    protected static final Dao<TableMdId, Index, TableId> INDEX_DAO = new IndexDao();
 
     protected static Table customers, products, orders, users;
 
-    private DataType serial, integer, varchar, text, numeric, date;
+    protected static DataType integer;
 
-    protected abstract Database getTestDatabase();
+    protected static void createTestData(String catalog, String schema, String aiTypeName) throws SQLException {
+        new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
+        TABLE_DAO.setDataSource(dataSource);
+        COLUMN_DAO.setDataSource(dataSource);
+        PRIMARY_KEY_DAO.setDataSource(dataSource);
+        FOREIGN_KEY_DAO.setDataSource(dataSource);
+        UNIQUE_KEY_DAO.setDataSource(dataSource);
+        INDEX_DAO.setDataSource(dataSource);
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    protected void createTestData(String catalog, String schema, String aiTypeName) throws SQLException {
-        Database testDb = getTestDatabase();
-        if (dataSource == null) {
-            dataSource = new SingleConnectionDataSource(testDb);
-            new DatabaseDao().setDataSource(dataSource).read(getTestDatabase().getId());
-            TABLE_DAO.setDataSource(dataSource);
-            COLUMN_DAO.setDataSource(dataSource);
-            PRIMARY_KEY_DAO.setDataSource(dataSource);
-            FOREIGN_KEY_DAO.setDataSource(dataSource);
-            UNIQUE_KEY_DAO.setDataSource(dataSource);
-            INDEX_DAO.setDataSource(dataSource);
-        }
-        serial = testDb.getDataType(aiTypeName);
+        DataType serial = testDb.getDataType(aiTypeName);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
-        varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
-        text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
-        numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
-        date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
+        DataType varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
+        DataType text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
+        DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
+        DataType date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
 
         TableId customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId)
@@ -107,6 +99,7 @@ public abstract class AbstractTableDaoTest {
                 .build();
     }
 
+    @Before
     public void setUp() throws SQLException {
         tearDown();
         TABLE_DAO.create(customers);
@@ -171,7 +164,7 @@ public abstract class AbstractTableDaoTest {
 
     @Test
     public void testReadAllTables() throws SQLException{
-        List<Table> tables = TABLE_DAO.readAll(getTestDatabase().getId());
+        List<Table> tables = TABLE_DAO.readAll(testDb.getId());
         assertTrue(tables.contains(customers));
         assertTrue(tables.contains(products));
         assertTrue(tables.contains(orders));
@@ -196,8 +189,8 @@ public abstract class AbstractTableDaoTest {
     @Test
     public void testDeleteAllTables() throws SQLException {
         TABLE_DAO.delete(orders.getId());
-        TABLE_DAO.deleteAll(getTestDatabase().getId());
-        assertTrue(TABLE_DAO.readAll(getTestDatabase().getId()).size() == 0);
+        TABLE_DAO.deleteAll(testDb.getId());
+        assertTrue(TABLE_DAO.readAll(testDb.getId()).size() == 0);
     }
 
     @Test
@@ -311,10 +304,10 @@ public abstract class AbstractTableDaoTest {
 
     @After
     public void tearDown() throws SQLException {
-        List<Table> tables = TABLE_DAO.readAll(getTestDatabase().getId());
+        List<Table> tables = TABLE_DAO.readAll(testDb.getId());
         if (tables.contains(orders))
             TABLE_DAO.delete(orders.getId());
-        TABLE_DAO.deleteAll(getTestDatabase().getId());
+        TABLE_DAO.deleteAll(testDb.getId());
     }
 
     protected static void tearDownClass() throws SQLException {

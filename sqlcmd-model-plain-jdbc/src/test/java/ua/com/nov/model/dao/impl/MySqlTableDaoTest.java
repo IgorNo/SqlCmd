@@ -1,10 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
@@ -15,21 +14,13 @@ import static org.junit.Assert.assertTrue;
 public class MySqlTableDaoTest extends AbstractTableDaoTest {
     public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
 
-    @Override
-    protected Database getTestDatabase() {
-        return DATABASE_DAO_TEST.getTestDatabase();
-    }
-
     @BeforeClass
     public static void setUpClass() throws SQLException {
+        MySqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
-    }
-
-    @Before
-    @Override
-    public void setUp() throws SQLException {
-        createTestData(getTestDatabase().getName(), null, "INT");
-        super.setUp();
+        testDb = DATABASE_DAO_TEST.getTestDatabase();
+        dataSource = new SingleConnectionDataSource(testDb, "root", "root");
+        createTestData(testDb.getName(), "PUBLIC", "INT");
     }
 
     @Override

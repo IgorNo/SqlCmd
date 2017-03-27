@@ -5,9 +5,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.Dao;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.Database.DbId;
+import ua.com.nov.model.entity.metadata.database.Database.Id;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,43 +18,41 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractDatabaseDaoTest {
     private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
 
-    public static final Dao<DbId, Database, Database> DAO = new DatabaseDao();
+    public static final Dao<Id, Database, Database> DAO = new DatabaseDao();
 
-    private static DataSource dataSource;
+    protected static DataSource dataSource;
 
-    public abstract DataSource getDataSourceDB();
     public abstract Database getTestDatabase();
-
-    public DataSource getDataSource() throws SQLException {
-        if (dataSource == null) dataSource =  new SingleConnectionDataSource(getDataSourceDB());
-        return dataSource;
-    }
 
     @Before
     public void setUp() throws SQLException {
         tearDown();
-        DAO.setDataSource(getDataSource());
+        DAO.setDataSource(dataSource);
         DAO.create(getTestDatabase());
     }
 
     @Test
     public void testCreateDataBase() throws SQLException {
-        Connection conn = getTestDatabase().getConnection();
+        Connection conn = getTestDatabase().getConnection(getUserName(), getPassword());
         assertTrue(conn != null);
         conn.close();
     }
 
+    protected abstract String getPassword();
+
+    protected abstract String getUserName();
+
     @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException {
         DAO.delete(getTestDatabase().getId());
-        Connection conn = getTestDatabase().getConnection();
+        Connection conn = getTestDatabase().getConnection(getUserName(), getPassword());
         assertTrue(conn == null);
         conn.close();
     }
 
     @After
     public void tearDown() throws SQLException{
-        Statement statement = getDataSource().getConnection().createStatement();
+        Statement statement = dataSource.getConnection().createStatement();
         statement.executeUpdate(DROP_DB_IF_EXISTS_SQL + getTestDatabase().getName());
         statement.close();
     }

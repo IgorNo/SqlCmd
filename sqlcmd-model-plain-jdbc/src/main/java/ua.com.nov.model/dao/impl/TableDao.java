@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
+public class TableDao extends DataDefinitionDao<TableId, Table, Database.Id> {
 
     @Override
     public void create(Table value) throws SQLException {
@@ -34,13 +34,13 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
     }
 
     @Override
-    protected ResultSet getResultSetAll(Database.DbId dbId) throws SQLException {
+    protected ResultSet getResultSetAll(Database.Id id) throws SQLException {
         return getDbMetaData().getTables(null, null, null, new String[] {"TABLE"});
     }
 
     @Override
-    protected Table rowMap(Database.DbId dbId, ResultSet rs) throws SQLException {
-        TableId tableId = new TableId(dbId, rs.getString("TABLE_NAME"),
+    protected Table rowMap(Database.Id id, ResultSet rs) throws SQLException {
+        TableId tableId = new TableId(id, rs.getString("TABLE_NAME"),
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
         Table.Builder builder = new Table.Builder(tableId, rs.getString("TABLE_TYPE"));
         Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
@@ -57,7 +57,7 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.DbId> {
     }
 
     @Override
-    protected SqlStatementSource<TableId, Table, Database.DbId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableId, Table, Database.Id> getSqlStmtSource(Database db) {
         return db.getTableSqlStmtSource();
     }
 }

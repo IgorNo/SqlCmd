@@ -3,23 +3,23 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 
-public class TableId extends AbstractMetaDataId<Database.DbId> {
+public class TableId extends AbstractMetaDataId<Database.Id> {
     public static final String META_DATA_NAME = "TABLE";
     private final String catalog; // table catalog
     private final String schema;  // table schema
 
-    public TableId(Database.DbId db, String name, String catalog, String schema) {
+    public TableId(Database.Id db, String name, String catalog, String schema) {
         super(db, name);
         this.catalog = catalog;
         this.schema = schema;
     }
 
-    public TableId(Database.DbId db, String name) {
+    public TableId(Database.Id db, String name) {
         this(db, name, null, null);
     }
 
     @Override
-    public String getMetaDataName() {
+    public String getMdName() {
         return META_DATA_NAME;
     }
 

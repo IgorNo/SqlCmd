@@ -5,7 +5,7 @@ import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 
-public abstract class AbstractTableSqlStatements extends BaseSqlStmtSource<TableId, Table, Database.DbId> {
+public abstract class AbstractTableSqlStatements extends BaseSqlStmtSource<TableId, Table, Database.Id> {
     public static final String CREATE_SQL = "CREATE TABLE %s (%s) %s";
     public static final String DROP_SQL = "DROP TABLE %s";
     public static final String RENAME_SQL = "ALTER TABLE %s RENAME TO %s";

@@ -14,7 +14,7 @@ public abstract class Constraint extends TableMd {
         StringBuilder sb = new StringBuilder();
         if (getId().getName() != null)
             sb.append("CONSTRAINT ").append(getId().getName()).append(' ');
-        sb.append(getId().getMetaDataName());
+        sb.append(getId().getMdName());
         return sb.toString();
     }
 }

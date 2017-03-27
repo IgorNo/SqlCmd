@@ -1,6 +1,8 @@
 package ua.com.nov.model.dao.impl;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
 import ua.com.nov.model.util.DbUtil;
@@ -14,9 +16,9 @@ import static org.junit.Assert.assertTrue;
 public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final String URL = DbUtil.POSTGRE_SQL_LOCAL_URL;
 
-    public static final DataSource DATA_SOURCE = DbUtil.POSTGRE_SQL_LOCAL_SYSTEM_DB;
+    public static final DataSource DATA_SOURCE = DbUtil.POSTGRES_SQL_LOCAL_SYSTEM_DB;
 
-    public static final Database TEST_DATABASE = new PostgresSqlDb(URL + "tmp", "postgres", "postgres");
+    public static final Database TEST_DATABASE = new PostgresSqlDb(URL,"tmp");
 
     @Override
     public Database getTestDatabase() {
@@ -24,8 +26,18 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Override
-    public DataSource getDataSourceDB() {
-        return DATA_SOURCE;
+    protected String getPassword() {
+        return "postgres";
+    }
+
+    @Override
+    protected String getUserName() {
+        return "postgres";
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws SQLException {
+        dataSource = new SingleConnectionDataSource(DATA_SOURCE, "postgres", "postgres");
     }
 
     @Test

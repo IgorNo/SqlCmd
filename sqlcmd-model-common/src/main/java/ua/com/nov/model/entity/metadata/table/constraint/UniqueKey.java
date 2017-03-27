@@ -34,7 +34,7 @@ public class UniqueKey extends Key {
         }
 
         @Override
-        public String getMetaDataName() {
+        public String getMdName() {
             return "UNIQUE";
         }
     }

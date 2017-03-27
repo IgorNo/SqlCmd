@@ -17,17 +17,13 @@ public class DbUtil {
 
     public static final String POSTGRE_SQL_LOCAL_URL = "jdbc:postgresql://localhost:5432/";
 
-    public static final Database HYPER_SQL_MEM_SYSTEM_DB =
-            new HyperSqlDb(HYPER_SQL_MEMORY_URL + "sys", "root", "root");
+    public static final Database HYPER_SQL_MEM_SYSTEM_DB = new HyperSqlDb(HYPER_SQL_MEMORY_URL, "");
 
-    public static final Database HYPER_SQL_FILE_SYSTEM_DB =
-            new HyperSqlDb(HYPER_SQL_FILE_URL + "sys", "root", "root");
+    public static final Database HYPER_SQL_FILE_SYSTEM_DB = new HyperSqlDb(HYPER_SQL_FILE_URL, "");
 
-    public static final Database MY_SQL_LOCAL_SYSTEM_DB =
-            new MySqlDb(MY_SQL_LOCAL_URL + "sys", "root", "root");
+    public static final Database MY_SQL_LOCAL_SYSTEM_DB = new MySqlDb(MY_SQL_LOCAL_URL, "");
 
-    public static final Database POSTGRE_SQL_LOCAL_SYSTEM_DB =
-            new PostgresSqlDb(POSTGRE_SQL_LOCAL_URL + "postgres", "postgres", "postgres");
+    public static final Database POSTGRES_SQL_LOCAL_SYSTEM_DB = new PostgresSqlDb(POSTGRE_SQL_LOCAL_URL , "");
 
     public static String getDatabaseProductName(String url) {
         int beginIndex = url.indexOf(':') + 1;

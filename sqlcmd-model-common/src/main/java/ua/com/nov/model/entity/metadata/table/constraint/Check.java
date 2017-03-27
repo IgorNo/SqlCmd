@@ -27,7 +27,7 @@ public class Check extends Constraint {
     public Check(Builder builder) {
         super(new TableMdId(builder.getTableId(), builder.getName()) {
             @Override
-            public String getMetaDataName() {
+            public String getMdName() {
                 return "CHECK";
             }
         });

@@ -2,7 +2,6 @@ package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.Child;
-import ua.com.nov.model.entity.Mappable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
@@ -13,27 +12,22 @@ import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.*;
-import ua.com.nov.model.util.DbUtil;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public abstract class Database extends BaseDataSource implements Unique<Database.DbId>, Child<Database>, Persistent {
-    private final DbId id;
-    private final String password;
-    private Map<String,DataType> dataTypes = new HashMap<>();
+public abstract class Database extends BaseDataSource implements Unique<Database.Id>, Child<Database>, Persistent {
+    private final Id id;
+    private String userName;
     private final String dbProperties;
 
+    private Map<String,DataType> dataTypes = new HashMap<>();
     private final Map<JdbcDataTypes, String> typesMap = new HashMap<>();
 
-    public Database(String dbUrl, String userName, String password, String dbProperties) {
-        this.id = new DbId(dbUrl, userName);
-        this.password = password;
+    public Database(String dbUrl, String dbName, String dbProperties) {
+        this.id = new Id(dbUrl, dbName);
         this.dbProperties = dbProperties;
     }
 
@@ -59,6 +53,14 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
     public abstract AbstractIndexSqlStatements getIndexSqlStmtSource();
 
+    // convert 'parameter' to database format (to upper or lower case)
+    public abstract String convert(String parameter);
+
+    @Override
+    public Id getId() {
+        return id;
+    }
+
     @Override
     public Database getContainerId() {
         return this;
@@ -70,17 +72,20 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     }
 
     @Override
-    public String getFullName() {
-        return getDbUrl();
+    public String getMdName() {
+        return id.getMdName();
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(getDbUrl(), getUserName(), password);
+    public String getFullName() {
+        return id.getFullName();
     }
 
-    // convert 'parameter' to database format (to upper or lower case)
-    public abstract String convert(String parameter);
+    @Override
+    public Connection getConnection(String userName, String password) throws SQLException {
+        this.userName = userName;
+        return DriverManager.getConnection(getDbUrl() + getName(), userName, password);
+    }
 
     public void addDataTypes(Collection<DataType> dataTypeList) {
         for (DataType dataType : dataTypeList) {
@@ -141,11 +146,6 @@ public abstract class Database extends BaseDataSource implements Unique<Database
         return dbProperties;
     }
 
-    @Override
-    public DbId getId() {
-        return id;
-    }
-
     public String getDbUrl() {
         return id.getDbUrl();
     }
@@ -155,11 +155,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     }
 
     public String getUserName() {
-        return id.getUserName();
-    }
-
-    public String getPassword() {
-        return password;
+        return userName;
     }
 
     @Override
@@ -177,22 +173,26 @@ public abstract class Database extends BaseDataSource implements Unique<Database
         return id.hashCode();
     }
 
-    public class DbId extends AbstractMetaDataId<Database> implements Persistent{
-        public static final String META_DATA_NAME = "DATABASE";
-        private final String dbUrl;
-        private final String userName;
-        private final DbRowMapper rowMapper = new DbRowMapper();
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("DATABASE ").append(id.getName());
+        if (dbProperties != null)
+            sb.append(dbProperties);
+        return sb.toString();
+    }
 
-        public DbId(String dbUrl, String userName) {
-            super(Database.this, userName);
+    public class Id extends AbstractMetaDataId<Database> implements Persistent{
+        private final String dbUrl;
+
+        public Id(String dbUrl, String dbName) {
+            super(Database.this, dbName);
             if (dbUrl == null || "".equals(dbUrl)) throw new IllegalArgumentException();
             this.dbUrl = dbUrl;
-            this.userName = userName;
         }
 
         @Override
-        public String getMetaDataName() {
-            return META_DATA_NAME;
+        public String getMdName() {
+            return "DATABASE";
         }
 
         @Override
@@ -204,21 +204,9 @@ public abstract class Database extends BaseDataSource implements Unique<Database
             return dbUrl;
         }
 
-        public Database getDatabase() {
-            return Database.this;
-        }
-
-        public String getName() {
-            return DbUtil.getDatabaseName(getDbUrl());
-        }
-
         @Override
         public String getFullName() {
-            return Database.this.getFullName();
-        }
-
-        public String getUserName() {
-            return userName;
+            return dbUrl + getName();
         }
 
         @Override
@@ -226,39 +214,14 @@ public abstract class Database extends BaseDataSource implements Unique<Database
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            DbId that = (DbId) o;
+            Id that = (Id) o;
 
-            if (!dbUrl.equalsIgnoreCase(that.dbUrl)) return false;
-            return userName.equals(that.userName);
+            return getFullName().equalsIgnoreCase(that.getFullName());
         }
 
         @Override
         public int hashCode() {
-            int result = dbUrl.toLowerCase().hashCode();
-            result = 31 * result + userName.toLowerCase().hashCode();
-            return result;
-        }
-
-        public class DbRowMapper implements Mappable {
-            @Override
-            public Database rowMap(ResultSet rs) throws SQLException {
-                String url = DbUtil.getDatabaseUrl(dbUrl) + rs.getString(1);
-                Class[] paramTypes = new Class[]{String.class, String.class};
-                Database db = null;
-                try {
-                    Constructor<? extends Database> constructor = Database.this.getClass().getConstructor(paramTypes);
-                    db = constructor.newInstance(new Object[]{url, userName});
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-                return db;
-            }
+            return getFullName().toLowerCase().hashCode();
         }
     }
 

@@ -131,7 +131,7 @@ public class Column extends TableMd {
         }
 
         @Override
-        public String getMetaDataName() {
+        public String getMdName() {
             return "COLUMN";
         }
     }

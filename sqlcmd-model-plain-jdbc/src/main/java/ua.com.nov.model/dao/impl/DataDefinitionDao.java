@@ -31,5 +31,5 @@ public abstract class DataDefinitionDao<K extends AbstractMetaDataId<C>, V exten
         stmt.executeUpdate(sqlStmt);
         stmt.close();
     }
-    
+
 }

@@ -11,16 +11,12 @@ import ua.com.nov.model.statement.*;
 
 public class PostgresSqlDb extends Database {
 
-    public PostgresSqlDb(String dbUrl, String userName) {
-        this(dbUrl, userName, null);
+    public PostgresSqlDb(String dbUrl, String dbName) {
+        this(dbUrl, dbName, null);
     }
 
-    public PostgresSqlDb(String dbUrl, String userName, String password) {
-        this(dbUrl, userName, password, "");
-    }
-
-    public PostgresSqlDb(String dbUrl, String userName, String password, String dbProperties) {
-        super(dbUrl, userName, password, dbProperties);
+    public PostgresSqlDb(String dbUrl, String dbName, String dbProperties) {
+        super(dbUrl, dbName, dbProperties);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "text");
     }
 

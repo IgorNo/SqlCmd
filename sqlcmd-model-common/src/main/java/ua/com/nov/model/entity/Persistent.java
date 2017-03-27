@@ -7,4 +7,6 @@ public interface Persistent {
    Database getDb();
    
    String getFullName();
+
+   String getMdName();
 }

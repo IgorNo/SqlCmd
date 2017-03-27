@@ -12,16 +12,12 @@ import ua.com.nov.model.statement.*;
 
 public final class MySqlDb extends Database {
 
-    public MySqlDb(String dbUrl, String userName) {
-        this(dbUrl, userName, null);
+    public MySqlDb(String dbUrl, String dbName) {
+        this(dbUrl, dbName, null);
     }
 
-    public MySqlDb(String dbUrl, String userName, String password) {
-        this(dbUrl, userName, password, "");
-    }
-
-    public MySqlDb(String dbUrl, String userName, String password, String dbProperties) {
-        super(dbUrl, userName, password, dbProperties);
+    public MySqlDb(String dbUrl, String dbName, String dbProperties) {
+        super(dbUrl, dbName, dbProperties);
         getTypesMap().put(JdbcDataTypes.INTEGER, "INT");
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "TEXT");
         getTypesMap().put(JdbcDataTypes.NUMERIC, "DECIMAL");

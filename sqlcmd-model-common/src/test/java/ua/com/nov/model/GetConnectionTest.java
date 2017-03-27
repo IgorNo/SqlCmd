@@ -18,38 +18,47 @@ public class GetConnectionTest {
 
     @Test
     public void testGetMySqlLocalConnection() throws SQLException{
-        String dbUrl = DbUtil.MY_SQL_LOCAL_URL + "sys";
-        DataSource dataSource = new SingleConnectionDataSource(new MySqlDb(dbUrl,"root", "root"));
-        Connection connection = dataSource.getConnection();
-        System.out.println(connection.getMetaData().getDatabaseProductName());
-        assertTrue(connection != null);
+        DataSource dataSource = new SingleConnectionDataSource(new MySqlDb(DbUtil.MY_SQL_LOCAL_URL, "sys"),
+                "root", "root");
+        Connection conn = dataSource.getConnection();
+        System.out.println(conn.getMetaData().getDatabaseProductName());
+        assertTrue(conn != null);
+        Connection conn1 = dataSource.getConnection();
+        assertTrue(conn1 == conn);
     }
 
     @Test
     public void testGetPostgreSqlLocalConnection() throws SQLException{
-        String dbUrl = DbUtil.POSTGRE_SQL_LOCAL_URL + "postgres";
-        DataSource dataSource = new SingleThreadConnectionDataSource(new PostgresSqlDb(dbUrl, "postgres", "postgres"));
-        Connection connection = dataSource.getConnection();
-        System.out.println(connection.getMetaData().getDatabaseProductName());
-        assertTrue(connection != null);
+        String dbUrl = DbUtil.POSTGRE_SQL_LOCAL_URL;
+        DataSource dataSource = new SingleThreadConnectionDataSource(new PostgresSqlDb(dbUrl , "postgres"),
+                "postgres", "postgres");
+        Connection conn = dataSource.getConnection();
+        System.out.println(conn.getMetaData().getDatabaseProductName());
+        assertTrue(conn != null);
+        Connection conn1 = dataSource.getConnection();
+        assertTrue(conn1 == conn);
     }
 
     @Test
     public void testGetHyperSqlFileConnection() throws SQLException{
-        String dbUrl = DbUtil.HYPER_SQL_FILE_URL + "sys";
-        DataSource dataSource = new HyperSqlDb(dbUrl, "root", "root");
-        Connection connection = dataSource.getConnection();
-        System.out.println(connection.getMetaData().getDatabaseProductName());
-        assertTrue(connection != null);
+        String dbUrl = DbUtil.HYPER_SQL_FILE_URL;
+        DataSource dataSource = new HyperSqlDb(dbUrl, "hsql");
+        Connection conn = dataSource.getConnection(null, null);
+        System.out.println(conn.getMetaData().getDatabaseProductName());
+        assertTrue(conn != null);
+        Connection conn1 = dataSource.getConnection(null, null);
+        assertTrue(conn1 != conn);
     }
 
     @Test
     public void testGetHyperSqlMemoryConnection() throws SQLException{
-        String dbUrl = DbUtil.HYPER_SQL_MEMORY_URL + "sys";
-        DataSource dataSource = new HyperSqlDb(dbUrl, "root", "root");
-        Connection connection = dataSource.getConnection();
-        System.out.println(connection.getMetaData().getDatabaseProductName());
-        assertTrue(connection != null);
+        String dbUrl = DbUtil.HYPER_SQL_MEMORY_URL;
+        DataSource dataSource = new HyperSqlDb(dbUrl, "hsql");
+        Connection conn = dataSource.getConnection("anyName", "anyPassword");
+        System.out.println(conn.getMetaData().getDatabaseProductName());
+        assertTrue(conn != null);
+        Connection conn1 = dataSource.getConnection("anyName", "anyPassword");
+        assertTrue(conn1 != conn);
     }
 
 }

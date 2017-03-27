@@ -1,30 +1,21 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.datasource.SingleConnectionDataSource;
 
 import java.sql.SQLException;
 
 public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new PostgreSqlDatabaseDaoTest();
 
-    @Override
-    protected Database getTestDatabase() {
-        return DATABASE_DAO_TEST.getTestDatabase();
-    }
-
     @BeforeClass
     public static void setUpClass() throws SQLException {
+        PostgreSqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
-    }
-
-    @Before
-    @Override
-    public void setUp() throws SQLException{
+        testDb = DATABASE_DAO_TEST.getTestDatabase();
+        dataSource = new SingleConnectionDataSource(testDb, "postgres", "postgres");
         createTestData(null, "public", "serial");
-        super.setUp();
     }
 
     @AfterClass

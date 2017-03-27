@@ -15,16 +15,12 @@ import java.util.List;
 
 public class HyperSqlDb extends Database {
 
-    public HyperSqlDb(String dbUrl, String userName) {
-        this(dbUrl, userName, null);
+    public HyperSqlDb(String dbUrl, String dbName) {
+        this(dbUrl, dbName, "");
     }
 
-    public HyperSqlDb(String dbUrl, String userName, String password) {
-        this(dbUrl, userName, password, "");
-    }
-
-    public HyperSqlDb(String dbUrl, String userName, String password, String dbProperties) {
-        super(dbUrl, userName, password, dbProperties);
+    public HyperSqlDb(String dbUrl, String dbName, String dbProperties) {
+        super(dbUrl, dbName, dbProperties);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "LONGVARCHAR");
         List<DataType> dataTypeList = new ArrayList<>();
         dataTypeList.add(new DataType.Builder("LONGVARCHAR", Types.LONGVARCHAR).build());
@@ -62,7 +58,7 @@ public class HyperSqlDb extends Database {
             }
 
             @Override
-            public String getDeleteStmt(DbId dbId) {
+            public String getDeleteStmt(Id id) {
                 throw new UnsupportedOperationException();
             }
         };

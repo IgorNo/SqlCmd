@@ -34,7 +34,7 @@ public class PrimaryKey extends Key {
     private PrimaryKey(Builder builder) {
         super(builder, new TableMdId(builder.getTableId(), builder.getName()) {
             @Override
-            public String getMetaDataName() {
+            public String getMdName() {
                 return "PRIMARY KEY";
             }
         });

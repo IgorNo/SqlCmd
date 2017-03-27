@@ -55,7 +55,7 @@ public class Index extends Key {
     public Index(Builder builder) {
         super(builder, new TableMdId(builder.getTableId(), builder.getName()) {
             @Override
-            public String getMetaDataName() {
+            public String getMdName() {
                 return "INDEX";
             }
         });

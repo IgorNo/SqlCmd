@@ -13,14 +13,14 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
         if (containerId == null) {
             throw new IllegalArgumentException("Meta data containerId can't be 'null'.");
         }
-        if (name == null || "".equals(name)) {
-            throw new IllegalArgumentException("Meta data name can't be 'null' or empty.");
+        if (name == null) {
+            throw new IllegalArgumentException("Meta data name can't be 'null'.");
         }
         this.containerId = containerId;
         this.name = name;
     }
 
-    public abstract String getMetaDataName();
+    public abstract String getMdName();
 
     @Override
     public C getContainerId() {

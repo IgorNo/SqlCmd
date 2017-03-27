@@ -1,10 +1,9 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.Database.DbId;
+import ua.com.nov.model.entity.metadata.database.Database.Id;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.statement.SqlStatementSource;
-import ua.com.nov.model.util.DbUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,13 +14,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Database> {
+public final class DatabaseDao extends DataDefinitionDao<Id, Database, Database> {
 
     @Override
-    public Database read(DbId dbId) throws SQLException {
+    public Database read(Id id) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        dbId.getDatabase().addDataTypes(getDataTypes(conn));
-        return dbId.getDatabase();
+        id.getDb().addDataTypes(getDataTypes(conn));
+        return id.getDb();
     }
 
     private List<DataType> getDataTypes(Connection conn) throws SQLException {
@@ -64,12 +63,11 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
 
     @Override
     protected Database rowMap(Database db, ResultSet rs) throws SQLException {
-        String url = DbUtil.getDatabaseUrl(db.getDbUrl()) + rs.getString(1);
         Class[] paramTypes = new Class[]{String.class, String.class};
         Database result = null;
         try {
             Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
-            return constructor.newInstance(new Object[]{url, db.getUserName()});
+            return constructor.newInstance(new Object[]{db.getDbUrl(), rs.getString(1)});
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -83,7 +81,7 @@ public final class DatabaseDao extends DataDefinitionDao<DbId, Database, Databas
     }
 
     @Override
-    protected SqlStatementSource<DbId, Database, Database> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<Id, Database, Database> getSqlStmtSource(Database db) {
         return db.getDatabaseSqlStmtSource();
     }
 }

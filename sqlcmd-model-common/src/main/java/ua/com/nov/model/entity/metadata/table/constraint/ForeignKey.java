@@ -155,7 +155,7 @@ public class ForeignKey extends Key {
         }
 
         @Override
-        public String getMetaDataName() {
+        public String getMdName() {
             return "FOREIGN KEY";
         }
     }
