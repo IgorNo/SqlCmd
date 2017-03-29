@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Index;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 import ua.com.nov.model.statement.AbstractIndexSqlStatements;
@@ -11,10 +11,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class IndexDao extends DataDefinitionDao<TableMdId, Index, TableId> {
+public class IndexDao extends DataDefinitionDao<TableMdId, Index, Table.Id> {
 
     @Override
-    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+    protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
         return  getDbMetaData().getIndexInfo(id.getCatalog(), id.getSchema(), id.getName(), false, false);
     }
 
@@ -29,7 +29,7 @@ public class IndexDao extends DataDefinitionDao<TableMdId, Index, TableId> {
     }
 
     @Override
-    protected Index rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected Index rowMap(Table.Id tableId, ResultSet rs) throws SQLException {
         Index.Builder index = new Index.Builder(rs.getString("INDEX_NAME"), tableId)
                 .unique(!rs.getBoolean("NON_UNIQUE"));
         do {

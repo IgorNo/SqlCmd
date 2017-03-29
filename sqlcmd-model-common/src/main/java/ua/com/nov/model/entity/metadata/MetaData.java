@@ -1,15 +1,17 @@
 package ua.com.nov.model.entity.metadata;
 
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optionable;
 import ua.com.nov.model.entity.Unique;
 
-public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements Unique<K> {
+public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optionable {
     private final K id;
-    private String alterExpression;
+    private final MetaDataOptions mdOptions;
     private String newName; // This field uses for renaming metadata
 
-    public AbstractMetaData(K id) {
+    public MetaData(K id, MetaDataOptions options) {
         this.id = id;
-        newName = id.getName();
+        this.mdOptions = options;
     }
 
     @Override
@@ -18,15 +20,12 @@ public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements 
     }
 
     public String getName() {
-        return getId().getName();
+        return id.getName();
     }
 
-    public String getAlterExpression() {
-        return alterExpression;
-    }
-
-    public void setAlterExpression(String alterExpression) {
-        this.alterExpression = alterExpression;
+    @Override
+    public MetaDataOptions getMdOptions() {
+        return mdOptions;
     }
 
     public String getNewName() {
@@ -40,9 +39,9 @@ public abstract class AbstractMetaData<K extends AbstractMetaDataId> implements 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractMetaData)) return false;
+        if (!(o instanceof MetaData)) return false;
 
-        AbstractMetaData<?> metaData = (AbstractMetaData<?>) o;
+        MetaData<?> metaData = (MetaData<?>) o;
 
         return id.equals(metaData.id);
     }

@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, TableId> {
+public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, Table.Id> {
 
     @Override
     public UniqueKey read(TableMdId key) throws SQLException {
@@ -23,12 +23,12 @@ public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, TableI
     }
 
     @Override
-    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+    protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
         return  getDbMetaData().getIndexInfo(id.getCatalog(), id.getSchema(), id.getName(), true, false);
     }
 
     @Override
-    protected UniqueKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected UniqueKey rowMap(Table.Id tableId, ResultSet rs) throws SQLException {
         UniqueKey.Builder index = new UniqueKey.Builder(rs.getString("INDEX_NAME"), tableId);
         do {
             if (!rs.getString("INDEX_NAME").equalsIgnoreCase(index.getName())) {
@@ -41,7 +41,7 @@ public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, TableI
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, UniqueKey, TableId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableMdId, UniqueKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getUniqueKeySqlStmtSource();
     }
     

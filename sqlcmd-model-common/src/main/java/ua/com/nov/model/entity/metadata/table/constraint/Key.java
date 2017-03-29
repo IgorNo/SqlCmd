@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
@@ -10,7 +10,6 @@ import java.util.*;
 public abstract class Key extends Constraint {
     private final Map<Integer, KeyCol> columnList;
     private final boolean unique;
-    private final String options;
 
     public abstract static class Builder extends TableMd.Builder {
         private final Map<Integer, KeyCol> columnList = new TreeMap<>();
@@ -18,18 +17,18 @@ public abstract class Key extends Constraint {
         private boolean unique = true;
         private String options;
 
-        public Builder(String keyName, TableId tableId) {
+        public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
        }
 
-        public Builder(String keyName, TableId tableId, KeyCol... columns) {
+        public Builder(String keyName, Table.Id tableId, KeyCol... columns) {
             this(keyName, tableId);
             for (KeyCol column : columns) {
                 addColumn(column);
             }
         }
 
-        public Builder(String keyName, TableId tableId, String... columns) {
+        public Builder(String keyName, Table.Id tableId, String... columns) {
             this(keyName, tableId);
             for (String column : columns) {
                 addColumn(column);
@@ -110,7 +109,6 @@ public abstract class Key extends Constraint {
                 throw new IllegalArgumentException("Invalid key's structure");
         }
         this.unique = builder.unique;
-        this.options = builder.options;
     }
 
     public int getNumberOfColumns() {
@@ -133,10 +131,6 @@ public abstract class Key extends Constraint {
 
     public boolean isUnique() {
         return unique;
-    }
-
-    public String getOptions() {
-        return options;
     }
 
     @Override
@@ -163,8 +157,8 @@ public abstract class Key extends Constraint {
 
         sb.append(getColumnNames());
 
-        if (options != null)
-            sb.append(' ').append(options);
+        if (getMdOptions() != null)
+            sb.append(' ').append(getMdOptions());
 
         return sb.toString();
     }

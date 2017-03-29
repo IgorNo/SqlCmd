@@ -1,15 +1,14 @@
 package ua.com.nov.model.entity.metadata.table;
 
-import ua.com.nov.model.Building;
-import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.AbstractMetaData;
+import ua.com.nov.model.entity.metadata.MetaData;
+import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.*;
 
 import java.util.*;
 
-public class Table extends AbstractMetaData<TableId> {
+public class Table extends MetaData<Table.Id> {
     private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
     //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private final String remarks;  // explanatory comment on the table
@@ -24,7 +23,7 @@ public class Table extends AbstractMetaData<TableId> {
     private String tableProperties = "";
 
     public Table(Builder builder) {
-        super(builder.id);
+        super(builder.id, null);
         this.constraints = builder.constraints;
         this.columns = builder.columns;
         this.type = builder.type;
@@ -169,8 +168,8 @@ public class Table extends AbstractMetaData<TableId> {
         return tableProperties;
     }
 
-    public static class Builder implements Building, Unique<TableId> {
-        private final TableId id;     // table object identifier
+    public static class Builder {
+        private final Id id;     // table object identifier
         private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
@@ -181,22 +180,21 @@ public class Table extends AbstractMetaData<TableId> {
 
         private String tableProperties = "";
 
-        public Builder(TableId id) {
+        public Builder(Id id) {
             this(id, "TABLE");
         }
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
-            this(new TableId(db, name, catalog, schema));
+            this(new Id(db, name, catalog, schema));
         }
 
-        public Builder(TableId id, String type) {
+        public Builder(Id id, String type) {
             this.id = id;
             this.type = type;
             constraints.put(PrimaryKey.class, new LinkedHashSet<PrimaryKey>(1));
         }
 
-        @Override
-        public TableId getId() {
+        public Id getId() {
             return id;
         }
 
@@ -397,4 +395,55 @@ public class Table extends AbstractMetaData<TableId> {
         }
     }
 
+    public static class Id extends MetaDataId<Database.Id> {
+        public static final String META_DATA_NAME = "TABLE";
+        private final String catalog; // table catalog
+        private final String schema;  // table schema
+
+        public Id(Database.Id db, String name, String catalog, String schema) {
+            super(db, name);
+            this.catalog = catalog;
+            this.schema = schema;
+        }
+
+        public Id(Database.Id db, String name) {
+            this(db, name, null, null);
+        }
+
+        @Override
+        public String getMdName() {
+            return META_DATA_NAME;
+        }
+
+        @Override
+        public String getFullName() {
+            return getDb().getFullTableName(this);
+        }
+
+        public String getCatalog() {
+            return getDb().convert(catalog);
+        }
+
+        public String getSchema() {
+            return getDb().convert(schema);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Id)) return false;
+
+            Id id = (Id) o;
+
+            return getFullName().equalsIgnoreCase(id.getFullName());
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getDb().hashCode();
+            result = 31 * result + getFullName().toLowerCase().hashCode();
+            return result;
+        }
+
+    }
 }

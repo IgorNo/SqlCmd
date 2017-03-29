@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -10,10 +10,10 @@ import ua.com.nov.model.statement.SqlStatementSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
+public class ColumnDao extends DataDefinitionDao<TableMdId, Column, Table.Id> {
 
     @Override
-    public void deleteAll(TableId container) throws SQLException {
+    public void deleteAll(Table.Id container) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
@@ -24,12 +24,12 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
     }
 
     @Override
-    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+    protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
         return getDbMetaData().getColumns(id.getCatalog(), id.getSchema(), id.getName(), null);
     }
 
     @Override
-    protected Column rowMap(TableId key, ResultSet rs) throws SQLException {
+    protected Column rowMap(Table.Id key, ResultSet rs) throws SQLException {
         DataType dataType = key.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
 
         Column.Builder column = new Column.Builder(key, rs.getString("COLUMN_NAME"), dataType)
@@ -46,7 +46,7 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, TableId> {
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, Column, TableId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableMdId, Column, Table.Id> getSqlStmtSource(Database db) {
         return db.getColumnSqlStmtSource();
     }
 }

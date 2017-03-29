@@ -10,12 +10,12 @@ public class Index extends Key {
         private String indexType;
         private String using;
 
-        public Builder(String keyName, TableId tableId) {
+        public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
             unique(false);
         }
 
-        public Builder(String keyName, TableId tableId, String... col) {
+        public Builder(String keyName, Table.Id tableId, String... col) {
             super(keyName, tableId, col);
             unique(false);
         }
@@ -92,8 +92,8 @@ public class Index extends Key {
 
         if (using != null)
             sb.append(" USING ").append(using);
-        if (getOptions() != null)
-            sb.append(' ').append(getOptions());
+        if (getMdOptions() != null)
+            sb.append(' ').append(getMdOptions());
 
         return sb.toString();
     }

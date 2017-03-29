@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 
@@ -44,7 +44,7 @@ public class Column extends TableMd {
         private boolean generatedColumn; // Indicates whether this is a generated column
 
 
-        public Builder(TableId tableId, String name, DataType dataType) {
+        public Builder(Table.Id tableId, String name, DataType dataType) {
             super(name, tableId);
             this.dataType = dataType;
         }
@@ -126,7 +126,7 @@ public class Column extends TableMd {
 
     // вложенный класс создатся для обеспечения уникальности ключей
     public static class Id extends TableMdId {
-         public Id(TableId containerId, String name) {
+         public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
 

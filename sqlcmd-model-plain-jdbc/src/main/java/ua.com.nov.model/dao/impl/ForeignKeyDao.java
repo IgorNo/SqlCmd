@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, TableId> {
+public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Table.Id> {
 
     @Override
     public ForeignKey read(TableMdId key) throws SQLException {
@@ -24,21 +24,21 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
     }
 
     @Override
-    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+    protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
         return  getDbMetaData().getImportedKeys(id.getCatalog(), id.getSchema(), id.getName());
     }
 
     @Override
-    protected ForeignKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected ForeignKey rowMap(Table.Id tableId, ResultSet rs) throws SQLException {
         ForeignKey.Builder fk = new ForeignKey.Builder(rs.getString("FK_NAME"), tableId);
         do {
             if (!rs.getString("FK_NAME").equalsIgnoreCase(fk.getName())) {
                 rs.previous();
                 break;
             }
-            TableId tableIdPk = new TableId(tableId.getDb().getId(), rs.getString("PKTABLE_NAME"),
+            Table.Id tableIdPk = new Table.Id(tableId.getDb().getId(), rs.getString("PKTABLE_NAME"),
                     rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_SCHEM"));
-            TableId tableIdFk = new TableId(tableId.getDb().getId(), rs.getString("FKTABLE_NAME"),
+            Table.Id tableIdFk = new Table.Id(tableId.getDb().getId(), rs.getString("FKTABLE_NAME"),
                     rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_SCHEM"));
             TableMdId pkColumn = new Column.Id(tableIdPk, rs.getString("PKCOLUMN_NAME"));
             fk.addColumnPair(rs.getInt("KEY_SEQ"), rs.getString("FKCOLUMN_NAME"), pkColumn);
@@ -48,7 +48,7 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, ForeignKey, TableId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableMdId, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getForeignKeySqlStmtSource();
     }
 

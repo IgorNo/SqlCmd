@@ -1,13 +1,14 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.datasource.BaseDataSource;
-import ua.com.nov.model.entity.Child;
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optionable;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
+import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -18,28 +19,29 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
-public abstract class Database extends BaseDataSource implements Unique<Database.Id>, Child<Database>, Persistent {
+public abstract class Database extends BaseDataSource
+        implements Unique<Database.Id>, Persistent<Database>, Optionable {
     private final Id id;
     private String userName;
-    private final String dbProperties;
+    private final MetaDataOptions options;
 
     private Map<String,DataType> dataTypes = new HashMap<>();
     private final Map<JdbcDataTypes, String> typesMap = new HashMap<>();
 
-    public Database(String dbUrl, String dbName, String dbProperties) {
+    public Database(String dbUrl, String dbName, MetaDataOptions options) {
         this.id = new Id(dbUrl, dbName);
-        this.dbProperties = dbProperties;
+        this.options = options;
     }
 
     protected Map<JdbcDataTypes, String> getTypesMap() {
         return typesMap;
     }
 
-    public abstract String getFullTableName(TableId id);
+    public abstract String getFullTableName(Table.Id id);
 
     public abstract String getAutoIncrementDefinition();
 
-    public abstract AbstractDbSqlStatements getDatabaseSqlStmtSource();
+    public abstract AbstractMetaDataSqlStatements<Id, Database, Database> getDatabaseSqlStmtSource();
 
     public abstract AbstractTableSqlStatements getTableSqlStmtSource();
 
@@ -142,8 +144,8 @@ public abstract class Database extends BaseDataSource implements Unique<Database
         }
     }
 
-    public String getDbProperties() {
-        return dbProperties;
+    public MetaDataOptions getMdOptions() {
+        return options;
     }
 
     public String getDbUrl() {
@@ -176,12 +178,12 @@ public abstract class Database extends BaseDataSource implements Unique<Database
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("DATABASE ").append(id.getName());
-        if (dbProperties != null)
-            sb.append(dbProperties);
+        if (options != null)
+            sb.append(' ').append(options);
         return sb.toString();
     }
 
-    public class Id extends AbstractMetaDataId<Database> implements Persistent{
+    public class Id extends MetaDataId<Database> {
         private final String dbUrl;
 
         public Id(String dbUrl, String dbName) {
@@ -206,7 +208,7 @@ public abstract class Database extends BaseDataSource implements Unique<Database
 
         @Override
         public String getFullName() {
-            return dbUrl + getName();
+            return getName();
         }
 
         @Override

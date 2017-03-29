@@ -9,7 +9,6 @@ import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -28,12 +27,12 @@ public abstract class AbstractTableDaoTest {
     protected static Database testDb;
     protected static DataSource dataSource;
 
-    protected static final Dao<TableId, Table, Database.Id> TABLE_DAO = new TableDao();
-    protected static final Dao<TableMdId, Column, TableId> COLUMN_DAO = new ColumnDao();
-    protected static final Dao<TableMdId, PrimaryKey, TableId> PRIMARY_KEY_DAO = new PrimaryKeyDao();
-    protected static final Dao<TableMdId, ForeignKey, TableId> FOREIGN_KEY_DAO = new ForeignKeyDao();
-    protected static final Dao<TableMdId, UniqueKey, TableId> UNIQUE_KEY_DAO = new UniqueKeyDao();
-    protected static final Dao<TableMdId, Index, TableId> INDEX_DAO = new IndexDao();
+    protected static final Dao<Table.Id, Table, Database.Id> TABLE_DAO = new TableDao();
+    protected static final Dao<TableMdId, Column, Table.Id> COLUMN_DAO = new ColumnDao();
+    protected static final Dao<TableMdId, PrimaryKey, Table.Id> PRIMARY_KEY_DAO = new PrimaryKeyDao();
+    protected static final Dao<TableMdId, ForeignKey, Table.Id> FOREIGN_KEY_DAO = new ForeignKeyDao();
+    protected static final Dao<TableMdId, UniqueKey, Table.Id> UNIQUE_KEY_DAO = new UniqueKeyDao();
+    protected static final Dao<TableMdId, Index, Table.Id> INDEX_DAO = new IndexDao();
 
     protected static Table customers, products, orders, users;
 
@@ -55,7 +54,7 @@ public abstract class AbstractTableDaoTest {
         DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
         DataType date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
 
-        TableId customersId = new TableId(testDb.getId(), "Customers", catalog, schema);
+        Table.Id customersId = new Table.Id(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("name", varchar).size(100).nullable(NOT_NULL))
@@ -67,7 +66,7 @@ public abstract class AbstractTableDaoTest {
                 .addIndex(new Index.Builder("address"))
                 .build();
 
-        TableId productsId = new TableId(testDb.getId(), "Products", catalog, schema);
+        Table.Id productsId = new Table.Id(testDb.getId(), "Products", catalog, schema);
         products = new Table.Builder(productsId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("description", varchar).size(100).nullable(NOT_NULL))
@@ -76,7 +75,7 @@ public abstract class AbstractTableDaoTest {
                 .primaryKey(new PrimaryKey.Builder("id"))
                 .build();
 
-        TableId ordersId = new TableId(testDb.getId(), "Orders", catalog, schema);
+        Table.Id ordersId = new Table.Id(testDb.getId(), "Orders", catalog, schema);
         orders = new Table.Builder(ordersId)
                 .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("date", date))
@@ -91,7 +90,7 @@ public abstract class AbstractTableDaoTest {
                         .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
                 .build();
 
-        TableId usersId = new TableId(testDb.getId(), "Users", catalog, schema);
+        Table.Id usersId = new Table.Id(testDb.getId(), "Users", catalog, schema);
         users = new Table.Builder(usersId)
                 .addColumn(new Column.Builder("login", varchar).size(25))
                 .addColumn(new Column.Builder("password",varchar).size(25))
@@ -174,7 +173,7 @@ public abstract class AbstractTableDaoTest {
     public void testRenameTable() throws SQLException{
         customers.setNewName("table11");
         TABLE_DAO.update(customers);
-        TableId updateTableId = new TableId(customers.getDb().getId(), customers.getNewName(), customers.getCatalog(),
+        Table.Id updateTableId = new Table.Id(customers.getDb().getId(), customers.getNewName(), customers.getCatalog(),
                 customers.getSchema());
         assertTrue(TABLE_DAO.read(updateTableId).getNewName().equalsIgnoreCase(customers.getNewName()));
     }

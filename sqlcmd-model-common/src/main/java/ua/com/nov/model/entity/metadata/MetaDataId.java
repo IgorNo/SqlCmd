@@ -1,15 +1,14 @@
 package ua.com.nov.model.entity.metadata;
 
-import ua.com.nov.model.entity.Child;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.metadata.database.Database;
 
-public abstract class AbstractMetaDataId<C extends Persistent> implements Child<C>, Persistent{
+public abstract class MetaDataId<C extends Persistent> implements Persistent<C> {
     private final C containerId;
     private final String name;
 
 
-    public AbstractMetaDataId(C containerId, String name) {
+    public MetaDataId(C containerId, String name) {
         if (containerId == null) {
             throw new IllegalArgumentException("Meta data containerId can't be 'null'.");
         }
@@ -46,7 +45,7 @@ public abstract class AbstractMetaDataId<C extends Persistent> implements Child<
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AbstractMetaDataId<?> that = (AbstractMetaDataId<?>) o;
+        MetaDataId<?> that = (MetaDataId<?>) o;
 
         if (!containerId.equals(that.containerId)) return false;
         return name.equalsIgnoreCase(that.name);

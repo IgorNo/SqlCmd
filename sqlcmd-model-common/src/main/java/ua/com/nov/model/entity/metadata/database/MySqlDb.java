@@ -1,7 +1,9 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import ua.com.nov.model.entity.MdCreateOptions;
+import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -10,14 +12,22 @@ import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.*;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public final class MySqlDb extends Database {
 
     public MySqlDb(String dbUrl, String dbName) {
         this(dbUrl, dbName, null);
     }
 
-    public MySqlDb(String dbUrl, String dbName, String dbProperties) {
+    public MySqlDb(String dbUrl, String dbName, Options dbProperties) {
         super(dbUrl, dbName, dbProperties);
+        initTypesMap();
+    }
+
+    private void initTypesMap() {
         getTypesMap().put(JdbcDataTypes.INTEGER, "INT");
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "TEXT");
         getTypesMap().put(JdbcDataTypes.NUMERIC, "DECIMAL");
@@ -29,7 +39,7 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public String getFullTableName(TableId id) {
+    public String getFullTableName(Table.Id id) {
         StringBuilder result = new StringBuilder();
         if (id.getCatalog() != null) result.append(id.getCatalog()).append('.');
         return result.append(id.getName()).toString();
@@ -42,11 +52,11 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public AbstractDbSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDbSqlStatements() {
+    public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
+        return new AbstractMetaDataSqlStatements() {
             @Override
-            public String getReadAllStmt(Database db) {
-                return "SHOW DATABASES";
+            public SqlStatement getReadAllStmt(Object containerId) {
+                return new SqlStatement.Builder("SHOW DATABASES").build();
             }
         };
     }
@@ -60,9 +70,10 @@ public final class MySqlDb extends Database {
     public AbstractColumnSqlStatements getColumnSqlStmtSource() {
         return new AbstractColumnSqlStatements() {
             @Override
-            public String getUpdateStmt(Column col) {
-                return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
-                        col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
+            public SqlStatement getUpdateStmt(Column col) {
+                return null;
+//                return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
+//                        col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
             }
         };
     }
@@ -71,8 +82,9 @@ public final class MySqlDb extends Database {
     public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<PrimaryKey>() {
             @Override
-            public String getDeleteStmt(TableMdId id) {
-                return String.format("ALTER TABLE %s DROP PRIMARY KEY", id.getTableId().getFullName());
+            public SqlStatement getDeleteStmt(TableMdId id) {
+                return new SqlStatement.Builder("ALTER TABLE %s DROP PRIMARY KEY",
+                        id.getTableId().getFullName()).build();
             }
         };
     }
@@ -81,22 +93,24 @@ public final class MySqlDb extends Database {
     public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<ForeignKey>() {
             @Override
-            public String getDeleteStmt(TableMdId id) {
-                return String.format("ALTER TABLE %s DROP FOREIGN KEY %s", id.getTableId().getFullName(), id.getName());
+            public SqlStatement getDeleteStmt(TableMdId id) {
+                return new SqlStatement.Builder("ALTER TABLE %s DROP FOREIGN KEY %s",
+                        id.getTableId().getFullName(), id.getName()).build();
             }
         };
     }
 
     private abstract static class KeySqlStatements<V extends Key> extends AbstractConstraintSqlStatements<V> {
         @Override
-        public String getUpdateStmt(Key pk) {
-            return String.format("ALTER TABLE %s RENAME INDEX %s TO %s", pk.getTableId().getFullName(),
-                    pk.getName(), pk.getNewName());
+        public SqlStatement getUpdateStmt(Key pk) {
+            return new SqlStatement.Builder("ALTER TABLE %s RENAME INDEX %s TO %s",
+                    pk.getTableId().getFullName(), pk.getName(), pk.getNewName()).build();
         }
 
         @Override
-        public String getDeleteStmt(TableMdId id) {
-            return String.format("ALTER TABLE %s DROP INDEX %s", id.getTableId().getFullName(), id.getName());
+        public SqlStatement getDeleteStmt(TableMdId id) {
+            return new SqlStatement.Builder("ALTER TABLE %s DROP INDEX %s",
+                    id.getTableId().getFullName(), id.getName()).build();
         }
 
     }
@@ -110,10 +124,39 @@ public final class MySqlDb extends Database {
     public AbstractIndexSqlStatements getIndexSqlStmtSource() {
         return new AbstractIndexSqlStatements() {
             @Override
-            public String getDeleteStmt(TableMdId id) {
-                return super.getDeleteStmt(id) + " ON " + id.getTableId().getFullName();
+            public SqlStatement getDeleteStmt(TableMdId id) {
+                return null;
+//                return super.getDeleteStmt(id) + " ON " + id.getTableId().getFullName();
             }
         };
+    }
+
+    public static class Options implements MdCreateOptions, MdUpdateOptions {
+        protected final List<String> optionList = new LinkedList<>();
+        private String characterSet;
+        private String collate;
+
+        @Override
+        public List<String> getOptionList() {
+            return Collections.unmodifiableList(optionList);
+        }
+
+
+        public Options(String charSet, String collate) {
+            this.characterSet = charSet;
+            this.collate = collate;
+            optionList.add(toString());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            if (characterSet != null)
+                sb.append("CHARACTER SET = ").append(characterSet);
+            if (collate != null)
+                sb.append(" COLLATE  = ").append(collate);
+            return sb.toString();
+        }
     }
 }
 

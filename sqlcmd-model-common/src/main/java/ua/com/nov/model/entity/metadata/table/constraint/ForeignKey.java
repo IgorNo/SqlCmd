@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 import java.util.Map;
@@ -80,11 +80,11 @@ public class ForeignKey extends Key {
                                                            when the primary constraint is deleted */
         private Match match;
 
-        public Builder(String keyName, TableId tableId) {
+        public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
         }
 
-        public Builder(String keyName, TableId tableId, String fkColumm, TableMdId pkColumn) {
+        public Builder(String keyName, Table.Id tableId, String fkColumm, TableMdId pkColumn) {
             super(keyName, tableId, fkColumm);
             addPkColumn(1, pkColumn);
         }
@@ -150,7 +150,7 @@ public class ForeignKey extends Key {
 
     // вложенный класс создатся для обеспечения уникальности ключей
     public static class Id extends TableMdId {
-        public Id(TableId containerId, String name) {
+        public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
 

@@ -2,8 +2,9 @@ package ua.com.nov.model.dao;
 
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
+import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.statement.SqlStatement;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import javax.sql.DataSource;
@@ -13,7 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDao<K extends AbstractMetaDataId<C>, V extends Unique<K>, C extends Persistent> implements Dao<K,V,C> {
+public abstract class AbstractDao<K extends MetaDataId<C>, V extends Unique<K>, C extends Persistent> implements Dao<K,V,C> {
 
     private DataSource dataSource;
 
@@ -43,7 +44,7 @@ public abstract class AbstractDao<K extends AbstractMetaDataId<C>, V extends Uni
         executeUpdateStmt(getSqlStmtSource(key.getDb()).getDeleteStmt(key));
     }
 
-    protected abstract void executeUpdateStmt(String createStmt) throws SQLException;
+    protected abstract void executeUpdateStmt(SqlStatement stmt) throws SQLException;
 
     protected abstract SqlStatementSource<K,V,C> getSqlStmtSource(Database db);
 

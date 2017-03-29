@@ -1,19 +1,19 @@
 package ua.com.nov.model.entity.metadata.table;
 
-import ua.com.nov.model.entity.metadata.AbstractMetaData;
+import ua.com.nov.model.entity.metadata.MetaData;
 
-public abstract class TableMd extends AbstractMetaData<TableMdId> {
+public abstract class TableMd extends MetaData<TableMdId> {
 
     public static class Builder {
-        private TableId tableId;
+        private Table.Id tableId;
         private String name;
 
-        public Builder(String name, TableId tableId) {
+        public Builder(String name, Table.Id tableId) {
             this.tableId = tableId;
             this.name = name;
         }
 
-        public void setTableId(TableId tableId) {
+        public void setTableId(Table.Id tableId) {
             this.tableId = tableId;
         }
 
@@ -21,7 +21,7 @@ public abstract class TableMd extends AbstractMetaData<TableMdId> {
             this.name = name;
         }
 
-        public TableId getTableId() {
+        public Table.Id getTableId() {
             return tableId;
         }
 
@@ -31,10 +31,10 @@ public abstract class TableMd extends AbstractMetaData<TableMdId> {
     }
 
     public TableMd(TableMdId id) {
-        super(id);
+        super(id, null);
     }
 
-    public TableId getTableId() {
+    public Table.Id getTableId() {
         return getId().getContainerId();
     }
 

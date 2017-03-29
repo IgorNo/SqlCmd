@@ -4,7 +4,6 @@ import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableId;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -17,19 +16,19 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-public class TableDao extends DataDefinitionDao<TableId, Table, Database.Id> {
+public class TableDao extends DataDefinitionDao<Table.Id, Table, Database.Id> {
 
     @Override
     public void create(Table value) throws SQLException {
         super.create(value);
-        Dao<TableMdId, Index, TableId> dao = new IndexDao().setDataSource(getDataSource());
+        Dao<TableMdId, Index, Table.Id> dao = new IndexDao().setDataSource(getDataSource());
         for (Index index : value.getIndexList()) {
             dao.create(index);
         }
     }
 
     @Override
-    public ResultSet getResultSet(TableId id) throws SQLException {
+    public ResultSet getResultSet(Table.Id id) throws SQLException {
         return getDbMetaData().getTables(id.getCatalog(), id.getSchema(), id.getName(), new String[] {"TABLE"});
     }
 
@@ -40,7 +39,7 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.Id> {
 
     @Override
     protected Table rowMap(Database.Id id, ResultSet rs) throws SQLException {
-        TableId tableId = new TableId(id, rs.getString("TABLE_NAME"),
+        Table.Id tableId = new Table.Id(id, rs.getString("TABLE_NAME"),
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
         Table.Builder builder = new Table.Builder(tableId, rs.getString("TABLE_TYPE"));
         Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
@@ -57,7 +56,7 @@ public class TableDao extends DataDefinitionDao<TableId, Table, Database.Id> {
     }
 
     @Override
-    protected SqlStatementSource<TableId, Table, Database.Id> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<Table.Id, Table, Database.Id> getSqlStmtSource(Database db) {
         return db.getTableSqlStmtSource();
     }
 }

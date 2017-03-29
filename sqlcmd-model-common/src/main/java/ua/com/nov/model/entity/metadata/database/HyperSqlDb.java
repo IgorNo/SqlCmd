@@ -1,8 +1,10 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
@@ -16,11 +18,7 @@ import java.util.List;
 public class HyperSqlDb extends Database {
 
     public HyperSqlDb(String dbUrl, String dbName) {
-        this(dbUrl, dbName, "");
-    }
-
-    public HyperSqlDb(String dbUrl, String dbName, String dbProperties) {
-        super(dbUrl, dbName, dbProperties);
+        super(dbUrl, dbName, null);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "LONGVARCHAR");
         List<DataType> dataTypeList = new ArrayList<>();
         dataTypeList.add(new DataType.Builder("LONGVARCHAR", Types.LONGVARCHAR).build());
@@ -33,7 +31,7 @@ public class HyperSqlDb extends Database {
     }
 
     @Override
-    public String getFullTableName(TableId id) {
+    public String getFullTableName(Table.Id id) {
         StringBuilder result = new StringBuilder();
         if (id.getSchema() != null) result.append(id.getSchema()).append('.');
         return result.append(id.getName()).toString();
@@ -44,23 +42,25 @@ public class HyperSqlDb extends Database {
         if (parameter != null) return parameter.toUpperCase();
         return parameter;
     }
-    @Override
-    public String getDbProperties() {
-        return "";
-    }
 
     @Override
-    public AbstractDbSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDbSqlStatements() {
+    public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
+        return new AbstractMetaDataSqlStatements() {
             @Override
-            public String getCreateStmt(Database db) {
+            public SqlStatement getCreateStmt(Unique value) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public String getDeleteStmt(Id id) {
+            public SqlStatement getUpdateStmt(Unique value) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            public SqlStatement getDeleteStmt(Persistent key) {
+                throw new UnsupportedOperationException();
+            }
+
         };
     }
 
@@ -74,9 +74,10 @@ public class HyperSqlDb extends Database {
     public AbstractColumnSqlStatements getColumnSqlStmtSource() {
         return new AbstractColumnSqlStatements() {
             @Override
-            public String getUpdateStmt(Column col) {
-                return String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
-                        col.getTableId().getFullName(), col.getName(), col.getNewName());
+            public SqlStatement getUpdateStmt(Column col) {
+                return null;
+//                return String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
+//                        col.getTableId().getFullName(), col.getName(), col.getNewName());
             }
         };
     }

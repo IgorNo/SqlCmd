@@ -1,13 +1,13 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class UniqueKey extends Key {
 
     public final static class Builder extends Key.Builder {
 
-        public Builder(String keyName, TableId tableId) {
+        public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
         }
 
@@ -29,7 +29,7 @@ public class UniqueKey extends Key {
 
     // вложенный класс создатся для обеспечения уникальности ключей
     public static class Id extends TableMdId {
-        public Id(TableId containerId, String name) {
+        public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
 

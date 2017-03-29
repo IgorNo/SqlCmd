@@ -3,13 +3,14 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.AbstractMetaDataId;
+import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.statement.SqlStatement;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public abstract class DataDefinitionDao<K extends AbstractMetaDataId<C>, V extends Unique<K>, C extends Persistent>
+public abstract class DataDefinitionDao<K extends MetaDataId<C>, V extends Unique<K>, C extends Persistent>
         extends AbstractDao<K,V,C>
 {
     @Override
@@ -26,10 +27,9 @@ public abstract class DataDefinitionDao<K extends AbstractMetaDataId<C>, V exten
     }
 
     @Override
-    protected void executeUpdateStmt(String sqlStmt) throws SQLException {
+    protected void executeUpdateStmt(SqlStatement sqlStmt) throws SQLException {
         Statement stmt = getDataSource().getConnection().createStatement();
-        stmt.executeUpdate(sqlStmt);
+        stmt.executeUpdate(sqlStmt.getSql());
         stmt.close();
     }
-
 }

@@ -19,8 +19,9 @@ public final class DatabaseDao extends DataDefinitionDao<Id, Database, Database>
     @Override
     public Database read(Id id) throws SQLException {
         Connection conn = getDataSource().getConnection();
-        id.getDb().addDataTypes(getDataTypes(conn));
-        return id.getDb();
+        Database result = createDatabase(id.getDb(), id.getName());
+        result.addDataTypes(getDataTypes(conn));
+        return result;
     }
 
     private List<DataType> getDataTypes(Connection conn) throws SQLException {
@@ -58,16 +59,20 @@ public final class DatabaseDao extends DataDefinitionDao<Id, Database, Database>
         Connection conn = getDataSource().getConnection();
         SqlStatementSource source = getSqlStmtSource(db);
         Statement stmt = conn.createStatement();
-        return stmt.executeQuery(source.getReadAllStmt(db));
+        return stmt.executeQuery(source.getReadAllStmt(db).getSql());
     }
 
     @Override
     protected Database rowMap(Database db, ResultSet rs) throws SQLException {
+        return createDatabase(db, rs.getString(1));
+    }
+
+    private static Database createDatabase(Database db, String dbName) {
         Class[] paramTypes = new Class[]{String.class, String.class};
         Database result = null;
         try {
             Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
-            return constructor.newInstance(new Object[]{db.getDbUrl(), rs.getString(1)});
+            return constructor.newInstance(new Object[]{db.getDbUrl(), dbName});
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {

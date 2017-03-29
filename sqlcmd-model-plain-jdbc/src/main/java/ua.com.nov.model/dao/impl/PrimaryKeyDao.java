@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.table.TableId;
+import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -9,7 +9,7 @@ import ua.com.nov.model.statement.SqlStatementSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, TableId> {
+public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Table.Id> {
 
     @Override
     protected ResultSet getResultSet(TableMdId id) throws SQLException {
@@ -17,13 +17,13 @@ public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Tabl
     }
 
     @Override
-    protected ResultSet getResultSetAll(TableId id) throws SQLException {
+    protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
         return  getDbMetaData().getPrimaryKeys(id.getCatalog(), id.getSchema(),
                 id.getName());
     }
 
     @Override
-    protected PrimaryKey rowMap(TableId tableId, ResultSet rs) throws SQLException {
+    protected PrimaryKey rowMap(Table.Id tableId, ResultSet rs) throws SQLException {
         PrimaryKey.Builder pk = new PrimaryKey.Builder(rs.getString("PK_NAME"), tableId);
         pk.addColumn(rs.getInt("KEY_SEQ"), rs.getString("COLUMN_NAME"));
         while (rs.next()) {
@@ -33,7 +33,7 @@ public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Tabl
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, PrimaryKey, TableId> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<TableMdId, PrimaryKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getPrimaryKeySqlStmtSource();
     }
 
