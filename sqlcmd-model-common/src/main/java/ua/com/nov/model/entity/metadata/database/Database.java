@@ -40,7 +40,7 @@ public abstract class Database extends BaseDataSource
         return typesMap;
     }
 
-    public abstract String getFullTableName(Table.Id id);
+//    public abstract String getFullTableName(Table.Id id);
 
     public abstract String getAutoIncrementDefinition();
 
@@ -190,7 +190,11 @@ public abstract class Database extends BaseDataSource
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("DATABASE ").append(id.getName());
+        final StringBuilder sb = new StringBuilder("DATABASE ");
+        if (options != null) {
+            sb.append(options.getExistOptions()).append(' ');
+        }
+        sb.append(id.getName());
         if (options != null)
             sb.append(' ').append(options);
         return sb.toString();

@@ -2,6 +2,7 @@ package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.MdCreateOptions;
 import ua.com.nov.model.entity.MdUpdateOptions;
+import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -14,10 +15,6 @@ import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
 import ua.com.nov.model.statement.SqlStatement;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public final class MySqlDb extends Database {
 
@@ -41,12 +38,12 @@ public final class MySqlDb extends Database {
         return " AUTO_INCREMENT";
     }
 
-    @Override
-    public String getFullTableName(Table.Id id) {
-        StringBuilder result = new StringBuilder();
-        if (id.getCatalog() != null) result.append(id.getCatalog()).append('.');
-        return result.append(id.getName()).toString();
-    }
+//    @Override
+//    public String getFullTableName(Table.Id id) {
+//        StringBuilder result = new StringBuilder();
+//        if (id.getCatalog() != null) result.append(id.getCatalog()).append('.');
+//        return result.append(id.getName()).toString();
+//    }
 
     @Override
     public String convert(String parameter) {
@@ -124,16 +121,9 @@ public final class MySqlDb extends Database {
         };
     }
 
-    public static class Options implements MdCreateOptions, MdUpdateOptions {
-        protected final List<String> optionList = new LinkedList<>();
+    public static class Options extends MetaDataOptions implements MdCreateOptions, MdUpdateOptions {
         private String characterSet;
         private String collate;
-
-        @Override
-        public List<String> getOptionList() {
-            return Collections.unmodifiableList(optionList);
-        }
-
 
         public Options(String charSet, String collate) {
             this.characterSet = charSet;

@@ -53,7 +53,15 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(id.getMdName()).append(' ').append(id.getFullName());
+        StringBuilder sb = new StringBuilder();
+        if (mdOptions != null)
+            sb.append(mdOptions.getPrefixOptins()).append(' ');
+        sb.append(id.getMdName()).append(' ');
+        if (mdOptions != null)
+            sb.append(mdOptions.getExistOptions()).append(' ');
+        sb.append(id.getFullName()).append(" %s");
+        if (mdOptions != null)
+            sb.append(mdOptions);
         return sb.toString();
     }
 }

@@ -156,7 +156,7 @@ public class Table extends MetaData<Table.Id> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
+        StringBuilder sb = new StringBuilder();
         if (columns.size() != 0) {
             sb.append("(\n");
             String s = "";
@@ -165,10 +165,8 @@ public class Table extends MetaData<Table.Id> {
                 if (s.isEmpty()) s = ",\n";
             }
             sb.append("\n)");
-
-            if (getMdOptions() != null) sb.append(getMdOptions());
         }
-        return sb.toString();
+        return String.format(super.toString(), sb.toString());
     }
 
     public static class Builder {

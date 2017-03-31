@@ -5,13 +5,15 @@ import ua.com.nov.model.entity.MdCreateOptions;
 import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
 import ua.com.nov.model.statement.SqlStatement;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class PostgresSqlDb extends Database {
 
@@ -30,12 +32,12 @@ public class PostgresSqlDb extends Database {
         return "";
     }
 
-    @Override
-    public String getFullTableName(Table.Id id) {
-        StringBuilder result = new StringBuilder();
-        if (id.getSchema() != null) result.append(id.getSchema()).append('.');
-        return result.append(id.getName()).toString();
-    }
+//    @Override
+//    public String getFullTableName(Table.Id id) {
+//        StringBuilder result = new StringBuilder();
+//        if (id.getSchema() != null) result.append(id.getSchema()).append('.');
+//        return result.append(id.getName()).toString();
+//    }
 
     @Override
     public String convert(String parameter) {
@@ -65,13 +67,7 @@ public class PostgresSqlDb extends Database {
         };
     }
 
-    private abstract static class Options implements MetaDataOptions {
-        protected final List<String> optionList = new LinkedList<>();
-
-        @Override
-        public List<String> getOptionList() {
-            return Collections.unmodifiableList(optionList);
-        }
+    private abstract static class Options extends MetaDataOptions {
 
         protected abstract static class Builder implements Buildable<Options> {
             String owner;
@@ -159,7 +155,7 @@ public class PostgresSqlDb extends Database {
         }
 
         public CreateOptions(Builder builder) {
-            this.optionList.add(builder.toString());
+            optionList.add(builder.toString());
         }
 
         @Override
