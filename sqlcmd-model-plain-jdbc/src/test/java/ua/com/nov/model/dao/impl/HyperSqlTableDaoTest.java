@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import static org.junit.Assert.assertTrue;
 
 public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
-    public static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
+    public static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
 
     @BeforeClass
     public static void setUpClass() throws SQLException {
@@ -21,7 +21,7 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, null, null);
-        createTestData(null, "PUBLIC", "INTEGER");
+        createTestData("PUBLIC", "PUBLIC", "INTEGER");
     }
 
     @Override

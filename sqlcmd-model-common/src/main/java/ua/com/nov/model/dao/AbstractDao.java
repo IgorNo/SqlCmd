@@ -2,7 +2,6 @@ package ua.com.nov.model.dao;
 
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.statement.SqlStatement;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -14,7 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDao<K extends MetaDataId<C>, V extends Unique<K>, C extends Persistent> implements Dao<K,V,C> {
+public abstract class AbstractDao<K extends Persistent<C>, V extends Unique<K>, C extends Persistent> implements Dao<K,V,C> {
 
     private DataSource dataSource;
 
@@ -63,7 +62,7 @@ public abstract class AbstractDao<K extends MetaDataId<C>, V extends Unique<K>, 
 
     private ResultSet checkResultSet(ResultSet rs, K id) throws SQLException {
         if (!rs.next()) throw new IllegalArgumentException(String.format("%s '%s' doesn't exist in %s '%s'.",
-                id.getClass().getSimpleName(), id.getName(),
+                id.getClass().getSimpleName(), id.getFullName(),
                 id.getContainerId().getFullName(), id.getContainerId().getClass().getSimpleName()));
         return rs;
     }

@@ -1,8 +1,9 @@
 package ua.com.nov.model.entity.metadata.table;
 
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 
-public class Index extends Key {
+public class Index extends Key<Index.Id> {
     private final String indexType;
     private final String using;
 
@@ -49,16 +50,21 @@ public class Index extends Key {
         public Index build() {
             return new Index(this);
         }
+    }
 
+    public static class Id extends Constraint.Id{
+        public Id(Table.Id containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMdName() {
+            return "INDEX";
+        }
     }
 
     public Index(Builder builder) {
-        super(builder, new TableMdId(builder.getTableId(), builder.getName()) {
-            @Override
-            public String getMdName() {
-                return "INDEX";
-            }
-        });
+        super(builder, new Id(builder.getTableId(), builder.getName()));
         this.indexType = builder.indexType;
         this.using = builder.using;
     }

@@ -1,21 +1,27 @@
 package ua.com.nov.model.statement;
 
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 
-public abstract class AbstractConstraintSqlStatements<V extends Constraint> extends BaseSqlStmtSource<TableMdId, V , Table.Id> {
-//    public static final String CREATE_SQL = "ALTER TABLE %s ADD %s";
-//    public static final String DROP_SQL = "ALTER TABLE %s DROP CONSTRAINT %s";
-//
-//    @Override
-//    public String getCreateStmt(V constraint) {
-//        return String.format(CREATE_SQL, constraint.getTableId().getFullName(), constraint.toString());
-//    }
-//
-//    @Override
-//    public String getDeleteStmt(TableMdId id) {
-//        return String.format(DROP_SQL, id.getTableId().getFullName(), id.getName());
-//    }
-//
+public abstract class AbstractConstraintSqlStatements<K extends Constraint.Id, V extends Constraint>
+        extends BaseSqlStmtSource<K, V , Table.Id> {
+
+    @Override
+    public SqlStatement getCreateStmt(V constraint) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s",
+                constraint.getTableId().getFullName(), constraint.toString())).build();
+    }
+
+    @Override
+    public SqlStatement getDeleteStmt(K id) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP CONSTRAINT %s",
+                id.getTableId().getFullName(), id.getName())).build();
+    }
+
+    @Override
+    public SqlStatement getUpdateStmt(V value) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME CONSTRAINT %s TO %s",
+                value.getTableId().getFullName(), value.getName(), value.getNewName())).build();
+    }
+
 }

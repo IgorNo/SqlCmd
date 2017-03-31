@@ -7,11 +7,9 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
-import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
-import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.*;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.statement.SqlStatement;
 
 import java.util.*;
 
@@ -47,18 +45,13 @@ public class PostgresSqlDb extends Database {
 
     @Override
     public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements() {
+        return new AbstractMetaDataSqlStatements<Database.Id, PostgresSqlDb, PostgresSqlDb>() {
             @Override
-            public SqlStatement getReadAllStmt(Object db) {
+            public SqlStatement getReadAllStmt(PostgresSqlDb db) {
                 return new SqlStatement.Builder("SELECT datname FROM pg_database WHERE datistemplate = false")
                         .build();
             }
         };
-    }
-
-    @Override
-    public AbstractTableSqlStatements getTableSqlStmtSource() {
-        return new AbstractTableSqlStatements() { };
     }
 
     @Override
@@ -70,34 +63,6 @@ public class PostgresSqlDb extends Database {
                         col.getTableId().getFullName(), col.getName(), col.getNewName()).build();
             }
         };
-    }
-
-    @Override
-    public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
-        return new ConstraintSqlStatements<>();
-    }
-
-    private static class ConstraintSqlStatements<V extends Constraint> extends AbstractConstraintSqlStatements<V> {
-        @Override
-        public SqlStatement getUpdateStmt(V value) {
-            return new SqlStatement.Builder("ALTER TABLE %s RENAME CONSTRAINT %s TO %s",
-                    value.getTableId().getFullName(), value.getName(), value.getNewName()).build();
-        }
-    }
-
-    @Override
-    public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
-        return new ConstraintSqlStatements<>();
-    }
-
-    @Override
-    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
-        return new ConstraintSqlStatements<>();
-    }
-
-    @Override
-    public AbstractIndexSqlStatements getIndexSqlStmtSource() {
-        return new AbstractIndexSqlStatements() {};
     }
 
     private abstract static class Options implements MetaDataOptions {
@@ -124,7 +89,6 @@ public class PostgresSqlDb extends Database {
                 if (isTemplate != null) sb.append("\n\tIS_TEMPLATE = ").append(isTemplate);
                 return sb.toString();
             }
-
         }
     }
 

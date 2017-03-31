@@ -1,8 +1,10 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.metadata.MetaData;
+import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.database.Database;
 
-public abstract class TableMd extends MetaData<TableMdId> {
+public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
 
     public static class Builder {
         private Table.Id tableId;
@@ -30,7 +32,7 @@ public abstract class TableMd extends MetaData<TableMdId> {
         }
     }
 
-    public TableMd(TableMdId id) {
+    public TableMd(K id) {
         super(id, null);
     }
 
@@ -40,5 +42,21 @@ public abstract class TableMd extends MetaData<TableMdId> {
 
     public String getName() {
         return getId().getName();
+    }
+
+    public abstract static class Id extends MetaDataId<Table.Id> {
+
+        public Id(Table.Id containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public Database getDb() {
+            return super.getContainerId().getDb();
+        }
+
+        public Table.Id getTableId() {
+            return getContainerId();
+        }
     }
 }

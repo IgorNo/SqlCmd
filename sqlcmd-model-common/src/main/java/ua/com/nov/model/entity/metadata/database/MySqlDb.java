@@ -3,14 +3,17 @@ package ua.com.nov.model.entity.metadata.database;
 import ua.com.nov.model.entity.MdCreateOptions;
 import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.*;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
+import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.statement.SqlStatement;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -53,17 +56,12 @@ public final class MySqlDb extends Database {
 
     @Override
     public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements() {
+        return new AbstractMetaDataSqlStatements<Database.Id, MySqlDb, MySqlDb>() {
             @Override
-            public SqlStatement getReadAllStmt(Object containerId) {
+            public SqlStatement getReadAllStmt(MySqlDb containerId) {
                 return new SqlStatement.Builder("SHOW DATABASES").build();
             }
         };
-    }
-
-    @Override
-    public AbstractTableSqlStatements getTableSqlStmtSource() {
-        return new AbstractTableSqlStatements() { };
     }
 
     @Override
@@ -79,10 +77,10 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<PrimaryKey>() {
+    public AbstractConstraintSqlStatements getPrimaryKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey>() {
             @Override
-            public SqlStatement getDeleteStmt(TableMdId id) {
+            public SqlStatement getDeleteStmt(PrimaryKey.Id id) {
                 return new SqlStatement.Builder("ALTER TABLE %s DROP PRIMARY KEY",
                         id.getTableId().getFullName()).build();
             }
@@ -90,25 +88,25 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<ForeignKey>() {
+    public AbstractConstraintSqlStatements getForeignKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey>() {
             @Override
-            public SqlStatement getDeleteStmt(TableMdId id) {
+            public SqlStatement getDeleteStmt(ForeignKey.Id id) {
                 return new SqlStatement.Builder("ALTER TABLE %s DROP FOREIGN KEY %s",
                         id.getTableId().getFullName(), id.getName()).build();
             }
         };
     }
 
-    private abstract static class KeySqlStatements<V extends Key> extends AbstractConstraintSqlStatements<V> {
+    private abstract static class KeySqlStatements<K extends Constraint.Id, V extends Key> extends AbstractConstraintSqlStatements<K,V> {
         @Override
-        public SqlStatement getUpdateStmt(Key pk) {
+        public SqlStatement getUpdateStmt(V pk) {
             return new SqlStatement.Builder("ALTER TABLE %s RENAME INDEX %s TO %s",
                     pk.getTableId().getFullName(), pk.getName(), pk.getNewName()).build();
         }
 
         @Override
-        public SqlStatement getDeleteStmt(TableMdId id) {
+        public SqlStatement getDeleteStmt(K id) {
             return new SqlStatement.Builder("ALTER TABLE %s DROP INDEX %s",
                     id.getTableId().getFullName(), id.getName()).build();
         }
@@ -116,17 +114,12 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
-        return new KeySqlStatements<UniqueKey>() {};
-    }
-
-    @Override
-    public AbstractIndexSqlStatements getIndexSqlStmtSource() {
-        return new AbstractIndexSqlStatements() {
+    public AbstractMetaDataSqlStatements getIndexSqlStmtSource() {
+        return new AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id>() {
             @Override
-            public SqlStatement getDeleteStmt(TableMdId id) {
-                return null;
-//                return super.getDeleteStmt(id) + " ON " + id.getTableId().getFullName();
+            public SqlStatement getDeleteStmt(Index.Id id) {
+                return new SqlStatement.Builder(super.getDeleteStmt(id).getSql()
+                        + " ON " + id.getTableId().getFullName()).build();
             }
         };
     }

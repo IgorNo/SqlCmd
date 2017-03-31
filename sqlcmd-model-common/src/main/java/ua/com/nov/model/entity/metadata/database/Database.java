@@ -8,11 +8,14 @@ import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.*;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
+import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,19 +44,29 @@ public abstract class Database extends BaseDataSource
 
     public abstract String getAutoIncrementDefinition();
 
-    public abstract AbstractMetaDataSqlStatements<Id, Database, Database> getDatabaseSqlStmtSource();
+    public abstract AbstractMetaDataSqlStatements<Database.Id, Database, Database> getDatabaseSqlStmtSource();
 
-    public abstract AbstractTableSqlStatements getTableSqlStmtSource();
+    public AbstractMetaDataSqlStatements<Table.Id, Table, Database.Id> getTableSqlStmtSource(){
+        return new AbstractMetaDataSqlStatements<Table.Id, Table, Database.Id>() {};
+    }
 
     public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
 
-    public abstract AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource();
+    public AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey> getPrimaryKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey>(){};
+    }
 
-    public abstract AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource();
+    public AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey> getForeignKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey>(){};
+    }
 
-    public abstract AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource();
+    public AbstractConstraintSqlStatements<UniqueKey.Id, UniqueKey> getUniqueKeySqlStmtSource() {
+        return new AbstractConstraintSqlStatements<UniqueKey.Id, UniqueKey>(){};
+    }
 
-    public abstract AbstractIndexSqlStatements getIndexSqlStmtSource();
+    public AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id> getIndexSqlStmtSource() {
+        return new AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id> (){};
+    }
 
     // convert 'parameter' to database format (to upper or lower case)
     public abstract String convert(String parameter);

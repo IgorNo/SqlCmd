@@ -43,19 +43,19 @@ public abstract class MetaDataId<C extends Persistent> implements Persistent<C> 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof MetaDataId<?>)) return false;
 
         MetaDataId<?> that = (MetaDataId<?>) o;
 
         if (!containerId.equals(that.containerId)) return false;
-        return name.equalsIgnoreCase(that.name);
+        return getFullName().equals(that.getFullName());
     }
 
     @Override
     public int hashCode() {
         int result = containerId.hashCode();
         
-        result = 31 * result + name.toLowerCase().hashCode();
+        result = 31 * result + getFullName().hashCode();
         return result;
     }
 }

@@ -1,9 +1,8 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 
-public class PrimaryKey extends Key {
+public class PrimaryKey extends Key<PrimaryKey.Id> {
 
     public final static class Builder extends Key.Builder {
 
@@ -32,12 +31,18 @@ public class PrimaryKey extends Key {
     }
 
     private PrimaryKey(Builder builder) {
-        super(builder, new TableMdId(builder.getTableId(), builder.getName()) {
-            @Override
-            public String getMdName() {
-                return "PRIMARY KEY";
-            }
-        });
+        super(builder, new Id(builder.getTableId(), builder.getName()));
     }
 
+    public static class Id extends Constraint.Id {
+        public Id(Table.Id containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMdName() {
+            return "PRIMARY KEY";
+        }
+
+    }
 }

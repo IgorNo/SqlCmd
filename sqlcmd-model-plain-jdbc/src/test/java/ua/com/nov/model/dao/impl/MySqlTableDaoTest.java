@@ -20,7 +20,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, "root", "root");
-        createTestData(testDb.getName(), "PUBLIC", "INT");
+        createTestData(testDb.getName(), null, "INT");
     }
 
     @Override

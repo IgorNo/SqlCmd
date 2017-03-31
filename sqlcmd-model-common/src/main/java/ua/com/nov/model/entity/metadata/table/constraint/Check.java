@@ -2,7 +2,6 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 
 public class Check extends Constraint {
     private final String expression;
@@ -24,13 +23,20 @@ public class Check extends Constraint {
         }
     }
 
+    public static class Id extends Constraint.Id {
+        public Id(Table.Id containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMdName() {
+            return "CHECK";
+        }
+
+    }
+
     public Check(Builder builder) {
-        super(new TableMdId(builder.getTableId(), builder.getName()) {
-            @Override
-            public String getMdName() {
-                return "CHECK";
-            }
-        });
+        super(new Id(builder.getTableId(), builder.getName()));
         this.expression = builder.expression;
     }
 

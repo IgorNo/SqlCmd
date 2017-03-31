@@ -2,12 +2,11 @@ package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 
 import java.util.*;
 
-public abstract class Key extends Constraint {
+public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
     private final Map<Integer, KeyCol> columnList;
     private final boolean unique;
 
@@ -101,7 +100,7 @@ public abstract class Key extends Constraint {
         public abstract Key build();
     }
 
-    protected Key(Builder builder, TableMdId id) {
+    protected Key(Builder builder, K id) {
         super(id);
         this.columnList = builder.columnList;
         for (int i = 1; i <= columnList.size(); i++) {

@@ -3,14 +3,13 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ColumnDao extends DataDefinitionDao<TableMdId, Column, Table.Id> {
+public class ColumnDao extends DataDefinitionDao<Column.Id, Column, Table.Id> {
 
     @Override
     public void deleteAll(Table.Id container) throws SQLException {
@@ -18,7 +17,7 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, Table.Id> {
     }
 
     @Override
-    protected ResultSet getResultSet(TableMdId id) throws SQLException {
+    protected ResultSet getResultSet(Column.Id id) throws SQLException {
         return getDbMetaData().getColumns(id.getTableId().getCatalog(), id.getTableId().getSchema(),
                 id.getTableId().getName(), id.getName());
     }
@@ -46,7 +45,7 @@ public class ColumnDao extends DataDefinitionDao<TableMdId, Column, Table.Id> {
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, Column, Table.Id> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<Column.Id, Column, Table.Id> getSqlStmtSource(Database db) {
         return db.getColumnSqlStmtSource();
     }
 }

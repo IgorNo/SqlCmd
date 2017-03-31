@@ -3,9 +3,8 @@ package ua.com.nov.model.entity.metadata.table.column;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 
-public class Column extends TableMd {
+public class Column extends TableMd<Column.Id> {
     private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;
@@ -54,7 +53,7 @@ public class Column extends TableMd {
         }
 
         public Builder(Column col) {
-            this(col.getId().getTableId(), col.getName(), col.dataType);
+            this(col.getTableId(), col.getName(), col.dataType);
             this.columnSize = col.columnSize;
             this.precision = col.precision;
             this.nullable = col.nullable;
@@ -124,8 +123,7 @@ public class Column extends TableMd {
         }
     }
 
-    // вложенный класс создатся для обеспечения уникальности ключей
-    public static class Id extends TableMdId {
+    public static class Id extends TableMd.Id {
          public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }

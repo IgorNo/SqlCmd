@@ -1,13 +1,13 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-public class ForeignKey extends Key {
-    private final Map<Integer, TableMdId> pkKey;
+public class ForeignKey extends Key<ForeignKey.Id> {
+    private final Map<Integer, Column.Id> pkKey;
     private final Rule updateRule; // to action what happens to a foreign constraint when the primary constraint is updated
     private final Rule deleteRule; // to action what happens to a foreign constraint when the primary constraint is deleted
     private final Match match;
@@ -73,7 +73,7 @@ public class ForeignKey extends Key {
     }
 
     public final static class Builder extends Key.Builder {
-        private Map<Integer, TableMdId> pkKey  = new TreeMap<>();
+        private Map<Integer, Column.Id> pkKey  = new TreeMap<>();
         private Rule updateRule; /* to action what happens to a foreign constraint
                                                            when the primary constraint is updated */
         private Rule deleteRule; /* to action what happens to a foreign constraint
@@ -84,12 +84,12 @@ public class ForeignKey extends Key {
             super(keyName, tableId);
         }
 
-        public Builder(String keyName, Table.Id tableId, String fkColumm, TableMdId pkColumn) {
+        public Builder(String keyName, Table.Id tableId, String fkColumm, Column.Id pkColumn) {
             super(keyName, tableId, fkColumm);
             addPkColumn(1, pkColumn);
         }
 
-        public Builder(String fkColumm, TableMdId pkColumn) {
+        public Builder(String fkColumm, Column.Id pkColumn) {
             this(null, null, fkColumm, pkColumn);
         }
 
@@ -98,19 +98,19 @@ public class ForeignKey extends Key {
             fkColumm - foreign constraint column
             pkColumn - primary constraint column ID that are referenced by the given table's foreign constraint column
        */
-        public Builder addColumnPair(int keySeq, String fkColumm, TableMdId pkColumn) {
+        public Builder addColumnPair(int keySeq, String fkColumm, Column.Id pkColumn) {
             super.addColumn(keySeq, fkColumm);
             addPkColumn(keySeq, pkColumn);
             return this;
         }
 
-        public Builder addColumnPair(String fkColumm, TableMdId pkColumn) {
+        public Builder addColumnPair(String fkColumm, Column.Id pkColumn) {
             super.addColumn(fkColumm);
             addPkColumn(getKeySeq(), pkColumn);
             return this;
         }
 
-        private Builder addPkColumn(int keySeq, TableMdId pkColumn) {
+        private Builder addPkColumn(int keySeq, Column.Id pkColumn) {
             if ( pkKey.put(keySeq, pkColumn) != null) {
                 throw new IllegalArgumentException(String.format("Column '%s' already exists in  in this foreign key.",
                         pkColumn));
@@ -148,8 +148,7 @@ public class ForeignKey extends Key {
         }
     }
 
-    // вложенный класс создатся для обеспечения уникальности ключей
-    public static class Id extends TableMdId {
+    public static class Id extends Constraint.Id {
         public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
@@ -176,8 +175,8 @@ public class ForeignKey extends Key {
         return super.getColumn(keySeq).getName();
     }
 
-    public TableMdId getPkColumn(int keySeq) {
-        TableMdId result = pkKey.get(keySeq);
+    public Column.Id getPkColumn(int keySeq) {
+        Column.Id result = pkKey.get(keySeq);
         if (result == null) throw new IllegalArgumentException();
         return result;
     }
@@ -196,7 +195,7 @@ public class ForeignKey extends Key {
         sb.append(" REFERENCES ").append(pkKey.get(1).getTableId().getFullName());
 
         String s = " (";
-        for (TableMdId col : pkKey.values()) {
+        for (Column.Id col : pkKey.values()) {
             sb.append(s).append(col.getName());
             if (s.isEmpty()) s = ",";
         }

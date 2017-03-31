@@ -50,4 +50,10 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
     public int hashCode() {
         return id.hashCode();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(id.getMdName()).append(' ').append(id.getFullName());
+        return sb.toString();
+    }
 }

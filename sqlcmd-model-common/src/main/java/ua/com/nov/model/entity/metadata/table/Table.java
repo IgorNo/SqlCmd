@@ -9,8 +9,6 @@ import ua.com.nov.model.entity.metadata.table.constraint.*;
 import java.util.*;
 
 public class Table extends MetaData<Table.Id> {
-    private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
-    //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
     private final String remarks;  // explanatory comment on the table
 
     private final Map<String, Column> columns; // all table columns
@@ -20,19 +18,15 @@ public class Table extends MetaData<Table.Id> {
 
     private final Set<Index> indices; // table indices list
 
-    private String tableProperties = "";
-
     public Table(Builder builder) {
         super(builder.id, null);
         this.constraints = builder.constraints;
         this.columns = builder.columns;
-        this.type = builder.type;
         this.remarks = builder.remarks;
         this.indices = builder.indices;
         for (Index index : new ArrayList<>(indices)) {
             if (!builder.checIndex(index)) indices.remove(index);
         }
-        this.tableProperties = builder.tableProperties;
     }
 
     private void checkTableMd(TableMd md) {
@@ -56,10 +50,6 @@ public class Table extends MetaData<Table.Id> {
 
     public String getSchema() {
         return getId().getSchema();
-    }
-
-    public String getType() {
-        return type;
     }
 
     public String getRemarks() {
@@ -164,33 +154,38 @@ public class Table extends MetaData<Table.Id> {
         return (Set<Check>) constraints.get(Check.class);
     }
 
-    public String getTableProperties() {
-        return tableProperties;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(super.toString());
+        if (columns.size() != 0) {
+            sb.append("(\n");
+            String s = "";
+            for (TableMd md : getMetaData()) {
+                sb.append(s).append('\t').append(md.toString());
+                if (s.isEmpty()) s = ",\n";
+            }
+            sb.append("\n)");
+
+            if (getMdOptions() != null) sb.append(getMdOptions());
+        }
+        return sb.toString();
     }
 
     public static class Builder {
         private final Id id;     // table object identifier
-        private final String type;    // table type.  Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY",
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
                 new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks)
-        //                                "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+
         private String remarks;  // explanatory comment on the table
         private Set<Index> indices = new HashSet<>(); // table indices list
-
-        private String tableProperties = "";
-
-        public Builder(Id id) {
-            this(id, "TABLE");
-        }
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new Id(db, name, catalog, schema));
         }
 
-        public Builder(Id id, String type) {
+        public Builder(Id id) {
             this.id = id;
-            this.type = type;
             constraints.put(PrimaryKey.class, new LinkedHashSet<PrimaryKey>(1));
         }
 
@@ -385,18 +380,12 @@ public class Table extends MetaData<Table.Id> {
             return this;
         }
 
-        public Builder tableProperties(String tableProperties) {
-            this.tableProperties = tableProperties;
-            return this;
-        }
-
         public Table build() {
             return new Table(this);
         }
     }
 
     public static class Id extends MetaDataId<Database.Id> {
-        public static final String META_DATA_NAME = "TABLE";
         private final String catalog; // table catalog
         private final String schema;  // table schema
 
@@ -412,12 +401,15 @@ public class Table extends MetaData<Table.Id> {
 
         @Override
         public String getMdName() {
-            return META_DATA_NAME;
+            return "TABLE";
         }
 
         @Override
         public String getFullName() {
-            return getDb().getFullTableName(this);
+            StringBuilder sb = new StringBuilder();
+            if (catalog != null) sb.append(catalog).append('.');
+            if (schema != null) sb.append(schema).append('.');
+            return sb.append(getName()).toString(); //getDb().getFullTableName(this);
         }
 
         public String getCatalog() {
@@ -426,23 +418,6 @@ public class Table extends MetaData<Table.Id> {
 
         public String getSchema() {
             return getDb().convert(schema);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Id)) return false;
-
-            Id id = (Id) o;
-
-            return getFullName().equalsIgnoreCase(id.getFullName());
-        }
-
-        @Override
-        public int hashCode() {
-            int result = getDb().hashCode();
-            result = 31 * result + getFullName().toLowerCase().hashCode();
-            return result;
         }
 
     }

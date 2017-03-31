@@ -2,17 +2,16 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.statement.SqlStatementSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Table.Id> {
+public class PrimaryKeyDao extends DataDefinitionDao<PrimaryKey.Id, PrimaryKey, Table.Id> {
 
     @Override
-    protected ResultSet getResultSet(TableMdId id) throws SQLException {
+    protected ResultSet getResultSet(PrimaryKey.Id id) throws SQLException {
         return getResultSetAll(id.getTableId());
     }
 
@@ -33,7 +32,7 @@ public class PrimaryKeyDao extends DataDefinitionDao<TableMdId, PrimaryKey, Tabl
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, PrimaryKey, Table.Id> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<PrimaryKey.Id, PrimaryKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getPrimaryKeySqlStmtSource();
     }
 

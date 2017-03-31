@@ -2,7 +2,6 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.statement.SqlStatementSource;
@@ -11,10 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Table.Id> {
+public class ForeignKeyDao extends DataDefinitionDao<ForeignKey.Id, ForeignKey, Table.Id> {
 
     @Override
-    public ForeignKey read(TableMdId key) throws SQLException {
+    public ForeignKey read(ForeignKey.Id key) throws SQLException {
         Collection<ForeignKey> foreignKeys = readAll(key.getTableId());
         for (ForeignKey fk : foreignKeys) {
             if (fk.getId().equals(key)) return fk;
@@ -40,7 +39,7 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
                     rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_SCHEM"));
             Table.Id tableIdFk = new Table.Id(tableId.getDb().getId(), rs.getString("FKTABLE_NAME"),
                     rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_SCHEM"));
-            TableMdId pkColumn = new Column.Id(tableIdPk, rs.getString("PKCOLUMN_NAME"));
+            Column.Id pkColumn = new Column.Id(tableIdPk, rs.getString("PKCOLUMN_NAME"));
             fk.addColumnPair(rs.getInt("KEY_SEQ"), rs.getString("FKCOLUMN_NAME"), pkColumn);
             fk.deleteRule(rs.getInt("DELETE_RULE")).updateRule(rs.getInt("UPDATE_RULE"));
         } while (rs.next());
@@ -48,7 +47,7 @@ public class ForeignKeyDao extends DataDefinitionDao<TableMdId, ForeignKey, Tabl
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<ForeignKey.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getForeignKeySqlStmtSource();
     }
 

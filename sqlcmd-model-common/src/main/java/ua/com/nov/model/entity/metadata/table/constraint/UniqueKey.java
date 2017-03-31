@@ -1,9 +1,8 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 
-public class UniqueKey extends Key {
+public class UniqueKey extends Key<UniqueKey.Id> {
 
     public final static class Builder extends Key.Builder {
 
@@ -27,8 +26,11 @@ public class UniqueKey extends Key {
         }
     }
 
-    // вложенный класс создатся для обеспечения уникальности ключей
-    public static class Id extends TableMdId {
+    public UniqueKey(Builder builder) {
+        super(builder, new Id(builder.getTableId(), builder.getName()));
+    }
+
+    public static class Id extends Constraint.Id {
         public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
@@ -37,14 +39,6 @@ public class UniqueKey extends Key {
         public String getMdName() {
             return "UNIQUE";
         }
-    }
-
-    public UniqueKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.getName()));
-    }
-
-    protected UniqueKey(Key.Builder builder, TableMdId id) {
-        super(builder, id);
     }
 
 }

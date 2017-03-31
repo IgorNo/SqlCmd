@@ -3,15 +3,14 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
-import ua.com.nov.model.statement.AbstractIndexSqlStatements;
+import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class IndexDao extends DataDefinitionDao<TableMdId, Index, Table.Id> {
+public class IndexDao extends DataDefinitionDao<Index.Id, Index, Table.Id> {
 
     @Override
     protected ResultSet getResultSetAll(Table.Id id) throws SQLException {
@@ -19,7 +18,7 @@ public class IndexDao extends DataDefinitionDao<TableMdId, Index, Table.Id> {
     }
 
     @Override
-    public Index read(TableMdId id) throws SQLException {
+    public Index read(Index.Id id) throws SQLException {
         Collection<Index> indices = readAll(id.getTableId());
         for (Index index : indices) {
             if (index.getId().equals(id)) return index;
@@ -52,7 +51,7 @@ public class IndexDao extends DataDefinitionDao<TableMdId, Index, Table.Id> {
     }
 
     @Override
-    protected AbstractIndexSqlStatements getSqlStmtSource(Database db) {
+    protected AbstractMetaDataSqlStatements getSqlStmtSource(Database db) {
         return db.getIndexSqlStmtSource();
     }
 

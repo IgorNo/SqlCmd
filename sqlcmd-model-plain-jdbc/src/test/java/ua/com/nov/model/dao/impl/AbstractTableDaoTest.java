@@ -3,13 +3,11 @@ package ua.com.nov.model.dao.impl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
@@ -27,19 +25,19 @@ public abstract class AbstractTableDaoTest {
     protected static Database testDb;
     protected static DataSource dataSource;
 
-    protected static final Dao<Table.Id, Table, Database.Id> TABLE_DAO = new TableDao();
-    protected static final Dao<TableMdId, Column, Table.Id> COLUMN_DAO = new ColumnDao();
-    protected static final Dao<TableMdId, PrimaryKey, Table.Id> PRIMARY_KEY_DAO = new PrimaryKeyDao();
-    protected static final Dao<TableMdId, ForeignKey, Table.Id> FOREIGN_KEY_DAO = new ForeignKeyDao();
-    protected static final Dao<TableMdId, UniqueKey, Table.Id> UNIQUE_KEY_DAO = new UniqueKeyDao();
-    protected static final Dao<TableMdId, Index, Table.Id> INDEX_DAO = new IndexDao();
+    protected static final TableDao TABLE_DAO = new TableDao();
+    protected static final ColumnDao COLUMN_DAO = new ColumnDao();
+    protected static final PrimaryKeyDao PRIMARY_KEY_DAO = new PrimaryKeyDao();
+    protected static final ForeignKeyDao FOREIGN_KEY_DAO = new ForeignKeyDao();
+    protected static final UniqueKeyDao UNIQUE_KEY_DAO = new UniqueKeyDao();
+    protected static final IndexDao INDEX_DAO = new IndexDao();
 
     protected static Table customers, products, orders, users;
 
     protected static DataType integer;
 
     protected static void createTestData(String catalog, String schema, String aiTypeName) throws SQLException {
-        new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
+        testDb = new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
         TABLE_DAO.setDataSource(dataSource);
         COLUMN_DAO.setDataSource(dataSource);
         PRIMARY_KEY_DAO.setDataSource(dataSource);

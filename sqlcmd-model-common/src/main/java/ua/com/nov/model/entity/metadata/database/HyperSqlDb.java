@@ -1,15 +1,12 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.Persistent;
-import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
-import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.*;
+import ua.com.nov.model.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.statement.SqlStatement;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -45,28 +42,22 @@ public class HyperSqlDb extends Database {
 
     @Override
     public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements() {
+        return new AbstractMetaDataSqlStatements<Database.Id, Database, Database>() {
             @Override
-            public SqlStatement getCreateStmt(Unique value) {
+            public SqlStatement getCreateStmt(Database value) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public SqlStatement getUpdateStmt(Unique value) {
+            public SqlStatement getUpdateStmt(Database value) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public SqlStatement getDeleteStmt(Persistent key) {
+            public SqlStatement getDeleteStmt(Database.Id key) {
                 throw new UnsupportedOperationException();
             }
 
-        };
-    }
-
-    @Override
-    public AbstractTableSqlStatements getTableSqlStmtSource() {
-        return new AbstractTableSqlStatements() {
         };
     }
 
@@ -75,30 +66,10 @@ public class HyperSqlDb extends Database {
         return new AbstractColumnSqlStatements() {
             @Override
             public SqlStatement getUpdateStmt(Column col) {
-                return null;
-//                return String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
-//                        col.getTableId().getFullName(), col.getName(), col.getNewName());
+                return new SqlStatement.Builder(String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
+                        col.getTableId().getFullName(), col.getName(), col.getNewName())).build();
             }
         };
     }
 
-    @Override
-    public AbstractConstraintSqlStatements<PrimaryKey> getPrimaryKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<PrimaryKey>(){};
-    }
-
-    @Override
-    public AbstractConstraintSqlStatements<ForeignKey> getForeignKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<ForeignKey>(){};
-    }
-
-    @Override
-    public AbstractConstraintSqlStatements<UniqueKey> getUniqueKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<UniqueKey>() {};
-    }
-
-    @Override
-    public AbstractIndexSqlStatements getIndexSqlStmtSource() {
-        return new AbstractIndexSqlStatements(){};
-    }
 }

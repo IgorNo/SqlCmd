@@ -2,7 +2,6 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import ua.com.nov.model.statement.SqlStatementSource;
 
@@ -10,10 +9,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, Table.Id> {
+public class UniqueKeyDao extends DataDefinitionDao<UniqueKey.Id, UniqueKey, Table.Id> {
 
     @Override
-    public UniqueKey read(TableMdId key) throws SQLException {
+    public UniqueKey read(UniqueKey.Id key) throws SQLException {
         Collection<UniqueKey> foreignKeys = readAll(key.getTableId());
         for (UniqueKey fk : foreignKeys) {
             if (fk.getId().equals(key)) return fk;
@@ -41,7 +40,7 @@ public class UniqueKeyDao extends DataDefinitionDao<TableMdId, UniqueKey, Table.
     }
 
     @Override
-    protected SqlStatementSource<TableMdId, UniqueKey, Table.Id> getSqlStmtSource(Database db) {
+    protected SqlStatementSource<UniqueKey.Id, UniqueKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getUniqueKeySqlStmtSource();
     }
     

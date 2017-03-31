@@ -4,7 +4,6 @@ import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.TableMdId;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
@@ -21,7 +20,7 @@ public class TableDao extends DataDefinitionDao<Table.Id, Table, Database.Id> {
     @Override
     public void create(Table value) throws SQLException {
         super.create(value);
-        Dao<TableMdId, Index, Table.Id> dao = new IndexDao().setDataSource(getDataSource());
+        Dao<Index.Id, Index, Table.Id> dao = new IndexDao().setDataSource(getDataSource());
         for (Index index : value.getIndexList()) {
             dao.create(index);
         }
@@ -41,7 +40,7 @@ public class TableDao extends DataDefinitionDao<Table.Id, Table, Database.Id> {
     protected Table rowMap(Database.Id id, ResultSet rs) throws SQLException {
         Table.Id tableId = new Table.Id(id, rs.getString("TABLE_NAME"),
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
-        Table.Builder builder = new Table.Builder(tableId, rs.getString("TABLE_TYPE"));
+        Table.Builder builder = new Table.Builder(tableId);
         Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
         builder.columns(columns);
         PrimaryKey pk = new PrimaryKeyDao().setDataSource(getDataSource()).readAll(tableId).get(0);
