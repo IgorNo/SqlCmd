@@ -64,7 +64,7 @@ public class Index extends Key<Index.Id> {
     }
 
     public Index(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.getName()));
+        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("idx")));
         this.indexType = builder.indexType;
         this.using = builder.using;
     }

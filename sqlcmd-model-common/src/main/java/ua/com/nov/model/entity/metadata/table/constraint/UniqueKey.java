@@ -27,7 +27,7 @@ public class UniqueKey extends Key<UniqueKey.Id> {
     }
 
     public UniqueKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.getName()));
+        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("unique")));
     }
 
     public static class Id extends Constraint.Id {

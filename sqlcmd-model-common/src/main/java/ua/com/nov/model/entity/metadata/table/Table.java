@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.metadata.table;
 
+import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
@@ -9,8 +10,6 @@ import ua.com.nov.model.entity.metadata.table.constraint.*;
 import java.util.*;
 
 public class Table extends MetaData<Table.Id> {
-    private final String remarks;  // explanatory comment on the table
-
     private final Map<String, Column> columns; // all table columns
 
     // all table constraint (primary key, foreign keys, unique keys, checks)
@@ -19,21 +18,16 @@ public class Table extends MetaData<Table.Id> {
     private final Set<Index> indices; // table indices list
 
     public Table(Builder builder) {
-        super(builder.id, null);
+        super(builder.id, builder.options);
         this.constraints = builder.constraints;
         this.columns = builder.columns;
-        this.remarks = builder.remarks;
         this.indices = builder.indices;
         for (Index index : new ArrayList<>(indices)) {
-            if (!builder.checIndex(index)) indices.remove(index);
+            if (builder.isContainsIndex(index)) indices.remove(index);
         }
-    }
 
-    private void checkTableMd(TableMd md) {
-        if (!md.getId().getContainerId().equals(this.getId())) {
-            throw new IllegalArgumentException(String.format("Object '%s' doesn't belong table '%s'.",
-                    md.getId().getFullName(), getFullName()));
-        }
+        if (constraints.get(UniqueKey.class) != null && constraints.get(UniqueKey.class).contains(getPrimaryKey()))
+            constraints.get(UniqueKey.class).remove(getPrimaryKey());
     }
 
     public Database getDb() {
@@ -50,10 +44,6 @@ public class Table extends MetaData<Table.Id> {
 
     public String getSchema() {
         return getId().getSchema();
-    }
-
-    public String getRemarks() {
-        return remarks;
     }
 
     public int getNumberOfColumns() {
@@ -169,14 +159,15 @@ public class Table extends MetaData<Table.Id> {
         return String.format(super.toString(), sb.toString());
     }
 
-    public static class Builder {
+    public static class Builder implements Buildable<Table> {
         private final Id id;     // table object identifier
+
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
-                new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks)
-
-        private String remarks;  // explanatory comment on the table
+                new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks, etc)
         private Set<Index> indices = new HashSet<>(); // table indices list
+
+        private TableOptions options;
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new Id(db, name, catalog, schema));
@@ -191,8 +182,8 @@ public class Table extends MetaData<Table.Id> {
             return id;
         }
 
-        public Builder remarks(String remarks) {
-            this.remarks = remarks;
+        public Builder options(TableOptions options) {
+            this.options = options;
             return this;
         }
 
@@ -224,27 +215,16 @@ public class Table extends MetaData<Table.Id> {
             return this;
         }
 
-        public Builder primaryKey(PrimaryKey key) {
-            checkKey(key);
-            Set<PrimaryKey> primaryKey = (Set<PrimaryKey>) constraints.get(PrimaryKey.class);
-            if (!primaryKey.isEmpty()) {
-                throw new IllegalArgumentException("The table must contain only one primary key");
+        private void checkColumnsInKey(Collection<String> columnNames) {
+            for (String s : columnNames) {
+                if (columns.get(s.toLowerCase()) == null)
+                    throw new IllegalArgumentException(String.format("Column with name '%s' doesn't exists in table '%s'",
+                            s, getId().getFullName()));
             }
-            primaryKey.add(key);
-            Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
-            if (uniqueKeys != null && uniqueKeys.contains(key)) {
-                uniqueKeys.remove(key);
-            }
-            return this;
-        }
-
-        private void checkKey(Key key) {
-            checkConstraint(key);
-            checkColumnsInKey(key.getColumnsList());
         }
 
         private void checkConstraint(Constraint addingConstraint) {
-            checkTableId(addingConstraint);
+
             for (Set<? extends Constraint> set : constraints.values()) {
                 for (Constraint constraint : set) {
                     if (constraint.getName().equalsIgnoreCase(addingConstraint.getName()))
@@ -254,104 +234,57 @@ public class Table extends MetaData<Table.Id> {
             }
         }
 
-        private void checkColumnsInKey(Collection<String> columnNames) {
-            for (String s : columnNames) {
-                if (columns.get(s.toLowerCase()) == null)
-                    throw new IllegalArgumentException(String.format("Column with name '%s' doesn't exists in table '%s'",
-                            s, getId().getFullName()));
-            }
-        }
-
-        public Builder primaryKey(PrimaryKey.Builder builder) {
+        public <V extends Constraint<?>> Builder addConstraint(V.Builder<V> builder) {
             builder.setTableId(getId());
-            builder.setName("pkey");
-            primaryKey(builder.build());
+            addConstraint(builder.build());
             return this;
         }
 
-        public Builder uniqueKeys(List<UniqueKey> uniqueKeyList) {
-            for (UniqueKey key : uniqueKeyList) {
-                addUniqueKey(key);
+        public <V extends Constraint<?>> Builder addConstraint(V constraint) {
+            checkTableId(constraint);
+            if (constraint instanceof Key<?>) {
+                checkColumnsInKey(((Key<?>) constraint).getColumnsList());
             }
-            return this;
-        }
 
-        public Builder addUniqueKey(UniqueKey key) {
-            if (!constraints.get(PrimaryKey.class).contains(key)) {
-                checkKey(key);
-                Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
-                if (uniqueKeys == null) {
-                    uniqueKeys = new LinkedHashSet<>();
-                    constraints.put(UniqueKey.class, uniqueKeys);
+            Set<V> constraintSet = (Set<V>) constraints.get(constraint.getClass());
+
+            if (constraintSet == null) {
+                if (!(constraint.getClass() == Index.class)) {
+                    constraintSet = new LinkedHashSet<>();
+                    constraints.put(constraint.getClass(), constraintSet);
+                } else {
+                    throw new IllegalArgumentException("Index isn't constraint");
                 }
-                if (!uniqueKeys.add(key)) {
-                    throw new IllegalArgumentException(String.format("Unique constraint %s already exists in table %s",
-                            key.getColumnNames(), key.getTableId().getFullName()));
+            } else {
+                if (constraint.getClass() == PrimaryKey.class) {
+                    if (constraintSet.isEmpty()) {
+                        Set<UniqueKey> uniqueKeys = (Set<UniqueKey>) constraints.get(UniqueKey.class);
+                        if (uniqueKeys != null && uniqueKeys.contains(constraint))
+                            uniqueKeys.remove(constraint);
+                    } else {
+                        throw new IllegalArgumentException("The table must contain only one primary key");
+                    }
                 }
+                checkConstraint(constraint);
+            }
+
+            if (!constraintSet.add(constraint))
+                throw new IllegalArgumentException(String.format("Table %s already contains '%s'",
+                        id.getFullName(), constraint));
+
+            return this;
+        }
+
+        public <V extends Constraint<?>> Builder addConstraintList(List<V> constraintList) {
+            for (V check : constraintList) {
+                addConstraint(check);
             }
             return this;
         }
 
-        public Builder addUniqueKey(UniqueKey.Builder builder) {
+        public Builder addIndex(Index.Builder builder) {
             builder.setTableId(getId());
-            builder.setName("unique");
-            addUniqueKey(builder.build());
-            return this;
-        }
-
-        public Builder foreignKeys(List<ForeignKey> foreignKeyList) {
-            for (ForeignKey key : foreignKeyList) {
-                addForeignKey(key);
-            }
-            return this;
-        }
-
-        public Builder addForeignKey(ForeignKey key) {
-            checkKey(key);
-            Set<ForeignKey> foreignKeys = (Set<ForeignKey>) constraints.get(ForeignKey.class);
-            if (foreignKeys == null) {
-                foreignKeys = new LinkedHashSet<>();
-                constraints.put(ForeignKey.class, foreignKeys);
-            }
-            foreignKeys.add(key);
-            return this;
-        }
-
-        public Builder addForeignKey(ForeignKey.Builder builder) {
-            builder.setTableId(getId());
-            builder.setName("fkey");
-            addForeignKey(builder.build());
-            return this;
-        }
-
-        public Builder checkExpressionList(List<Check> checkExpressionList) {
-            for (Check check : checkExpressionList) {
-                addCheckExpression(check);
-            }
-            return this;
-        }
-
-        public Builder addCheckExpression(Check check) {
-            checkConstraint(check);
-            Set<Check> checkExpressions = (Set<Check>) constraints.get(Check.class);
-            if (checkExpressions == null) {
-                checkExpressions = new LinkedHashSet<>();
-                constraints.put(Check.class, checkExpressions);
-            }
-            checkExpressions.add(check);
-            return this;
-        }
-
-        public Builder addCheckExpression(Check.Builder builder) {
-            builder.setTableId(getId());
-            addCheckExpression(builder.build());
-            return this;
-        }
-
-        public Builder indexList(List<Index> indexList) {
-            for (Index index : indexList) {
-                addIndex(index);
-            }
+            addIndex(builder.build());
             return this;
         }
 
@@ -364,18 +297,18 @@ public class Table extends MetaData<Table.Id> {
             return this;
         }
 
-        private boolean checIndex(Index index) {
-            for (Set<? extends Constraint> set : constraints.values()) {
-                if (set.contains(index)) return false;
+        public Builder indexList(List<Index> indexList) {
+            for (Index index : indexList) {
+                addIndex(index);
             }
-            return true;
+            return this;
         }
 
-        public Builder addIndex(Index.Builder builder) {
-            builder.setTableId(getId());
-            builder.setName("idx");
-            addIndex(builder.build());
-            return this;
+        private boolean isContainsIndex(Index index) {
+            for (Set<? extends Constraint> set : constraints.values()) {
+                if (set.contains(index)) return true;
+            }
+            return false;
         }
 
         public Table build() {

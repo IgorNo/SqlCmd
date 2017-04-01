@@ -1,12 +1,13 @@
 package ua.com.nov.model.entity.metadata.table;
 
+import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 
 public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
 
-    public static class Builder {
+    public abstract static class Builder<V> implements Buildable<V> {
         private Table.Id tableId;
         private String name;
 
@@ -17,10 +18,6 @@ public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
 
         public void setTableId(Table.Id tableId) {
             this.tableId = tableId;
-        }
-
-        public void setName(String name) {
-            this.name = name;
         }
 
         public Table.Id getTableId() {

@@ -10,7 +10,7 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
     private final Map<Integer, KeyCol> columnList;
     private final boolean unique;
 
-    public abstract static class Builder extends TableMd.Builder {
+    public abstract static class Builder<V> extends TableMd.Builder<V> {
         private final Map<Integer, KeyCol> columnList = new TreeMap<>();
         private int keySeq = 1;
         private boolean unique = true;
@@ -69,14 +69,15 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
             return Collections.unmodifiableCollection(columnList.values());
         }
 
-        public void setName(String postfix) {
+        public String generateNameIfNull(String postfix) {
             if (getName() == null) {
                 StringBuilder sb = new StringBuilder(getTableId().getName()).append("_");
                 for (KeyCol s : getColumnList()) {
                     sb.append(s.getName()).append('_');
                 }
-                super.setName(sb.append(postfix).toString());
+                return sb.append(postfix).toString();
             }
+            return getName();
         }
 
         protected Map<Integer, KeyCol> getColumnMap() {
@@ -97,7 +98,6 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
             return this;
         }
 
-        public abstract Key build();
     }
 
     protected Key(Builder builder, K id) {

@@ -160,7 +160,7 @@ public class ForeignKey extends Key<ForeignKey.Id> {
     }
 
     public ForeignKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.getName()));
+        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("fkey")));
         this.pkKey = builder.pkKey;
         this.updateRule = builder.updateRule;
         this.deleteRule = builder.deleteRule;

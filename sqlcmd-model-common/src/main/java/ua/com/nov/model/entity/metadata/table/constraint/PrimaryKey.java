@@ -12,7 +12,7 @@ public class PrimaryKey extends Key<PrimaryKey.Id> {
 
         public Builder(Table.Id tableId, String... column) {
             super( null, tableId,column);
-            setName("pkey");
+            generateNameIfNull("pkey");
         }
 
         public Builder(String... columnName) {
@@ -31,7 +31,7 @@ public class PrimaryKey extends Key<PrimaryKey.Id> {
     }
 
     private PrimaryKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.getName()));
+        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("pkey")));
     }
 
     public static class Id extends Constraint.Id {

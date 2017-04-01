@@ -59,8 +59,8 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("phone", varchar).size(20).defaultValue("0"))
                 .addColumn(new Column.Builder("address", varchar).size(150))
                 .addColumn(new Column.Builder("rating", integer))
-                .primaryKey(new PrimaryKey.Builder("id"))
-                .addUniqueKey(new UniqueKey.Builder("name", "phone"))
+                .addConstraint(new PrimaryKey.Builder("id"))
+                .addConstraint(new UniqueKey.Builder("name", "phone"))
                 .addIndex(new Index.Builder("address"))
                 .build();
 
@@ -70,7 +70,7 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("description", varchar).size(100).nullable(NOT_NULL))
                 .addColumn(new Column.Builder("details", text))
                 .addColumn(new Column.Builder("price", numeric).size(8).precision(0).defaultValue("0"))
-                .primaryKey(new PrimaryKey.Builder("id"))
+                .addConstraint(new PrimaryKey.Builder("id"))
                 .build();
 
         Table.Id ordersId = new Table.Id(testDb.getId(), "Orders", catalog, schema);
@@ -81,10 +81,10 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("qty", integer))
                 .addColumn(new Column.Builder("amount", numeric).size(10).precision(2))
                 .addColumn(new Column.Builder("customer_id", integer))
-                .primaryKey(new PrimaryKey.Builder("id"))
-                .addForeignKey(new ForeignKey.Builder("product_id", products.getColumn("id").getId())
+                .addConstraint(new PrimaryKey.Builder("id"))
+                .addConstraint(new ForeignKey.Builder("product_id", products.getColumn("id").getId())
                         .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
-                .addForeignKey(new ForeignKey.Builder("customer_id", customers.getColumn("id").getId())
+                .addConstraint(new ForeignKey.Builder("customer_id", customers.getColumn("id").getId())
                         .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
                 .build();
 
@@ -92,7 +92,7 @@ public abstract class AbstractTableDaoTest {
         users = new Table.Builder(usersId)
                 .addColumn(new Column.Builder("login", varchar).size(25))
                 .addColumn(new Column.Builder("password",varchar).size(25))
-                .primaryKey(new PrimaryKey.Builder("login"))
+                .addConstraint(new PrimaryKey.Builder("login"))
                 .build();
     }
 

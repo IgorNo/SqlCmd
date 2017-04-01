@@ -43,12 +43,12 @@ public class TableDao extends DataDefinitionDao<Table.Id, Table, Database.Id> {
         Table.Builder builder = new Table.Builder(tableId);
         Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
         builder.columns(columns);
-        PrimaryKey pk = new PrimaryKeyDao().setDataSource(getDataSource()).readAll(tableId).get(0);
-        builder.primaryKey(pk);
         List<ForeignKey> foreignKeys = new ForeignKeyDao().setDataSource(getDataSource()).readAll(tableId);
-        builder.foreignKeys(foreignKeys);
+        builder.addConstraintList(foreignKeys);
         List<UniqueKey> uniqueKeys = new UniqueKeyDao().setDataSource(getDataSource()).readAll(tableId);
-        builder.uniqueKeys(uniqueKeys);
+        builder.addConstraintList(uniqueKeys);
+        PrimaryKey pk = new PrimaryKeyDao().setDataSource(getDataSource()).readAll(tableId).get(0);
+        builder.addConstraint(pk);
         List<Index> indices = new IndexDao().setDataSource(getDataSource()).readAll(tableId);
         builder.indexList(indices);
         return builder.build();
