@@ -26,11 +26,11 @@ public abstract class MetaDataOptions {
         this(builder.prefixOptins, builder.existOptions);
     }
 
-    public MetaDataOptions() {
+    protected MetaDataOptions() {
         this("", "");
     }
 
-    public MetaDataOptions(String prefixOptins, String existOptions) {
+    protected MetaDataOptions(String prefixOptins, String existOptions) {
         this.prefixOptins = prefixOptins;
         this.existOptions = existOptions;
     }

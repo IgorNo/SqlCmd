@@ -25,9 +25,6 @@ public class Table extends MetaData<Table.Id> {
         for (Index index : new ArrayList<>(indices)) {
             if (builder.isContainsIndex(index)) indices.remove(index);
         }
-
-        if (constraints.get(UniqueKey.class) != null && constraints.get(UniqueKey.class).contains(getPrimaryKey()))
-            constraints.get(UniqueKey.class).remove(getPrimaryKey());
     }
 
     public Database getDb() {
@@ -224,7 +221,6 @@ public class Table extends MetaData<Table.Id> {
         }
 
         private void checkConstraint(Constraint addingConstraint) {
-
             for (Set<? extends Constraint> set : constraints.values()) {
                 for (Constraint constraint : set) {
                     if (constraint.getName().equalsIgnoreCase(addingConstraint.getName()))
@@ -247,7 +243,6 @@ public class Table extends MetaData<Table.Id> {
             }
 
             Set<V> constraintSet = (Set<V>) constraints.get(constraint.getClass());
-
             if (constraintSet == null) {
                 if (!(constraint.getClass() == Index.class)) {
                     constraintSet = new LinkedHashSet<>();

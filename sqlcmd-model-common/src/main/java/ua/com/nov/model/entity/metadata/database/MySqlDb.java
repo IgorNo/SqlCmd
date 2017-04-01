@@ -121,13 +121,29 @@ public final class MySqlDb extends Database {
         };
     }
 
-    public static class Options extends MetaDataOptions implements MdCreateOptions, MdUpdateOptions {
-        private String characterSet;
-        private String collate;
+    public abstract static class Options extends MetaDataOptions {
+        private final String characterSet;
+        private final String collate;
 
-        public Options(String charSet, String collate) {
-            this.characterSet = charSet;
-            this.collate = collate;
+        public abstract static class Builder extends MetaDataOptions.Builder<Options> {
+            protected String characterSet;
+            protected String collate;
+
+            public Builder characterSet(String characterSet) {
+                this.characterSet = characterSet;
+                return this;
+            }
+
+            public Builder collate(String collate) {
+                this.collate = collate;
+                return this;
+            }
+        }
+
+        public Options(Builder builder) {
+            super(builder);
+            this.characterSet = builder.characterSet;
+            this.collate = builder.collate;
             optionList.add(toString());
         }
 
@@ -139,6 +155,37 @@ public final class MySqlDb extends Database {
             if (collate != null)
                 sb.append(" COLLATE  = ").append(collate);
             return sb.toString();
+        }
+    }
+
+    public static class CreateOptions extends Options implements MdCreateOptions {
+        public static class Builder extends Options.Builder {
+            public Builder existOptions(boolean existOptions) {
+                if (existOptions)
+                    setExistOptions("IF NOT EXISTS");
+                return this;
+            }
+
+            @Override
+            public CreateOptions build() {
+                return new CreateOptions(this);
+            }
+        }
+
+        public CreateOptions(Builder builder) {
+            super(builder);
+        }
+    }
+
+    public static class UpdateOptions extends Options implements MdUpdateOptions {
+        public static class Builder extends Options.Builder {
+            @Override
+            public Options build() {
+                return new UpdateOptions(this);
+            }
+        }
+        public UpdateOptions(Builder builder) {
+            super(builder);
         }
     }
 }

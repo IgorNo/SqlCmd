@@ -15,7 +15,9 @@ import static ua.com.nov.model.util.DbUtil.MY_SQL_LOCAL_URL;
 
 public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     public static final Database TEST_DATABASE =
-            new MySqlDb(MY_SQL_LOCAL_URL, "tmp", new MySqlDb.Options("utf8", "utf8_general_ci"));
+            new MySqlDb(MY_SQL_LOCAL_URL, "tmp",
+                    new MySqlDb.CreateOptions.Builder()
+                            .existOptions(true).characterSet("utf8").collate("utf8_general_ci").build());
 
     @Override
     public Database getTestDatabase() {
@@ -47,7 +49,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     @Test
     public void testUpdateDatabase() throws SQLException {
         DAO.update(new MySqlDb(MY_SQL_LOCAL_URL, TEST_DATABASE.getName(),
-                new MySqlDb.Options("cp1251", "cp1251_general_ci")));
+                new MySqlDb.UpdateOptions.Builder().characterSet("cp1251").collate("cp1251_general_ci").build()));
     }
 
 }
