@@ -7,13 +7,9 @@ public abstract class MetaDataId<C extends Persistent> implements Persistent<C> 
     private final C containerId;
     private final String name;
 
-
     public MetaDataId(C containerId, String name) {
         if (containerId == null) {
             throw new IllegalArgumentException("Meta data containerId can't be 'null'.");
-        }
-        if (name == null) {
-            throw new IllegalArgumentException("Meta data name can't be 'null'.");
         }
         this.containerId = containerId;
         this.name = name;
@@ -54,7 +50,6 @@ public abstract class MetaDataId<C extends Persistent> implements Persistent<C> 
     @Override
     public int hashCode() {
         int result = containerId.hashCode();
-        
         result = 31 * result + getFullName().hashCode();
         return result;
     }

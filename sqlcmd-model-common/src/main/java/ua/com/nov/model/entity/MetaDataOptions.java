@@ -5,16 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class MetaDataOptions {
-    private final String prefixOptins;
     private final String existOptions;
     protected final List<String> optionList = new LinkedList<>();
 
     protected abstract static class Builder<V> implements Buildable<V> {
-        private String prefixOptins = "";
-        private String existOptions = "";
+        private String existOptions;
 
-        protected void setPrefixOptins(String prefixOptins) {
-            this.prefixOptins = prefixOptins;
+        public Builder() {
         }
 
         protected void setExistOptions(String existOptions) {
@@ -23,20 +20,7 @@ public abstract class MetaDataOptions {
     }
 
     protected MetaDataOptions(Builder builder) {
-        this(builder.prefixOptins, builder.existOptions);
-    }
-
-    protected MetaDataOptions() {
-        this("", "");
-    }
-
-    protected MetaDataOptions(String prefixOptins, String existOptions) {
-        this.prefixOptins = prefixOptins;
-        this.existOptions = existOptions;
-    }
-
-    public String getPrefixOptins() {
-        return prefixOptins;
+        this.existOptions = builder.existOptions;
     }
 
     public String getExistOptions() {

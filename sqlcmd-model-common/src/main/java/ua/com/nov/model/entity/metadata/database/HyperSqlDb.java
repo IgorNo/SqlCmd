@@ -1,11 +1,11 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.column.Column;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
-import ua.com.nov.model.statement.SqlStatement;
 
 import java.sql.Types;
 import java.util.ArrayList;

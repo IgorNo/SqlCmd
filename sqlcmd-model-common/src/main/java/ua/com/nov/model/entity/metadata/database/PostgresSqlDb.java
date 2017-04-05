@@ -1,14 +1,13 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.entity.Buildable;
+import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MdCreateOptions;
 import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.column.Column;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
-import ua.com.nov.model.statement.SqlStatement;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +68,7 @@ public class PostgresSqlDb extends Database {
 
     private abstract static class Options extends MetaDataOptions {
 
-        protected abstract static class Builder implements Buildable<Options> {
+        protected abstract static class Builder extends MetaDataOptions.Builder<Options> {
             String owner;
             String tableSpace;
             Boolean allowConn;
@@ -85,6 +84,10 @@ public class PostgresSqlDb extends Database {
                 if (isTemplate != null) sb.append("\n\tIS_TEMPLATE = ").append(isTemplate);
                 return sb.toString();
             }
+        }
+
+        public Options(MetaDataOptions.Builder builder) {
+            super(builder);
         }
     }
 
@@ -155,6 +158,7 @@ public class PostgresSqlDb extends Database {
         }
 
         public CreateOptions(Builder builder) {
+            super(builder);
             optionList.add(builder.toString());
         }
 
@@ -219,6 +223,7 @@ public class PostgresSqlDb extends Database {
         }
 
         public UpdateOptions(Builder builder) {
+            super(builder);
             if (!builder.toString().isEmpty()) optionList.add(builder.toString());
             if (builder.owner != null) optionList.add("OWNER TO " + builder.owner);
             if (builder.tableSpace != null) optionList.add("SET TABLESPACE " + builder.tableSpace);

@@ -1,5 +1,9 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractConstraintSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MdCreateOptions;
 import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.MetaDataOptions;
@@ -11,10 +15,6 @@ import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
-import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
-import ua.com.nov.model.statement.SqlStatement;
 
 public final class MySqlDb extends Database {
 
@@ -122,12 +122,12 @@ public final class MySqlDb extends Database {
     }
 
     public abstract static class Options extends MetaDataOptions {
-        private final String characterSet;
-        private final String collate;
-
         public abstract static class Builder extends MetaDataOptions.Builder<Options> {
             protected String characterSet;
             protected String collate;
+
+            public Builder() {
+            }
 
             public Builder characterSet(String characterSet) {
                 this.characterSet = characterSet;
@@ -138,28 +138,35 @@ public final class MySqlDb extends Database {
                 this.collate = collate;
                 return this;
             }
+
+            @Override
+            public String toString() {
+                final StringBuilder sb = new StringBuilder();
+                if (characterSet != null)
+                    sb.append("CHARACTER SET = ").append(characterSet);
+                if (collate != null)
+                    sb.append(" COLLATE  = ").append(collate);
+                return sb.toString();
+            }
+
         }
 
         public Options(Builder builder) {
             super(builder);
-            this.characterSet = builder.characterSet;
-            this.collate = builder.collate;
-            optionList.add(toString());
+            optionList.add(builder.toString());
         }
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            if (characterSet != null)
-                sb.append("CHARACTER SET = ").append(characterSet);
-            if (collate != null)
-                sb.append(" COLLATE  = ").append(collate);
-            return sb.toString();
+            return optionList.get(0);
         }
     }
 
     public static class CreateOptions extends Options implements MdCreateOptions {
         public static class Builder extends Options.Builder {
+            public Builder() {
+            }
+
             public Builder existOptions(boolean existOptions) {
                 if (existOptions)
                     setExistOptions("IF NOT EXISTS");

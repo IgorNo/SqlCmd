@@ -1,9 +1,9 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
+import ua.com.nov.model.entity.Schematic;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.database.Database;
 
 public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
 
@@ -41,19 +41,24 @@ public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
         return getId().getName();
     }
 
-    public abstract static class Id extends MetaDataId<Table.Id> {
+    public abstract static class Id extends MetaDataId<Table.Id> implements Schematic{
 
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public Database getDb() {
-            return super.getContainerId().getDb();
+        public Id(Table.Id tableId, String name) {
+            super(tableId, name);
         }
 
         public Table.Id getTableId() {
             return getContainerId();
+        }
+
+        @Override
+        public String getCatalog() {
+            return getTableId().getCatalog();
+        }
+
+        @Override
+        public String getSchema() {
+            return getTableId().getSchema();
         }
     }
 }

@@ -1,15 +1,15 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.schema.Schema;
+import ua.com.nov.model.entity.metadata.schema.SchemaMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.*;
 
 import java.util.*;
 
-public class Table extends MetaData<Table.Id> {
+public class Table extends SchemaMd<Table.Id> {
     private final Map<String, Column> columns; // all table columns
 
     // all table constraint (primary key, foreign keys, unique keys, checks)
@@ -17,8 +17,11 @@ public class Table extends MetaData<Table.Id> {
 
     private final Set<Index> indices; // table indices list
 
+    private final String remarks;
+
     public Table(Builder builder) {
         super(builder.id, builder.options);
+        this.remarks = builder.remarks;
         this.constraints = builder.constraints;
         this.columns = builder.columns;
         this.indices = builder.indices;
@@ -35,12 +38,8 @@ public class Table extends MetaData<Table.Id> {
         return getId().getFullName();
     }
 
-    public String getCatalog() {
-        return getId().getCatalog();
-    }
-
-    public String getSchema() {
-        return getId().getSchema();
+    public String getRemarks() {
+        return remarks;
     }
 
     public int getNumberOfColumns() {
@@ -158,12 +157,14 @@ public class Table extends MetaData<Table.Id> {
 
     public static class Builder implements Buildable<Table> {
         private final Id id;     // table object identifier
+        private String type;
 
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
                 new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks, etc)
         private Set<Index> indices = new HashSet<>(); // table indices list
 
+        private String remarks;
         private TableOptions options;
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
@@ -179,8 +180,18 @@ public class Table extends MetaData<Table.Id> {
             return id;
         }
 
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
         public Builder options(TableOptions options) {
             this.options = options;
+            return this;
+        }
+
+        public Builder remarks(String remarks) {
+            this.remarks = remarks;
             return this;
         }
 
@@ -311,40 +322,19 @@ public class Table extends MetaData<Table.Id> {
         }
     }
 
-    public static class Id extends MetaDataId<Database.Id> {
-        private final String catalog; // table catalog
-        private final String schema;  // table schema
+    public static class Id extends SchemaMd.Id {
 
-        public Id(Database.Id db, String name, String catalog, String schema) {
-            super(db, name);
-            this.catalog = catalog;
-            this.schema = schema;
+        public Id(Schema.Id schemaId, String name) {
+            super(schemaId, name);
         }
 
-        public Id(Database.Id db, String name) {
-            this(db, name, null, null);
+        public Id(Database.Id db, String name, String catalog, String schema) {
+            super(new Schema.Id(db, catalog, schema), name);
         }
 
         @Override
         public String getMdName() {
             return "TABLE";
         }
-
-        @Override
-        public String getFullName() {
-            StringBuilder sb = new StringBuilder();
-            if (catalog != null) sb.append(catalog).append('.');
-            if (schema != null) sb.append(schema).append('.');
-            return sb.append(getName()).toString(); //getDb().getFullTableName(this);
-        }
-
-        public String getCatalog() {
-            return getDb().convert(catalog);
-        }
-
-        public String getSchema() {
-            return getDb().convert(schema);
-        }
-
     }
 }

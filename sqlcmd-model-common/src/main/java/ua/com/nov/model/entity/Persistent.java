@@ -5,10 +5,12 @@ import ua.com.nov.model.entity.metadata.database.Database;
 public interface Persistent<C> {
 
    Database getDb();
-   
-   String getFullName();
 
    String getMdName();
+
+   String getName();
+
+   String getFullName();
 
    C getContainerId();
 

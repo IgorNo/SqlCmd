@@ -1,5 +1,8 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractConstraintSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optionable;
@@ -8,14 +11,12 @@ import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
-import ua.com.nov.model.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.statement.AbstractConstraintSqlStatements;
-import ua.com.nov.model.statement.AbstractMetaDataSqlStatements;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -46,8 +47,8 @@ public abstract class Database extends BaseDataSource
 
     public abstract AbstractMetaDataSqlStatements<Database.Id, Database, Database> getDatabaseSqlStmtSource();
 
-    public AbstractMetaDataSqlStatements<Table.Id, Table, Database.Id> getTableSqlStmtSource(){
-        return new AbstractMetaDataSqlStatements<Table.Id, Table, Database.Id>() {};
+    public AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource(){
+        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() {};
     }
 
     public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
@@ -191,7 +192,7 @@ public abstract class Database extends BaseDataSource
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("DATABASE ");
-        if (options != null) {
+        if (options != null && options.getExistOptions() != null) {
             sb.append(options.getExistOptions()).append(' ');
         }
         sb.append(id.getName());

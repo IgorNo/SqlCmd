@@ -6,12 +6,18 @@ import ua.com.nov.model.entity.Unique;
 
 public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optionable {
     private final K id;
+    private final String type;
     private final MetaDataOptions mdOptions;
     private String newName; // This field uses for renaming metadata
 
-    public MetaData(K id, MetaDataOptions options) {
+    public MetaData(K id, String type, MetaDataOptions options) {
         this.id = id;
         this.mdOptions = options;
+        this.type = type;
+    }
+
+    public MetaData(K id, MetaDataOptions mdOptions) {
+       this(id, null, mdOptions);
     }
 
     @Override
@@ -21,6 +27,10 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
 
     public String getName() {
         return id.getName();
+    }
+
+    public String getType() {
+        return type;
     }
 
     @Override
@@ -54,10 +64,10 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (mdOptions != null)
-            sb.append(mdOptions.getPrefixOptins()).append(' ');
+        if (type != null)
+            sb.append(type).append(' ');
         sb.append(id.getMdName()).append(' ');
-        if (mdOptions != null)
+        if (mdOptions != null && mdOptions.getExistOptions() != null)
             sb.append(mdOptions.getExistOptions()).append(' ');
         sb.append(id.getFullName()).append(" %s");
         if (mdOptions != null)
