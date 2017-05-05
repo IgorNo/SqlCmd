@@ -45,4 +45,9 @@ public class SqlStatement {
     public List<Object> getParameters() {
         return Collections.unmodifiableList(parameters);
     }
+
+    @Override
+    public String toString() {
+        return sql;
+    }
 }

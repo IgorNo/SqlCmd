@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.dao.statement.SqlStatementSource;
+import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -13,8 +13,8 @@ import java.sql.SQLException;
 public class ForeignKeyDao extends MetaDataDao<ForeignKey.Id, ForeignKey, Table.Id> {
 
     @Override
-    protected ResultSet getResultSet(String catalog, String schema, String tableName, String ignore) throws SQLException {
-        return getDbMetaData().getImportedKeys(catalog, schema, tableName);
+    protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {
+        return getDbMetaData().getImportedKeys(id.getCatalog(), id.getSchema(), id.getName());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ForeignKeyDao extends MetaDataDao<ForeignKey.Id, ForeignKey, Table.
     }
 
     @Override
-    protected SqlStatementSource<ForeignKey.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
+    protected DataDefinitionSqlStmtSource<ForeignKey.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
         return db.getForeignKeySqlStmtSource();
     }
 

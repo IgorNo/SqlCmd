@@ -1,18 +1,13 @@
 package ua.com.nov.model.entity.metadata.schema;
 
-import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Schematic;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 
 public class SchemaMd<K extends SchemaMd.Id> extends MetaData<K> {
 
-    public SchemaMd(K id, String type, MetaDataOptions options) {
-        super(id, type, options);
-    }
-
-    public SchemaMd(K id, MetaDataOptions mdOptions) {
-        this(id, null, mdOptions);
+    public SchemaMd(K id, String type) {
+        super(id, type);
     }
 
     public String getCatalog() {
@@ -29,15 +24,16 @@ public class SchemaMd<K extends SchemaMd.Id> extends MetaData<K> {
             super(schemaId, name);
         }
 
+        @Override
         public String getCatalog() {
             return getContainerId().getCatalog();
         }
 
+        @Override
         public String getSchema() {
             return getContainerId().getSchema();
         }
 
     }
-
 
 }

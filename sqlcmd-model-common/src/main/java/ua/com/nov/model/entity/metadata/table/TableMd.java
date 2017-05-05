@@ -60,5 +60,6 @@ public abstract class TableMd<K extends TableMd.Id> extends MetaData<K> {
         public String getSchema() {
             return getTableId().getSchema();
         }
+
     }
 }

@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.dao.statement.SqlStatementSource;
+import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -13,9 +13,9 @@ import java.sql.SQLException;
 public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
 
     @Override
-    protected ResultSet getResultSet(String catalog, String schema, String tableName, String columnName)
+    protected ResultSet getResultSet(Table.Id id, String columnName)
             throws SQLException {
-        return getDbMetaData().getColumns(catalog, schema, tableName, columnName);
+        return getDbMetaData().getColumns(id.getCatalog(), id.getSchema(), id.getName(), columnName);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
     }
 
     @Override
-    protected SqlStatementSource<Column.Id, Column, Table.Id> getSqlStmtSource(Database db) {
+    protected DataDefinitionSqlStmtSource<Column.Id, Column, Table.Id> getSqlStmtSource(Database db) {
         return db.getColumnSqlStmtSource();
     }
 }

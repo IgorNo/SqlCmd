@@ -1,6 +1,7 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
+import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.schema.SchemaMd;
@@ -17,11 +18,9 @@ public class Table extends SchemaMd<Table.Id> {
 
     private final Set<Index> indices; // table indices list
 
-    private final String remarks;
-
     public Table(Builder builder) {
-        super(builder.id, builder.options);
-        this.remarks = builder.remarks;
+        super(builder.id, builder.type);
+        setViewName(builder.viewName);
         this.constraints = builder.constraints;
         this.columns = builder.columns;
         this.indices = builder.indices;
@@ -38,8 +37,8 @@ public class Table extends SchemaMd<Table.Id> {
         return getId().getFullName();
     }
 
-    public String getRemarks() {
-        return remarks;
+    public String getViewName() {
+        return super.getViewName();
     }
 
     public int getNumberOfColumns() {
@@ -140,6 +139,7 @@ public class Table extends SchemaMd<Table.Id> {
         return (Set<Check>) constraints.get(Check.class);
     }
 
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -152,20 +152,20 @@ public class Table extends SchemaMd<Table.Id> {
             }
             sb.append("\n)");
         }
-        return String.format(super.toString(), sb.toString());
+        return super.toString() + sb.toString();
     }
 
     public static class Builder implements Buildable<Table> {
         private final Id id;     // table object identifier
         private String type;
+        private MetaDataOptions<Table> options;
 
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
                 new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks, etc)
         private Set<Index> indices = new HashSet<>(); // table indices list
 
-        private String remarks;
-        private TableOptions options;
+        private String viewName;
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new Id(db, name, catalog, schema));
@@ -185,13 +185,8 @@ public class Table extends SchemaMd<Table.Id> {
             return this;
         }
 
-        public Builder options(TableOptions options) {
-            this.options = options;
-            return this;
-        }
-
-        public Builder remarks(String remarks) {
-            this.remarks = remarks;
+        public Builder viewName(String viewName) {
+            this.viewName = viewName;
             return this;
         }
 
@@ -315,6 +310,11 @@ public class Table extends SchemaMd<Table.Id> {
                 if (set.contains(index)) return true;
             }
             return false;
+        }
+
+        public Builder options(MetaDataOptions<Table> options) {
+            this.options = options;
+            return this;
         }
 
         public Table build() {

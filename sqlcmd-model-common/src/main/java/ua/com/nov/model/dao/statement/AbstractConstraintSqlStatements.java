@@ -3,25 +3,39 @@ package ua.com.nov.model.dao.statement;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 
-public abstract class AbstractConstraintSqlStatements<K extends Constraint.Id, V extends Constraint>
-        extends BaseSqlStmtSource<K, V , Table.Id> {
+public abstract class AbstractConstraintSqlStatements<I extends Constraint.Id, E extends Constraint<I>>
+        implements DataDefinitionSqlStmtSource<I, E,  Table.Id> {
 
     @Override
-    public SqlStatement getCreateStmt(V constraint) {
+    public SqlStatement getCreateStmt(E entity) {
         return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s",
-                constraint.getTableId().getFullName(), constraint.toString())).build();
+                entity.getTableId().getFullName(), entity.getCreateStmtDefinition(null))).build();
     }
 
     @Override
-    public SqlStatement getDeleteStmt(K id) {
+    public SqlStatement getCreateIfNotExistsStmt(E entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SqlStatement getUpdateStmt(E entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SqlStatement getDeleteStmt(I eId) {
         return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP CONSTRAINT %s",
-                id.getTableId().getFullName(), id.getName())).build();
+                eId.getTableId().getFullName(), eId.getName())).build();
     }
 
     @Override
-    public SqlStatement getUpdateStmt(V value) {
-        return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME CONSTRAINT %s TO %s",
-                value.getTableId().getFullName(), value.getName(), value.getNewName())).build();
+    public SqlStatement getDeleteIfExistStmt(I eId) {
+        throw new UnsupportedOperationException();
     }
 
+    @Override
+    public SqlStatement getRenameStmt(I eId, String newName) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME CONSTRAINT %s TO %s",
+                eId.getTableId().getFullName(), eId.getName(), newName)).build();
+    }
 }

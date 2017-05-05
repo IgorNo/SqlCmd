@@ -87,7 +87,7 @@ public class Index extends Key<Index.Id> {
             sb.append("UNIQUE ");
         }
 
-        sb.append("INDEX ").append(getId().getName()).append(" ON ").append(getTableId().getFullName()).append(" (");
+        sb.append(getId().getName()).append(" ON ").append(getTableId().getFullName()).append(" (");
 
         String s = "";
         for (int i = 1; i <= getNumberOfColumns(); i++) {
@@ -98,8 +98,6 @@ public class Index extends Key<Index.Id> {
 
         if (using != null)
             sb.append(" USING ").append(using);
-        if (getMdOptions() != null)
-            sb.append(' ').append(getMdOptions());
 
         return sb.toString();
     }

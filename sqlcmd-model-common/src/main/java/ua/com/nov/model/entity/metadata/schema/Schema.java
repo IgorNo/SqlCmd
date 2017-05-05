@@ -1,6 +1,5 @@
 package ua.com.nov.model.entity.metadata.schema;
 
-import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Schematic;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
@@ -47,8 +46,8 @@ public class Schema extends MetaData<Schema.Id> {
         }
     }
 
-    public Schema(Id id, MetaDataOptions mdOptions) {
-        super(id, mdOptions);
+    public Schema(Id id) {
+        super(id, null);
     }
 
 }

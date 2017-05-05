@@ -1,5 +1,5 @@
 package ua.com.nov.model.entity;
 
-public interface Buildable<V> {
-        V build();
+public interface Buildable<T> {
+        T build();
 }

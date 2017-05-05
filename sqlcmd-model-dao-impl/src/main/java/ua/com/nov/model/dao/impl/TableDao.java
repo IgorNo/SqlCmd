@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
-import ua.com.nov.model.dao.statement.SqlStatementSource;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
@@ -21,17 +21,17 @@ import java.util.List;
 public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
 
     @Override
-    public void create(Table value) throws DaoSystemException {
-        super.create(value);
+    public void create(Table entity) throws DaoSystemException {
+        super.create(entity);
         Dao<Index.Id, Index, Table.Id> dao = new IndexDao().setDataSource(getDataSource());
-        for (Index index : value.getIndexList()) {
+        for (Index index : entity.getIndexList()) {
             dao.create(index);
         }
     }
 
     @Override
-    protected ResultSet getResultSet(String catalog, String schema, String ignore, String name) throws SQLException {
-        return getDbMetaData().getTables(catalog, schema, name, new String[] {"TABLE"});
+    protected ResultSet getResultSet(Schema.Id id, String name) throws SQLException {
+        return getDbMetaData().getTables(id.getCatalog(), id.getSchema(), name, id.getDb().getTableTypes());
     }
 
     @Override
@@ -41,7 +41,8 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
             public Table mapRow(ResultSet rs, int i) throws SQLException {
                 Table.Id tableId = new Table.Id(id, rs.getString("TABLE_NAME"));
 
-                Table.Builder builder = new Table.Builder(tableId).type("TYPE_NAME");
+                Table.Builder builder = new Table.Builder(tableId).type(rs.getString("TABLE_TYPE"))
+                        .viewName(rs.getString("REMARKS"));
                 try {
                     Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
                     builder.columns(columns);
@@ -56,14 +57,13 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                 } catch (DaoSystemException e) {
                     throw new SQLException("",e);
                 }
-
                 return builder.build();
             }
         };
     }
 
     @Override
-    protected SqlStatementSource<Table.Id, Table, Schema.Id> getSqlStmtSource(Database db) {
+    protected AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getSqlStmtSource(Database db) {
         return db.getTableSqlStmtSource();
     }
 }

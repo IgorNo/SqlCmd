@@ -3,11 +3,10 @@ package ua.com.nov.model.entity.metadata.database;
 import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.datasource.BaseDataSource;
-import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.Optionable;
-import ua.com.nov.model.entity.Persistent;
-import ua.com.nov.model.entity.Unique;
+import ua.com.nov.model.entity.*;
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -24,15 +23,16 @@ import java.sql.SQLException;
 import java.util.*;
 
 public abstract class Database extends BaseDataSource
-        implements Unique<Database.Id>, Persistent<Database>, Optionable {
+        implements Unique<Database.Id>, Persistent, Hierarchical<Database> {
     private final Id id;
     private String userName;
-    private final MetaDataOptions options;
+    protected MetaDataOptions<? extends Database> options;
 
     private Map<String,DataType> dataTypes = new HashMap<>();
-    private final Map<JdbcDataTypes, String> typesMap = new HashMap<>();
+    protected List<String> tableTypes;
+    private Map<JdbcDataTypes, String> typesMap = new HashMap<>();
 
-    public Database(String dbUrl, String dbName, MetaDataOptions options) {
+    public Database(String dbUrl, String dbName, MetaDataOptions<? extends Database> options) {
         this.id = new Id(dbUrl, dbName);
         this.options = options;
     }
@@ -41,14 +41,22 @@ public abstract class Database extends BaseDataSource
         return typesMap;
     }
 
-//    public abstract String getFullTableName(Table.Id id);
-
     public abstract String getAutoIncrementDefinition();
+
+    public DataDefinitionSqlStmtSource getSqlStmtSource(String mdName) {
+        switch (mdName) {
+           case "DATABASE":
+              return getDatabaseSqlStmtSource();
+
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 
     public abstract AbstractMetaDataSqlStatements<Database.Id, Database, Database> getDatabaseSqlStmtSource();
 
     public AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource(){
-        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() {};
+        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() { };
     }
 
     public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
@@ -98,9 +106,24 @@ public abstract class Database extends BaseDataSource
     }
 
     @Override
+    public Optional<? extends Database> getOptions() {
+        return options;
+    }
+
+    @Override
     public Connection getConnection(String userName, String password) throws SQLException {
         this.userName = userName;
         return DriverManager.getConnection(getDbUrl() + getName(), userName, password);
+    }
+
+    @Override
+    public String getType() {
+        return getMdName();
+    }
+
+    @Override
+    public String getViewName() {
+        return null;
     }
 
     public void addDataTypes(Collection<DataType> dataTypeList) {
@@ -114,6 +137,15 @@ public abstract class Database extends BaseDataSource
         if (dataType == null)
             throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
         return dataType;
+    }
+
+
+    public void addTableTypes(Collection<String> tableTypes) {
+        this.tableTypes = new ArrayList<>(tableTypes);
+    }
+
+    public String[] getTableTypes() {
+        return tableTypes.toArray(new String[0]);
     }
 
     /**
@@ -158,10 +190,6 @@ public abstract class Database extends BaseDataSource
         }
     }
 
-    public MetaDataOptions getMdOptions() {
-        return options;
-    }
-
     public String getDbUrl() {
         return id.getDbUrl();
     }
@@ -190,15 +218,19 @@ public abstract class Database extends BaseDataSource
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("DATABASE ");
-        if (options != null && options.getExistOptions() != null) {
-            sb.append(options.getExistOptions()).append(' ');
-        }
+    public String getCreateStmtDefinition(String conflictOption) {
+        final StringBuilder sb = new StringBuilder(getMdName()).append(' ');
+        if (conflictOption != null) sb.append(conflictOption).append(' ');
         sb.append(id.getName());
         if (options != null)
             sb.append(' ').append(options);
         return sb.toString();
+
+    }
+
+    @Override
+    public String toString() {
+        return getCreateStmtDefinition(null);
     }
 
     public class Id extends MetaDataId<Database> {

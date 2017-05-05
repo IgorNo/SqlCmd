@@ -1,30 +1,32 @@
 package ua.com.nov.model.entity.metadata.database;
 
+import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractConstraintSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
 import ua.com.nov.model.dao.statement.SqlStatement;
-import ua.com.nov.model.entity.MdCreateOptions;
-import ua.com.nov.model.entity.MdUpdateOptions;
 import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.Key;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public final class MySqlDb extends Database {
 
-    public MySqlDb(String dbUrl, String dbName) {
-        this(dbUrl, dbName, null);
+    public MySqlDb(String dbUrl, String dbName, MetaDataOptions<MySqlDb> options) {
+        super(dbUrl, dbName, options);
+        initTypesMap();
     }
 
-    public MySqlDb(String dbUrl, String dbName, Options dbProperties) {
-        super(dbUrl, dbName, dbProperties);
-        initTypesMap();
+    public MySqlDb(String dbUrl, String dbName) {
+        this(dbUrl, dbName, null);
     }
 
     private void initTypesMap() {
@@ -38,13 +40,6 @@ public final class MySqlDb extends Database {
         return " AUTO_INCREMENT";
     }
 
-//    @Override
-//    public String getFullTableName(Table.Id id) {
-//        StringBuilder result = new StringBuilder();
-//        if (id.getCatalog() != null) result.append(id.getCatalog()).append('.');
-//        return result.append(id.getName()).toString();
-//    }
-
     @Override
     public String convert(String parameter) {
         if (parameter != null) return parameter.toLowerCase();
@@ -53,10 +48,70 @@ public final class MySqlDb extends Database {
 
     @Override
     public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements<Database.Id, MySqlDb, MySqlDb>() {
+        return new AbstractMetaDataSqlStatements<Database.Id, MySqlDb, Database>() {
             @Override
-            public SqlStatement getReadAllStmt(MySqlDb containerId) {
+            public SqlStatement getReadAllStmt(Database cId) {
                 return new SqlStatement.Builder("SHOW DATABASES").build();
+            }
+
+            @Override
+            public SqlStatement getReadOptionsStmt(Id eId) {
+                return new SqlStatement.Builder(
+                        "SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME  " +
+                                "FROM information_schema.SCHEMATA " +
+                                "WHERE SCHEMA_NAME = '" + eId.getName() + "'").build();
+            }
+
+            @Override
+            public RowMapper<Optional<MySqlDb>> getOptionsRowMapper() {
+                return new RowMapper<Optional<MySqlDb>>() {
+                    @Override
+                    public Optional<MySqlDb> mapRow(ResultSet rs, int i) throws SQLException {
+                        return new MySqlDb.Options.Builder()
+                                .characterSet(rs.getString(1)).collate(rs.getString(2))
+                                .build();
+                    }
+                };
+            }
+
+            @Override
+            public SqlStatement getRenameStmt(Id eId, String newName) {
+                throw new UnsupportedOperationException();
+            }
+
+        };
+    }
+
+    @Override
+    public AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource() {
+        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() {
+            @Override
+            public String getCommentStmt(Table table) {
+                if (table.getViewName() == null) return "";
+                return  String.format("ALTER TABLE %s COMMENT '%s'", table.getFullName(), table.getViewName());
+            }
+
+            @Override
+            public SqlStatement getReadOptionsStmt(Table.Id eId) {
+                return new SqlStatement.Builder(
+                        "SELECT ENGINE, ROW_FORMAT, AVG_ROW_LENGTH, AUTO_INCREMENT, " +
+                                "TABLE_COLLATION, CHECKSUM, TABLE_COMMENT " +
+                                "FROM information_schema.TABLES " +
+                                "WHERE TABLE_NAME = '" + eId.getName() + "'").build();
+            }
+
+            @Override
+            public RowMapper<Optional<Table>> getOptionsRowMapper() {
+                return new RowMapper<Optional<Table>>() {
+                    @Override
+                    public Optional<Table> mapRow(ResultSet rs, int i) throws SQLException {
+                        return new MySqlTableOptions.Builder()
+                                .engine(rs.getString(1)).avgRowLength(rs.getInt(2))
+                                .autoIncrement(rs.getInt(3)).defaultCharset(rs.getString(4))
+                                .checkSum(rs.getBoolean(5)).comment(rs.getString(6))
+                                .build();
+                    }
+                };
             }
         };
     }
@@ -64,136 +119,97 @@ public final class MySqlDb extends Database {
     @Override
     public AbstractColumnSqlStatements getColumnSqlStmtSource() {
         return new AbstractColumnSqlStatements() {
-            @Override
-            public SqlStatement getUpdateStmt(Column col) {
-                return null;
-//                return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
-//                        col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
-            }
+//            @Override
+//            public SqlStatement getUpdateStmt(Column col) {
+//                return null;
+////                return String.format("ALTER TABLE %s CHANGE COLUMN %s %s %s",
+////                        col.getTableId().getFullName(), col.getName(), col.getNewName(), col.getFullTypeDeclaration());
+//            }
         };
     }
 
     @Override
     public AbstractConstraintSqlStatements getPrimaryKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey>() {
-            @Override
-            public SqlStatement getDeleteStmt(PrimaryKey.Id id) {
-                return new SqlStatement.Builder("ALTER TABLE %s DROP PRIMARY KEY",
-                        id.getTableId().getFullName()).build();
-            }
+////            @Override
+////            public SqlStatement getDeleteStmt(PrimaryKey.Id eId) {
+////                return new SqlStatement.Builder("ALTER TABLE %s DROP PRIMARY KEY",
+////                        eId.getTableId().getFullName()).build();
+////            }
         };
     }
 
     @Override
     public AbstractConstraintSqlStatements getForeignKeySqlStmtSource() {
         return new AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey>() {
-            @Override
-            public SqlStatement getDeleteStmt(ForeignKey.Id id) {
-                return new SqlStatement.Builder("ALTER TABLE %s DROP FOREIGN KEY %s",
-                        id.getTableId().getFullName(), id.getName()).build();
-            }
+//            @Override
+//            public SqlStatement getDeleteStmt(ForeignKey.Id eId) {
+//                return new SqlStatement.Builder("ALTER TABLE %s DROP FOREIGN KEY %s",
+//                        eId.getTableId().getFullName(), eId.getName()).build();
+//            }
         };
     }
 
-    private abstract static class KeySqlStatements<K extends Constraint.Id, V extends Key> extends AbstractConstraintSqlStatements<K,V> {
-        @Override
-        public SqlStatement getUpdateStmt(V pk) {
-            return new SqlStatement.Builder("ALTER TABLE %s RENAME INDEX %s TO %s",
-                    pk.getTableId().getFullName(), pk.getName(), pk.getNewName()).build();
-        }
-
-        @Override
-        public SqlStatement getDeleteStmt(K id) {
-            return new SqlStatement.Builder("ALTER TABLE %s DROP INDEX %s",
-                    id.getTableId().getFullName(), id.getName()).build();
-        }
+    private abstract static class KeySqlStatements<K extends Constraint.Id, V extends Constraint<K>> extends AbstractConstraintSqlStatements<K,V> {
+//        @Override
+//        public SqlStatement getUpdateStmt(V pk) {
+//            return new SqlStatement.Builder("ALTER TABLE %s RENAME INDEX %s TO %s",
+//                    pk.getTableId().getFullName(), pk.getName(), pk.getNewName()).build();
+//        }
+//
+//        @Override
+//        public SqlStatement getDeleteStmt(K eId) {
+//            return new SqlStatement.Builder("ALTER TABLE %s DROP INDEX %s",
+//                    eId.getTableId().getFullName(), eId.getName()).build();
+//        }
 
     }
 
     @Override
     public AbstractMetaDataSqlStatements getIndexSqlStmtSource() {
         return new AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id>() {
-            @Override
-            public SqlStatement getDeleteStmt(Index.Id id) {
-                return new SqlStatement.Builder(super.getDeleteStmt(id).getSql()
-                        + " ON " + id.getTableId().getFullName()).build();
-            }
+//            @Override
+//            public SqlStatement getDeleteStmt(Index.Id eId) {
+//                return new SqlStatement.Builder(super.getDeleteStmt(eId).getSql()
+//                        + " ON " + eId.getTableId().getFullName()).build();
+//            }
         };
     }
 
-    public abstract static class Options extends MetaDataOptions {
-        public abstract static class Builder extends MetaDataOptions.Builder<Options> {
-            protected String characterSet;
-            protected String collate;
-
+    public static class Options extends MetaDataOptions<MySqlDb> {
+        public static class Builder extends MetaDataOptions.Builder<Options> {
             public Builder() {
+                super(MySqlDb.class);
             }
 
             public Builder characterSet(String characterSet) {
-                this.characterSet = characterSet;
+                addOption("CHARACTER SET", characterSet);
                 return this;
             }
 
             public Builder collate(String collate) {
-                this.collate = collate;
+                addOption("COLLATE", collate);
                 return this;
             }
 
             @Override
-            public String toString() {
-                final StringBuilder sb = new StringBuilder();
-                if (characterSet != null)
-                    sb.append("CHARACTER SET = ").append(characterSet);
-                if (collate != null)
-                    sb.append(" COLLATE  = ").append(collate);
-                return sb.toString();
+            public Options build() {
+                return new Options(this);
             }
-
         }
 
         public Options(Builder builder) {
             super(builder);
-            optionList.add(builder.toString());
         }
 
-        @Override
-        public String toString() {
-            return optionList.get(0);
-        }
-    }
-
-    public static class CreateOptions extends Options implements MdCreateOptions {
-        public static class Builder extends Options.Builder {
-            public Builder() {
-            }
-
-            public Builder existOptions(boolean existOptions) {
-                if (existOptions)
-                    setExistOptions("IF NOT EXISTS");
-                return this;
-            }
-
-            @Override
-            public CreateOptions build() {
-                return new CreateOptions(this);
-            }
+        public String getCharacterSet() {
+            return getOption("CHARACTER SET");
         }
 
-        public CreateOptions(Builder builder) {
-            super(builder);
+        public String getCollate() {
+            return getOption("COLLATE");
         }
-    }
 
-    public static class UpdateOptions extends Options implements MdUpdateOptions {
-        public static class Builder extends Options.Builder {
-            @Override
-            public Options build() {
-                return new UpdateOptions(this);
-            }
-        }
-        public UpdateOptions(Builder builder) {
-            super(builder);
-        }
     }
 }
 

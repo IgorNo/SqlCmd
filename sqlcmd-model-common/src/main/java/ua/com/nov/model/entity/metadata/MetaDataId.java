@@ -1,9 +1,9 @@
 package ua.com.nov.model.entity.metadata;
 
-import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.metadata.database.Database;
 
-public abstract class MetaDataId<C extends Persistent> implements Persistent<C> {
+public abstract class MetaDataId<C extends Hierarchical> implements Hierarchical<C> {
     private final C containerId;
     private final String name;
 

@@ -1,27 +1,45 @@
 package ua.com.nov.model.entity.metadata;
 
-import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.Optionable;
+import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
 
-public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optionable {
-    private final K id;
+public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persistent {
+    private final I id;
     private final String type;
-    private final MetaDataOptions mdOptions;
+    private String viewName;
     private String newName; // This field uses for renaming metadata
+    private final Optional<? extends MetaData> options;
 
-    public MetaData(K id, String type, MetaDataOptions options) {
+    public MetaData(I id, String type, Optional<? extends MetaData> options) {
         this.id = id;
-        this.mdOptions = options;
-        this.type = type;
+        if (type != null) {
+            if (type.toUpperCase().contains(id.getMdName())) {
+                this.type = type;
+            } else {
+                this.type = type + " " + id.getMdName();
+            }
+        } else {
+            this.type = id.getMdName();
+        }
+        checkMatch(id, options);
+        this.options = options;
     }
 
-    public MetaData(K id, MetaDataOptions mdOptions) {
-       this(id, null, mdOptions);
+    private boolean checkMatch(I eId, Optional<? extends MetaData> options) {
+        if (options != null) {
+            if (options.getDbClass() != eId.getDb().getClass())
+                throw new IllegalArgumentException("Mismatch between database and options class.");
+        }
+        return true;
+    }
+
+    public MetaData(I id, String type) {
+        this(id, type, null);
     }
 
     @Override
-    public K getId() {
+    public I getId() {
         return id;
     }
 
@@ -33,9 +51,12 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
         return type;
     }
 
-    @Override
-    public MetaDataOptions getMdOptions() {
-        return mdOptions;
+    public String getViewName() {
+        return viewName;
+    }
+
+    protected void setViewName(String viewName) {
+        this.viewName = viewName;
     }
 
     public String getNewName() {
@@ -44,6 +65,11 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
 
     public void setNewName(String newName) {
         this.newName = newName;
+    }
+
+    @Override
+    public Optional<? extends MetaData> getOptions() {
+        return options;
     }
 
     @Override
@@ -62,16 +88,19 @@ public abstract class MetaData<K extends MetaDataId> implements Unique<K>, Optio
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (type != null)
-            sb.append(type).append(' ');
-        sb.append(id.getMdName()).append(' ');
-        if (mdOptions != null && mdOptions.getExistOptions() != null)
-            sb.append(mdOptions.getExistOptions()).append(' ');
-        sb.append(id.getFullName()).append(" %s");
-        if (mdOptions != null)
-            sb.append(mdOptions);
+    public String getCreateStmtDefinition(String conflictOption) {
+        StringBuilder sb = new StringBuilder(type).append(' ');
+        if (conflictOption != null) sb.append(conflictOption).append(' ');
+        sb.append(id.getFullName());
+        if (options != null)
+            sb.append(' ').append(options);
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return getCreateStmtDefinition(null);
+    }
+
+
 }

@@ -1,33 +1,55 @@
 package ua.com.nov.model.dao.statement;
 
-import ua.com.nov.model.entity.*;
+import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.Unique;
+import ua.com.nov.model.entity.metadata.MetaDataId;
 
-public abstract class AbstractMetaDataSqlStatements<K extends Persistent, V extends Unique<K> & Optionable, C>
-        extends BaseSqlStmtSource<K, V, C> {
+public abstract class AbstractMetaDataSqlStatements
+        <I extends MetaDataId<C>, E extends Unique<I> & Persistent, C extends Hierarchical>
+        implements DataDefinitionSqlStmtSource<I, E, C> {
 
-    public SqlStatement getCreateStmt(V value) {
-        MetaDataOptions mdOptions = value.getMdOptions();
-        if (mdOptions != null) {
-            if (!(mdOptions instanceof MdCreateOptions))
-                throw new IllegalArgumentException("MetaDataOptions must be MdCreateOptions.");
-        }
-        return new SqlStatement.Builder(String.format("CREATE %s", value.toString())).build();
+    @Override
+    public SqlStatement getCreateStmt(E entity) {
+        return new SqlStatement.Builder("CREATE " + entity.getCreateStmtDefinition(null) + ";" +
+                getCommentStmt(entity)).build();
     }
 
-    public SqlStatement getUpdateStmt(V value) {
-        MetaDataOptions mdOptions = value.getMdOptions();
-        if (!(mdOptions instanceof MdUpdateOptions))
-            throw new IllegalArgumentException("MetaDataOptions must be MdUpdateOptions.");
+    protected String getCommentStmt(E entity) {
+        if (entity.getViewName() == null) return "";
+        return String.format("COMMENT ON %s %s IS '%s'",
+                entity.getId().getMdName(), entity.getId().getFullName(), entity.getViewName());
+    }
 
+    @Override
+    public SqlStatement getCreateIfNotExistsStmt(E entity) {
+        return new SqlStatement.Builder("CREATE " + entity.getCreateStmtDefinition("IF NOT EXISTS") +
+                ";" + getCommentStmt(entity)).build();
+    }
+
+    @Override
+    public SqlStatement getUpdateStmt(E entity) {
         StringBuilder sql = new StringBuilder();
-        for (String s : mdOptions.getOptionList()) {
-            sql.append(String.format("ALTER %s %s %s ;\n", value.getId().getMdName(), value.getId().getFullName(), s));
+        if (!getCommentStmt(entity).isEmpty()) sql.append('\n').append(getCommentStmt(entity)).append(';');
+        for (String s : entity.getOptions().getUpdateOptionsDefinition()) {
+            sql.append(String.format("\nALTER %s %s %s ;", entity.getId().getMdName(), entity.getId().getFullName(), s));
         }
         return new SqlStatement.Builder(sql.toString()).build();
     }
 
-    public SqlStatement getDeleteStmt(K key) {
-        return new SqlStatement.Builder(String.format("DROP %s %s", key.getMdName(), key.getFullName())).build();
+    @Override
+    public SqlStatement getDeleteStmt(I eId) {
+        return new SqlStatement.Builder(String.format("DROP %s %s", eId.getMdName(), eId.getFullName())).build();
     }
 
+    @Override
+    public SqlStatement getDeleteIfExistStmt(I eId) {
+        return new SqlStatement.Builder(String.format("DROP %s IF EXISTS %s", eId.getMdName(), eId.getFullName())).build();
+    }
+
+    @Override
+    public SqlStatement getRenameStmt(I eId, String newName) {
+        return new SqlStatement.Builder(String.format("ALTER %s %s RENAME TO %s",
+                eId.getMdName(), eId.getFullName(), newName)).build();
+    }
 }

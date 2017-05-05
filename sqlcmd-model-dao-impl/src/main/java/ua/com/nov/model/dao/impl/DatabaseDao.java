@@ -3,7 +3,9 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
-import ua.com.nov.model.dao.statement.SqlStatementSource;
+import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.Database.Id;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
@@ -20,24 +22,27 @@ import java.util.List;
 public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
 
     @Override
-    public Database read(Database.Id id) throws DaoSystemException {
+    public Database read(Database.Id eId) throws DaoSystemException {
         Database result = null;
         try {
             Connection conn = getDataSource().getConnection();
-            result = createDatabase(id.getDb(), id.getName());
+            result = createDatabase(eId.getDb(), eId.getName());
             result.addDataTypes(getDataTypes(conn));
+            result.addTableTypes(getTableTypes(conn));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return result;
     }
 
-    private static Database createDatabase(Database db, String dbName) {
-        Class[] paramTypes = new Class[]{String.class, String.class};
+    private Database createDatabase(Database db, String dbName) throws SQLException{
+        Class[] paramTypes = new Class[]{String.class, String.class, MetaDataOptions.class};
         Database result = null;
+        Optional<? extends Database> options = new OptionsDao<Id, Database>().read(db.new Id(db.getDbUrl(), dbName), getDataSource());
         try {
             Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
-            return constructor.newInstance(new Object[]{db.getDbUrl(), dbName});
+            return constructor.newInstance(new Object[]{db.getDbUrl(), dbName,
+                    options});
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -75,6 +80,15 @@ public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
         return dataTypeList;
     }
 
+    private List<String> getTableTypes(Connection conn) throws SQLException {
+        ResultSet rs = conn.getMetaData().getTableTypes();
+        List<String> result = new ArrayList<>();
+        while (rs.next()) {
+            result.add(rs.getString("TABLE_TYPE"));
+        }
+        return result;
+    }
+
     @Override
     protected SqlExecutor getExecutor(DataSource dataSource) {
         return new DDLSqlExecutor<>(dataSource);
@@ -91,7 +105,7 @@ public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
     }
 
     @Override
-    protected SqlStatementSource<Database.Id, Database, Database> getSqlStmtSource(Database db) {
+    protected AbstractMetaDataSqlStatements<Id, Database, Database> getSqlStmtSource(Database db) {
         return db.getDatabaseSqlStmtSource();
     }
 }

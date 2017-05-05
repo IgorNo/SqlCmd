@@ -13,8 +13,8 @@ import java.sql.SQLException;
 public class IndexDao extends MetaDataDao<Index.Id, Index, Table.Id> {
 
     @Override
-    protected ResultSet getResultSet(String catalog, String schema, String tableName, String ignore) throws SQLException {
-        return getDbMetaData().getIndexInfo(catalog, schema, tableName, false, false);
+    protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {
+        return getDbMetaData().getIndexInfo(id.getCatalog(), id.getSchema(), id.getName(), false, false);
     }
 
     @Override

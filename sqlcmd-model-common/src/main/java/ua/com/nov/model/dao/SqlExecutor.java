@@ -7,7 +7,7 @@ import ua.com.nov.model.dao.statement.SqlStatement;
 import javax.sql.DataSource;
 import java.util.List;
 
-public abstract class SqlExecutor<V> {
+public abstract class SqlExecutor<E> {
     private DataSource dataSource;
 
     public SqlExecutor(DataSource dataSource) {
@@ -25,6 +25,6 @@ public abstract class SqlExecutor<V> {
 
     public abstract void executeUpdateStmt(SqlStatement sqlStmt) throws DaoSystemException;
 
-    public abstract List<V> executeQueryStmt(SqlStatement sqlStmt, RowMapper mapper) throws DaoSystemException;
+    public abstract List<E> executeQueryStmt(SqlStatement sqlStmt, RowMapper mapper) throws DaoSystemException;
 
 }

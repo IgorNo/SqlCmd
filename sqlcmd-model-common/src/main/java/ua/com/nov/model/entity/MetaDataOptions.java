@@ -1,33 +1,73 @@
 package ua.com.nov.model.entity;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import ua.com.nov.model.entity.metadata.database.Database;
 
-public abstract class MetaDataOptions {
-    private final String existOptions;
-    protected final List<String> optionList = new LinkedList<>();
+import java.util.*;
 
-    protected abstract static class Builder<V> implements Buildable<V> {
-        private String existOptions;
+public abstract class MetaDataOptions<E> implements Optional<E> {
+    private final Class<? extends Database> dbClass;
+    private final Map<String, String> optionsMap;
 
-        public Builder() {
+    protected abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
+        private Class<? extends Database> dbClass;
+        private final Map<String, String> options = new HashMap<>();
+
+        public Builder(Class<? extends Database> dbClass) {
+            this.dbClass = dbClass;
         }
 
-        protected void setExistOptions(String existOptions) {
-            this.existOptions = existOptions;
+        public void addOption(String optionName, String optionValue) {
+            options.put(optionName, optionValue);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("");
+            for (Map.Entry<String, String> entry : options.entrySet()) {
+                sb.append(entry.getKey()).append(" = ").append(entry.getValue());
+            }
+            return sb.toString();
         }
     }
 
-    protected MetaDataOptions(Builder builder) {
-        this.existOptions = builder.existOptions;
+    public MetaDataOptions(Builder builder) {
+        this.dbClass = builder.dbClass;
+        optionsMap = builder.options;
     }
 
-    public String getExistOptions() {
-        return existOptions;
+    @Override
+    public String getOption(String optionName) {
+        return optionsMap.get(optionName);
     }
 
-    public List<String> getOptionList() {
-        return Collections.unmodifiableList(optionList);
+    @Override
+    public String getCreateOptionsDefinition() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : optionsMap.entrySet()) {
+            sb.append(entry.getKey()).append(" = ").append(entry.getValue()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public List<String> getUpdateOptionsDefinition() {
+        List<String> result = new LinkedList<>();
+        result.add(getCreateOptionsDefinition());
+        return result;
+    }
+
+    @Override
+    public Map<String, String> getOptionsMap() {
+        return Collections.unmodifiableMap(optionsMap);
+    }
+
+    @Override
+    public Class<? extends Database> getDbClass() {
+        return dbClass;
+    }
+
+    @Override
+    public String toString() {
+        return getCreateOptionsDefinition();
     }
 }

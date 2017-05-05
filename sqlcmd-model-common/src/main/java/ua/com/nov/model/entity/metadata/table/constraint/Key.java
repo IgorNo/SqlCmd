@@ -156,9 +156,6 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
 
         sb.append(getColumnNames());
 
-        if (getMdOptions() != null)
-            sb.append(' ').append(getMdOptions());
-
         return sb.toString();
     }
 

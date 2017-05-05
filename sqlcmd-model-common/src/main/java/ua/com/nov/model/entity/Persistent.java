@@ -1,17 +1,10 @@
 package ua.com.nov.model.entity;
 
-import ua.com.nov.model.entity.metadata.database.Database;
+public interface Persistent {
 
-public interface Persistent<C> {
+    String getViewName();
 
-   Database getDb();
+    Optional<?> getOptions();
 
-   String getMdName();
-
-   String getName();
-
-   String getFullName();
-
-   C getContainerId();
-
+    String getCreateStmtDefinition(String conflictOption);
 }
