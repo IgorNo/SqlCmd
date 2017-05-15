@@ -55,8 +55,8 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     }
 
     @Override
-    public void delete(I key) throws DaoSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(key.getDb()).getDeleteStmt(key));
+    public void delete(E entity) throws DaoSystemException {
+        executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getDeleteStmt(entity));
     }
 
     protected abstract AbstractRowMapper<E,C> getRowMapper(C id);
@@ -69,7 +69,7 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
 
 //    @Override
 //    public <T extends FetchParametersSource<C>> List<E> readFetch(T params) throws DaoSystemException {
-//        SqlStatement sqlStmt = getSqlStmtSource(params.getContainerId().getDb()).getReadFetchStmt(params);
+//        SqlStatement sqlStmt = getOptionsSqlStmtSource(params.getContainerId().getDb()).getReadFetchStmt(params);
 //        return executor.executeQueryStmt(sqlStmt, getRowMapper(params.getContainerId()));
 //    }
 //

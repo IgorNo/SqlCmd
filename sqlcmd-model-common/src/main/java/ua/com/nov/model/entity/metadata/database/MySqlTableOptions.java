@@ -25,12 +25,12 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
         }
 
         public Builder rowFormat(String rowFormat) {
-            addOption("ROW_FORMAT ", rowFormat);
+            addOption("ROW_FORMAT", rowFormat);
             return this;
         }
 
         public Builder defaultCharset(String defaultCharset) {
-            addOption("DEFAULT CHARACTER SET", defaultCharset);
+            addOption("DEFAULT CHARSET", defaultCharset);
             return this;
         }
 
@@ -44,18 +44,26 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
             return this;
         }
 
-        public Builder checkSum(Boolean checkSum) {
-            addOption("CHECKSUM", checkSum.toString());
+        public Builder checkSum(boolean checkSum) {
+            if (checkSum)
+                addOption("CHECKSUM", "1");
+            else
+                addOption("CHECKSUM", "0");
             return this;
         }
 
         public Builder avgRowLength (Integer avgRowLength) {
-            addOption("AVG_ROW_LENGTH ", avgRowLength.toString());
+            addOption("AVG_ROW_LENGTH", avgRowLength.toString());
             return this;
         }
 
-        public Builder createOptions(String parameters) {
-            addOption("", parameters);
+        public Builder minRows(Integer minRows) {
+            addOption("MIN_ROWS", minRows.toString());
+            return this;
+        }
+
+        public Builder maxRows(Integer minRows) {
+            addOption("MAX_ROWS", minRows.toString());
             return this;
         }
 
@@ -78,7 +86,7 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
     }
 
     public String getDefaultCharset() {
-        return getOption("DEFAULT CHARACTER SET");
+        return getOption("DEFAULT CHARSET");
     }
 
     public String getCollation() {
@@ -97,28 +105,27 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
         return Integer.valueOf(getOption("AVG_ROW_LENGTH"));
     }
 
-    public String getCreateOptions() {
-        return getOption("");
+    public String getMinRows() {
+        return getOption("MIN_ROWS");
+    }
+    public String getMaxRows() {
+        return getOption("MAX_ROWS");
     }
 
-    @Override
-    public String getCreateOptionsDefinition() {
-        StringBuilder sb = new StringBuilder();
-        String s = "";
-        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
-            if (entry.getKey().isEmpty())
-                sb.append(s).append(entry.getValue());
-            else
-                sb.append(s).append(entry.getKey()).append("=").append(entry.getValue());
-            s = " \n";
-        }
-        return sb.toString();
+    public String getComment() {
+        return getOption("COMMENT");
     }
 
     @Override
     public List<String> getUpdateOptionsDefinition() {
         List<String> result = new LinkedList<>();
-        result.add(getCreateOptionsDefinition().replace(' ', ','));
+        StringBuilder sb = new StringBuilder();
+        String s = "";
+        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
+            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
+            s = " \n";
+        }
+        result.add(sb.toString());
         return result;
     }
 

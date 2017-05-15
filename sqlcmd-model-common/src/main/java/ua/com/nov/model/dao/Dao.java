@@ -19,7 +19,7 @@ public interface Dao<I, E, C> {
     void update(E entity) throws DaoSystemException;
 
     //Delete entity with identifier = 'eId'
-    void delete(I eId) throws DaoSystemException;
+    void delete(E entity) throws DaoSystemException;
 
     // Read one entity with identifier = 'eId'
     E read(I eId) throws DaoSystemException, DaoBusinessLogicException;

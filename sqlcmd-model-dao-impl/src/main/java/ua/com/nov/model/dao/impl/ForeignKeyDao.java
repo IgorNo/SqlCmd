@@ -4,13 +4,14 @@ import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ForeignKeyDao extends MetaDataDao<ForeignKey.Id, ForeignKey, Table.Id> {
+public class ForeignKeyDao extends MetaDataDao<TableMd.Id, ForeignKey, Table.Id> {
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {
@@ -42,8 +43,8 @@ public class ForeignKeyDao extends MetaDataDao<ForeignKey.Id, ForeignKey, Table.
     }
 
     @Override
-    protected DataDefinitionSqlStmtSource<ForeignKey.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
-        return db.getForeignKeySqlStmtSource();
+    protected DataDefinitionSqlStmtSource<TableMd.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
+        return db.getTableMdSqlStmtSource();
     }
 
 }

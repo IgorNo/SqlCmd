@@ -6,7 +6,7 @@ import ua.com.nov.model.entity.metadata.table.column.Column;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class ForeignKey extends Key<ForeignKey.Id> {
+public class ForeignKey extends Key {
     private final Map<Integer, Column.Id> pkKey;
     private final Rule updateRule; // to action what happens to a foreign constraint when the primary constraint is updated
     private final Rule deleteRule; // to action what happens to a foreign constraint when the primary constraint is deleted
@@ -144,23 +144,14 @@ public class ForeignKey extends Key<ForeignKey.Id> {
         }
 
         public ForeignKey build() {
+            setType("FOREIGN KEY");
+            if (getName() == null) setName(generateName("fkey"));
             return new ForeignKey(this);
         }
     }
 
-    public static class Id extends Constraint.Id {
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public String getMdName() {
-            return "FOREIGN KEY";
-        }
-    }
-
-    public ForeignKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("fkey")));
+    private ForeignKey(Builder builder) {
+        super(builder);
         this.pkKey = builder.pkKey;
         this.updateRule = builder.updateRule;
         this.deleteRule = builder.deleteRule;
@@ -190,8 +181,8 @@ public class ForeignKey extends Key<ForeignKey.Id> {
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(super.toString());
+    public String getCreateStmtDefinition(String conflictOption) {
+        final StringBuilder sb = new StringBuilder(super.getCreateStmtDefinition(null));
         sb.append(" REFERENCES ").append(pkKey.get(1).getTableId().getFullName());
 
         String s = " (";

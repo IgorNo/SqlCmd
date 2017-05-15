@@ -12,19 +12,17 @@ import ua.com.nov.model.util.DbUtil;
 
 import java.sql.SQLException;
 
-
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-
-    public static final Database TEST_DATABASE = new HyperSqlDb(DbUtil.HYPER_SQL_MEMORY_URL, "tmp");
+    public static final Database TEST_DATABASE = new HyperSqlDb(DbUtil.HYPER_SQL_FILE_URL, "sys");
 
     @Override
     protected String getPassword() {
-        return null;
+        return "root";
     }
 
     @Override
     protected String getUserName() {
-        return null;
+        return "root";
     }
 
     @Override
@@ -34,13 +32,18 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws SQLException {
-        dataSource = new SingleConnectionDataSource(DbUtil.HYPER_SQL_MEM_SYSTEM_DB, null, null);
+        dataSource = new SingleConnectionDataSource(DbUtil.HYPER_SQL_FILE_SYSTEM_DB, "root", "root");
     }
 
     @Override
     @Before
     public void setUp() throws SQLException {
         DAO.setDataSource(dataSource);
+    }
+
+    @Test
+    public void testRead() throws DaoSystemException {
+        readDatabase();
     }
 
     @Override

@@ -118,7 +118,13 @@ public class Column extends TableMd<Column.Id> {
             return this;
         }
 
+        @Override
+        public String generateName(String postfix) {
+            return "newcol";
+        }
+
         public Column build() {
+            if (getName() == null) setName(generateName(""));
             return new Column(this);
         }
     }
@@ -135,7 +141,7 @@ public class Column extends TableMd<Column.Id> {
     }
 
     private Column(Builder builder) {
-        super(new Id(builder.getTableId(), builder.getName()));
+        super(new Id(builder.getTableId(), builder.getName()), builder);
         if (builder.precision != null && builder.precision > builder.columnSize) {
             throw new IllegalArgumentException("Precision can not be greater than column size.");
         }
@@ -148,6 +154,11 @@ public class Column extends TableMd<Column.Id> {
         this.remarks = builder.remarks;
         this.autoIncrement = builder.autoIncrement;
         this.generatedColumn = builder.generatedColumn;
+    }
+
+    @Override
+    public Column.Id getId() {
+        return super.getId();
     }
 
     public String getName() {
@@ -191,7 +202,7 @@ public class Column extends TableMd<Column.Id> {
     }
 
     @Override
-    public String toString() {
+    public String getCreateStmtDefinition(String conflictOption) {
         final StringBuilder sb = new StringBuilder(getName());
         sb.append(" ");
         sb.append(getFullTypeDeclaration());

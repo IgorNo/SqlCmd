@@ -4,12 +4,13 @@ import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UniqueKeyDao extends MetaDataDao<UniqueKey.Id, UniqueKey, Table.Id> {
+public class UniqueKeyDao extends MetaDataDao<TableMd.Id, UniqueKey, Table.Id> {
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {
@@ -34,8 +35,8 @@ public class UniqueKeyDao extends MetaDataDao<UniqueKey.Id, UniqueKey, Table.Id>
     }
 
     @Override
-    protected DataDefinitionSqlStmtSource<UniqueKey.Id, UniqueKey, Table.Id> getSqlStmtSource(Database db) {
-        return db.getUniqueKeySqlStmtSource();
+    protected DataDefinitionSqlStmtSource<TableMd.Id, UniqueKey, Table.Id> getSqlStmtSource(Database db) {
+        return db.getTableMdSqlStmtSource();
     }
     
 }

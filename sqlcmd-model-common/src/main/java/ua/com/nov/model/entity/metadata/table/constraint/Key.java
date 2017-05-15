@@ -1,20 +1,18 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 
 import java.util.*;
 
-public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
-    private final Map<Integer, KeyCol> columnList;
-    private final boolean unique;
+public abstract class Key extends Constraint {
+    private final Index index;
 
     public abstract static class Builder<V> extends TableMd.Builder<V> {
         private final Map<Integer, KeyCol> columnList = new TreeMap<>();
         private int keySeq = 1;
-        private boolean unique = true;
-        private String options;
 
         public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
@@ -69,7 +67,7 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
             return Collections.unmodifiableCollection(columnList.values());
         }
 
-        public String generateNameIfNull(String postfix) {
+        public String generateName(String postfix) {
             if (getName() == null) {
                 StringBuilder sb = new StringBuilder(getTableId().getName()).append("_");
                 for (KeyCol s : getColumnList()) {
@@ -88,85 +86,50 @@ public abstract class Key<K extends Constraint.Id> extends Constraint<K> {
             return keySeq;
         }
 
-        protected Builder unique(boolean unique) {
-            this.unique = unique;
-            return this;
-        }
-
-        public Builder options(String options) {
-            this.options = options;
-            return this;
-        }
-
     }
 
-    protected Key(Builder builder, K id) {
-        super(id);
-        this.columnList = builder.columnList;
-        for (int i = 1; i <= columnList.size(); i++) {
-            if (columnList.get(i) == null)
-                throw new IllegalArgumentException("Invalid key's structure");
+    protected Key(Builder builder) {
+        super(builder);
+        Index.Builder indexBuilder = new Index.Builder(builder.getName(), builder.getTableId());
+        Set<Map.Entry<Integer, KeyCol>> entry = builder.columnList.entrySet();
+        for (Map.Entry<Integer, KeyCol> colEntry : entry) {
+            indexBuilder.addColumn(colEntry.getKey(), colEntry.getValue());
         }
-        this.unique = builder.unique;
-    }
-
-    public int getNumberOfColumns() {
-        return columnList.size();
+        this.index = indexBuilder.build();
     }
 
     public KeyCol getColumn(int keySeq) {
-        KeyCol result = columnList.get(keySeq);
-        if (result == null) throw new IllegalArgumentException();
-        return result;
+        return index.getColumn(keySeq);
     }
 
     public List<String> getColumnsList() {
-        List<String> result = new ArrayList<>();
-        for (KeyCol col : columnList.values()) {
-            result.add(col.getName());
-        }
-        return result;
+        return index.getColumnsList();
     }
 
-    public boolean isUnique() {
-        return unique;
+    public Index getIndex() {
+        return index;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Key)) return false;
+        if (!(o instanceof Key || o.getClass() == Index.class)) return false;
 
-        Key key = (Key) o;
+        Index idx;
+        if (o instanceof Key) idx = ((Key) o).index;
+        else idx = (Index) o;
 
-        if (!getTableId().equals(key.getTableId())) return false;
-        return columnList.equals(key.columnList);
+        return index.equals(idx);
     }
 
     @Override
     public int hashCode() {
-        int result = getTableId().hashCode();
-        result = 31 * result + columnList.hashCode();
-        return result;
+        return index.hashCode();
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(super.toString());
-
-        sb.append(getColumnNames());
-
-        return sb.toString();
+    public String getCreateStmtDefinition(String conflictOption) {
+        return String.format(super.getCreateStmtDefinition(conflictOption), index.getColumnNames());
     }
 
-    public String getColumnNames() {
-        StringBuilder sb = new StringBuilder("(");
-        String s = "";
-        for (KeyCol column : columnList.values()) {
-            sb.append(s).append(column);
-            if (s.isEmpty()) s = ",";
-        }
-        sb.append(')');
-        return sb.toString();
-    }
 }

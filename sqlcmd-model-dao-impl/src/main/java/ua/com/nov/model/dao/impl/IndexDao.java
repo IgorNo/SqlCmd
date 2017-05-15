@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -22,8 +22,7 @@ public class IndexDao extends MetaDataDao<Index.Id, Index, Table.Id> {
         return new AbstractDao.AbstractRowMapper<Index, Table.Id>(id) {
             @Override
             public Index mapRow(ResultSet rs, int i) throws SQLException {
-                Index.Builder index = new Index.Builder(rs.getString("INDEX_NAME"), id)
-                        .unique(!rs.getBoolean("NON_UNIQUE"));
+                Index.Builder index = new Index.Builder(rs.getString("INDEX_NAME"), id);
                 do {
                     if (!rs.getString("INDEX_NAME").equalsIgnoreCase(index.getName())) {
                         rs.previous();
@@ -46,8 +45,8 @@ public class IndexDao extends MetaDataDao<Index.Id, Index, Table.Id> {
     }
 
     @Override
-    protected AbstractMetaDataSqlStatements getSqlStmtSource(Database db) {
-        return db.getIndexSqlStmtSource();
+    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Database db) {
+        return db.getDatabaseMdSqlStmtSource();
     }
 
 }

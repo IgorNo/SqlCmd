@@ -19,7 +19,7 @@ public class DbUtil {
 
     public static final Database HYPER_SQL_MEM_SYSTEM_DB = new HyperSqlDb(HYPER_SQL_MEMORY_URL, "");
 
-    public static final Database HYPER_SQL_FILE_SYSTEM_DB = new HyperSqlDb(HYPER_SQL_FILE_URL, "");
+    public static final Database HYPER_SQL_FILE_SYSTEM_DB = new HyperSqlDb(HYPER_SQL_FILE_URL, "sys");
 
     public static final Database MY_SQL_LOCAL_SYSTEM_DB = new MySqlDb(MY_SQL_LOCAL_URL, "");
 

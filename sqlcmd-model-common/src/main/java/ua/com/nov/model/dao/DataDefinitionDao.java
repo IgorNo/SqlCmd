@@ -2,13 +2,13 @@ package ua.com.nov.model.dao;
 
 import ua.com.nov.model.dao.exception.DaoSystemException;
 
-public interface DataDefinitionDao<I,E> {
+public interface DataDefinitionDao<E> {
     // Create entity if not exist
     void createIfNotExist(E entity) throws DaoSystemException;
 
     //Delete entity with identifier = 'eId'
-    void deleteIfExist(I eId) throws DaoSystemException;
+    void deleteIfExist(E entity) throws DaoSystemException;
 
     //Rename entity
-    void rename(I eId, String newName) throws DaoSystemException;
+    void rename(E entity, String newName) throws DaoSystemException;
 }

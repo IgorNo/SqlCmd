@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.metadata.schema;
 
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Schematic;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
@@ -7,7 +8,7 @@ import ua.com.nov.model.entity.metadata.database.Database;
 
 public class Schema extends MetaData<Schema.Id> {
 
-    public static class Id extends MetaDataId<Database.Id> implements Schematic{
+    public static class Id extends MetaDataId<Database.Id> implements Schematic {
         private final String catalog;
 
         public Id(Database.Id containerId, String catalog, String schema) {
@@ -46,8 +47,8 @@ public class Schema extends MetaData<Schema.Id> {
         }
     }
 
-    public Schema(Id id) {
-        super(id, null);
+    public Schema(Id id, Optional<Schema> options) {
+        super(id, null, options);
     }
 
 }

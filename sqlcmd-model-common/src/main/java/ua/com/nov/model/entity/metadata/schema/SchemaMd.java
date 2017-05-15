@@ -1,13 +1,14 @@
 package ua.com.nov.model.entity.metadata.schema;
 
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Schematic;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 
 public class SchemaMd<K extends SchemaMd.Id> extends MetaData<K> {
 
-    public SchemaMd(K id, String type) {
-        super(id, type);
+    public SchemaMd(K id, String type, Optional<? extends SchemaMd> options) {
+        super(id, type, options);
     }
 
     public String getCatalog() {

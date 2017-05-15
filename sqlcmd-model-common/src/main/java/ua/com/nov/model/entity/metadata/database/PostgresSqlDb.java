@@ -1,13 +1,12 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import org.springframework.jdbc.core.RowMapper;
-import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
+import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Table;
 
 import java.sql.ResultSet;
@@ -48,14 +47,20 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    public AbstractMetaDataSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements<Database.Id, PostgresSqlDb, Database>() {
+    public AbstractDatabaseMdSqlStatements getDatabaseSqlStmtSource() {
+        return new AbstractDatabaseMdSqlStatements<Id, PostgresSqlDb, Database>() {
             @Override
             public SqlStatement getReadAllStmt(Database cId) {
                 return new SqlStatement.Builder("SELECT datname FROM pg_database WHERE datistemplate = false")
                         .build();
             }
 
+        };
+    }
+
+    @Override
+    protected OptionsSqlStmtSource<Id, PostgresSqlDb> getDatabaseOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Id, PostgresSqlDb>() {
             @Override
             public SqlStatement getReadOptionsStmt(Id eId) {
                 return new SqlStatement.Builder(
@@ -85,16 +90,16 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    public AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() {
+    protected OptionsSqlStmtSource<Table.Id, Table> getTableOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Table.Id, Table>() {
             @Override
             public SqlStatement getReadOptionsStmt(Table.Id eId) {
                 return new SqlStatement.Builder(String.format(
-                        "SELECT pg_get_userbyid(c.relowner), spcname, relhasoids, reloptions\n" +
+                        "SELECT pg_get_userbyid(relowner), spcname, relhasoids, reloptions\n" +
                                 "FROM pg_catalog.pg_class\n" +
                                 "LEFT JOIN pg_tablespace ON reltablespace = pg_tablespace.oid\n" +
                                 "LEFT JOIN pg_namespace ON relnamespace = pg_namespace.oid\n" +
-                                "WHERE relname = '%s' AND relnamespace = '%s' ", eId.getName(), eId.getSchema()))
+                                "WHERE relname = '%s' AND nspname = '%s' ", eId.getName(), eId.getSchema()))
                         .build();
             }
 
@@ -103,26 +108,29 @@ public class PostgresSqlDb extends Database {
                 return new RowMapper<Optional<Table>>() {
                     @Override
                     public Optional<Table> mapRow(ResultSet rs, int i) throws SQLException {
-                        return new PostgresSqlTableOptions.Builder()
-                                .owner(rs.getString(1)).tableSpace(rs.getString(2))
-                                .oids(rs.getBoolean(3)).storageParameters(rs.getString(4))
-                                .build();
+                        PostgresSqlTableOptions.Builder builder = new PostgresSqlTableOptions.Builder()
+                                .owner(rs.getString(1))
+                                .oids(rs.getBoolean(3));
+                        String tablespace = rs.getString(2);
+                        if (tablespace == null) tablespace = "pg_default";
+                        builder.tableSpace(tablespace);
+                        String s = rs.getString(4);
+                        if (s != null) {
+                            s = s.substring(1, s.length()-1);
+                            String[] storageParameters = s.split(",");
+                            for (String option : storageParameters) {
+                                int equalPosition = option.indexOf('=');
+                                builder.addStorageParameter(option.substring(0, equalPosition).toUpperCase(),
+                                        option.substring(equalPosition + 1));
+                            }
+                        }
+                        return builder.build();
                     }
                 };
             }
         };
     }
 
-    @Override
-    public AbstractColumnSqlStatements getColumnSqlStmtSource() {
-        return new AbstractColumnSqlStatements() {
-//            @Override
-//            public SqlStatement getUpdateStmt(Column col) {
-//                return new SqlStatement.Builder("ALTER TABLE %s RENAME COLUMN %s TO %s",
-//                        col.getTableId().getFullName(), col.getName(), col.getNewName()).build();
-//            }
-        };
-    }
 
     public static class Options extends MetaDataOptions<PostgresSqlDb> {
 

@@ -1,10 +1,12 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 
-public class UniqueKey extends Key<UniqueKey.Id> {
+public class UniqueKey extends Key {
 
-    public final static class Builder extends Key.Builder {
+    public final static class Builder extends Key.Builder<UniqueKey> {
 
         public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
@@ -14,31 +16,19 @@ public class UniqueKey extends Key<UniqueKey.Id> {
             super(null, null, col);
         }
 
-        @Override
-        public Builder options(String options) {
-            super.options(options);
+        public Builder options(MetaDataOptions<Index> options) {
+            super.setOptions(options);
             return this;
         }
 
         public UniqueKey build() {
-            unique(true);
+            setType("UNIQUE");
+            if (getName() == null) setName(generateName("unique"));
             return new UniqueKey(this);
         }
     }
 
-    public UniqueKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("unique")));
+    private UniqueKey(Builder builder) {
+        super(builder);
     }
-
-    public static class Id extends Constraint.Id {
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public String getMdName() {
-            return "UNIQUE";
-        }
-    }
-
 }

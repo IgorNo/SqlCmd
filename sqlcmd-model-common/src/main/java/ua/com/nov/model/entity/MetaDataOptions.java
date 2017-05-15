@@ -6,7 +6,7 @@ import java.util.*;
 
 public abstract class MetaDataOptions<E> implements Optional<E> {
     private final Class<? extends Database> dbClass;
-    private final Map<String, String> optionsMap;
+    private final Map<String, String> options;
 
     protected abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
         private Class<? extends Database> dbClass;
@@ -30,20 +30,20 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
         }
     }
 
-    public MetaDataOptions(Builder builder) {
+    protected MetaDataOptions(Builder builder) {
         this.dbClass = builder.dbClass;
-        optionsMap = builder.options;
+        options = builder.options;
     }
 
     @Override
     public String getOption(String optionName) {
-        return optionsMap.get(optionName);
+        return options.get(optionName);
     }
 
     @Override
     public String getCreateOptionsDefinition() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : optionsMap.entrySet()) {
+        for (Map.Entry<String, String> entry : options.entrySet()) {
             sb.append(entry.getKey()).append(" = ").append(entry.getValue()).append('\n');
         }
         return sb.toString();
@@ -58,7 +58,7 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
 
     @Override
     public Map<String, String> getOptionsMap() {
-        return Collections.unmodifiableMap(optionsMap);
+        return Collections.unmodifiableMap(options);
     }
 
     @Override

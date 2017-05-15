@@ -42,9 +42,7 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Test
     public void testRead() throws DaoSystemException {
-        Database db = DAO.read(TEST_DATABASE.getId());
-        assertTrue(TEST_DATABASE.equals(db));
-        MySqlDb.Options options = (MySqlDb.Options) db.getOptions();
+        MySqlDb.Options options = (MySqlDb.Options) readDatabase().getOptions();
         assertTrue(OPTIONS.getCollate().equalsIgnoreCase(options.getCollate()));
         assertTrue(OPTIONS.getCharacterSet().equalsIgnoreCase(options.getCharacterSet()));
     }

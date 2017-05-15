@@ -1,10 +1,12 @@
 package ua.com.nov.model.entity.metadata.table.constraint;
 
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 
-public class PrimaryKey extends Key<PrimaryKey.Id> {
+public class PrimaryKey extends Key{
 
-    public final static class Builder extends Key.Builder {
+    public final static class Builder extends Key.Builder<PrimaryKey> {
 
         public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
@@ -12,37 +14,26 @@ public class PrimaryKey extends Key<PrimaryKey.Id> {
 
         public Builder(Table.Id tableId, String... column) {
             super( null, tableId,column);
-            generateNameIfNull("pkey");
         }
 
         public Builder(String... columnName) {
             super(null, null, columnName);
         }
 
-        @Override
-        public Builder options(String options) {
-            super.options(options);
+        public Builder options(MetaDataOptions<Index> options) {
+            super.setOptions(options);
             return this;
         }
 
         public PrimaryKey build() {
+            setType("PRIMARY KEY");
+            if (getName() == null) setName(generateName("pkey"));
             return new PrimaryKey(this);
         }
     }
 
     private PrimaryKey(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("pkey")));
+        super(builder);
     }
 
-    public static class Id extends Constraint.Id {
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public String getMdName() {
-            return "PRIMARY KEY";
-        }
-
-    }
 }

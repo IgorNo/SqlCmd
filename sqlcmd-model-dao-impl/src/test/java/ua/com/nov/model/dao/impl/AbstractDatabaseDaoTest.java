@@ -43,9 +43,15 @@ public abstract class AbstractDatabaseDaoTest {
 
     protected abstract String getUserName();
 
-    @Test(expected = SQLException.class)
+    public Database readDatabase() throws DaoSystemException {
+        Database db = DAO.read(getTestDatabase().getId());
+        assertTrue(getTestDatabase().equals(db));
+        return db;
+    }
+
+        @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException, DaoSystemException {
-        DAO.delete(getTestDatabase().getId());
+        DAO.delete(getTestDatabase());
         Connection conn = getTestDatabase().getConnection(getUserName(), getPassword());
         assertTrue(false);
         conn.close();

@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public abstract class MetaDataDao<I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
-        extends AbstractDao<I,E,C> implements DataDefinitionDao<I, E> {
+        extends AbstractDao<I,E,C> implements DataDefinitionDao<E> {
 
     @Override
     protected SqlExecutor<E> getExecutor(DataSource dataSource) {
@@ -35,13 +35,13 @@ public abstract class MetaDataDao<I extends MetaDataId<C>, E extends MetaData<I>
     }
 
     @Override
-    public void deleteIfExist(I eId) throws DaoSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(eId.getDb()).getDeleteIfExistStmt(eId));
+    public void deleteIfExist(E entity) throws DaoSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getDeleteIfExistStmt(entity));
     }
 
     @Override
-    public void rename(I eId, String newName) throws DaoSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(eId.getDb()).getRenameStmt(eId, newName));
+    public void rename(E entity, String newName) throws DaoSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getRenameStmt(entity, newName));
     }
 
     @Override

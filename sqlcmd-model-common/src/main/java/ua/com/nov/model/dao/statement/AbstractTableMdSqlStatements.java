@@ -1,9 +1,9 @@
 package ua.com.nov.model.dao.statement;
 
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.TableMd;
 
-public abstract class AbstractConstraintSqlStatements<I extends Constraint.Id, E extends Constraint<I>>
+public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E extends TableMd>
         implements DataDefinitionSqlStmtSource<I, E,  Table.Id> {
 
     @Override
@@ -23,19 +23,19 @@ public abstract class AbstractConstraintSqlStatements<I extends Constraint.Id, E
     }
 
     @Override
-    public SqlStatement getDeleteStmt(I eId) {
-        return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP CONSTRAINT %s",
-                eId.getTableId().getFullName(), eId.getName())).build();
+    public SqlStatement getDeleteStmt(E entity) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP %s %s",
+                entity.getTableId().getFullName(), entity.getId().getMdName(), entity.getName())).build();
     }
 
     @Override
-    public SqlStatement getDeleteIfExistStmt(I eId) {
+    public SqlStatement getDeleteIfExistStmt(E entity) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public SqlStatement getRenameStmt(I eId, String newName) {
-        return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME CONSTRAINT %s TO %s",
-                eId.getTableId().getFullName(), eId.getName(), newName)).build();
+    public SqlStatement getRenameStmt(E entity, String newName) {
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME %s %s TO %s",
+                entity.getTableId().getFullName(), entity.getId().getMdName(), entity.getName(), newName)).build();
     }
 }

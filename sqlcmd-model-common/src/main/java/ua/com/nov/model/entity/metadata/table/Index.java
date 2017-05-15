@@ -1,58 +1,49 @@
 package ua.com.nov.model.entity.metadata.table;
 
-import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
+import ua.com.nov.model.entity.metadata.database.PostgresSqlIndexOptions;
+import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 
-public class Index extends Key<Index.Id> {
-    private final String indexType;
-    private final String using;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-    public final static class Builder extends Key.Builder {
-        private String indexType;
-        private String using;
+public class Index extends TableMd<Index.Id> {
+    private final Map<Integer, KeyCol> columnList;
+
+    public final static class Builder extends Key.Builder<Index> {
 
         public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
-            unique(false);
         }
 
         public Builder(String keyName, Table.Id tableId, String... col) {
             super(keyName, tableId, col);
-            unique(false);
         }
 
         public Builder(String... col) {
             this(null, null, col);
         }
 
-        public Builder indexType(String indexType) {
-            this.indexType = indexType;
-            return this;
-        }
-
-        public Builder using(String using) {
-            this.using = using;
-            return this;
-        }
-
-        @Override
-        public Builder unique(boolean unique) {
-            super.unique(unique);
-            return this;
-        }
-
-        @Override
-        public Builder options(String options) {
-            super.options(options);
+        public Builder options(MetaDataOptions<Index> options) {
+            super.setOptions(options);
             return this;
         }
 
         public Index build() {
+            if (getName() == null) setName(generateName("idx"));
             return new Index(this);
+        }
+
+        @Override
+        protected Map<Integer, KeyCol> getColumnMap() {
+            return super.getColumnMap();
         }
     }
 
-    public static class Id extends Constraint.Id{
+    public static class Id extends TableMd.Id {
         public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
@@ -63,42 +54,79 @@ public class Index extends Key<Index.Id> {
         }
     }
 
-    public Index(Builder builder) {
-        super(builder, new Id(builder.getTableId(), builder.generateNameIfNull("idx")));
-        this.indexType = builder.indexType;
-        this.using = builder.using;
+    private Index(Builder builder) {
+        super(new Id(builder.getTableId(), builder.getName()), builder);
+        this.columnList = builder.getColumnMap();
+        for (int i = 1; i <= columnList.size(); i++) {
+            if (columnList.get(i) == null)
+                throw new IllegalArgumentException("Invalid key's structure");
+        }
     }
 
-    public String getIndexType() {
-        return indexType;
+    public int getNumberOfColumns() {
+        return columnList.size();
     }
 
-    public String getUsing() {
-        return using;
+    public KeyCol getColumn(int keySeq) {
+        KeyCol result = columnList.get(keySeq);
+        if (result == null) throw new IllegalArgumentException();
+        return result;
+    }
+
+    public List<String> getColumnsList() {
+        List<String> result = new ArrayList<>();
+        for (KeyCol col : columnList.values()) {
+            result.add(col.getName());
+        }
+        return result;
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o.getClass() == Index.class || o instanceof Key)) return false;
 
-        if (indexType != null) {
-            sb.append(indexType).append(' ');
-        } else if (isUnique()) {
-            sb.append("UNIQUE ");
+        Index idx;
+        if (o instanceof Key) idx = ((Key) o).getIndex();
+        else idx = (Index) o;
+
+        if (!getId().getTableId().equals(idx.getId().getTableId())) return false;
+        return columnList.equals(idx.columnList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getTableId().hashCode();
+        result = 31 * result + columnList.hashCode();
+        return result;
+    }
+
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        final StringBuilder sb = new StringBuilder(" ON ");
+        sb.append(getId().getTableId().getFullName());
+
+        if (getId().getTableId().getDb().getClass().equals(PostgresSqlDb.class)) {
+            if (getOptions() != null) {
+                PostgresSqlIndexOptions options = (PostgresSqlIndexOptions) getOptions();
+                if (options.getUsing() != null) sb.append(options.getUsing());
+            }
         }
 
-        sb.append(getId().getName()).append(" ON ").append(getTableId().getFullName()).append(" (");
+        sb.append(' ').append(getColumnNames());
 
+        return String.format(super.getCreateStmtDefinition(conflictOption), sb.toString());
+    }
+
+    public String getColumnNames() {
+
+        StringBuilder sb = new StringBuilder("(");
         String s = "";
-        for (int i = 1; i <= getNumberOfColumns(); i++) {
-            sb.append(s).append(getColumn(i));
+        for (KeyCol column : columnList.values()) {
+            sb.append(s).append(column);
             if (s.isEmpty()) s = ",";
         }
         sb.append(')');
-
-        if (using != null)
-            sb.append(" USING ").append(using);
-
         return sb.toString();
     }
 

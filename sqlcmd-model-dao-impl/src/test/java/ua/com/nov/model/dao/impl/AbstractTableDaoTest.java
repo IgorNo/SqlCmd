@@ -1,10 +1,15 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.MetaData;
+import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -19,12 +24,13 @@ import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractTableDaoTest {
 
-    protected static final TableDao TABLE_DAO = new TableDao();
+    protected static final MetaDataDao<Table.Id, Table, Schema.Id> TABLE_DAO = new TableDao();
     protected static final ColumnDao COLUMN_DAO = new ColumnDao();
     protected static final PrimaryKeyDao PRIMARY_KEY_DAO = new PrimaryKeyDao();
     protected static final ForeignKeyDao FOREIGN_KEY_DAO = new ForeignKeyDao();
@@ -95,9 +101,11 @@ public abstract class AbstractTableDaoTest {
 
         Table.Id usersId = new Table.Id(testDb.getId(), "Users", catalog, schema);
         users = new Table.Builder(usersId).viewName("Пользователи")
-                .addColumn(new Column.Builder("login", varchar).size(25))
+                .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("login", varchar).size(25).nullable(DataType.NOT_NULL))
                 .addColumn(new Column.Builder("password", varchar).size(25))
                 .addConstraint(new PrimaryKey.Builder("login"))
+                .addConstraint(new UniqueKey.Builder("id"))
                 .options(options)
                 .build();
 
@@ -111,13 +119,20 @@ public abstract class AbstractTableDaoTest {
         dataSource.getConnection().close();
     }
 
+    protected static void compareOptions(Optional<?> options, Optional<?> rOptions) {
+        for (Map.Entry<String, String> entry : options.getOptionsMap().entrySet()) {
+            assertTrue(entry.getValue().equalsIgnoreCase(rOptions.getOption(entry.getKey())));
+        }
+    }
+
+    @Before
     public void setUp() throws DaoSystemException, DaoBusinessLogicException {
         tearDown();
         TABLE_DAO.create(customers);
         TABLE_DAO.create(products);
         TABLE_DAO.create(orders);
         TABLE_DAO.create(users);
-        TABLE_DAO.create(temp);
+//        TABLE_DAO.create(temp);
     }
 
     @Test
@@ -150,7 +165,27 @@ public abstract class AbstractTableDaoTest {
         for (ForeignKey key : orders.getForeignKeyList()) {
             assertTrue(table.getForeignKeyList().contains(key));
         }
+
+        Table result = TABLE_DAO.read(users.getId());
+        assertTrue(users.equals(result));
+        compareColumns(result, users);
+        if (getCreateOptions() != null)
+            compareOptions(getCreateOptions(), result.getOptions());
     }
+
+    protected abstract Optional<?> getCreateOptions();
+
+    @Test
+    public void testUpdateTable() throws DaoSystemException, DaoBusinessLogicException {
+        Table table = new Table.Builder(users.getId()).viewName("New Comment").options(getUpdateOptions()).build();
+        TABLE_DAO.update(table);
+        Table result = TABLE_DAO.read(users.getId());
+        assertTrue(result.getViewName().equalsIgnoreCase(table.getViewName()));
+        if (getUpdateOptions() != null)
+            compareOptions(getUpdateOptions(), result.getOptions());
+    }
+
+    protected abstract Optional<Table> getUpdateOptions();
 
     protected void compareColumns(Table table1, Table table2) {
         for (Column col : table1.getColumns()) {
@@ -176,10 +211,11 @@ public abstract class AbstractTableDaoTest {
         }
     }
 
-    @Test(expected = DaoBusinessLogicException.class)
+    @Test
     public void testCreateTemporaryTable() throws DaoSystemException {
         TABLE_DAO.create(temp);
         Table readTable = TABLE_DAO.read(temp.getId());
+        assertTrue(readTable.equals(temp));
     }
 
     @Test
@@ -191,20 +227,44 @@ public abstract class AbstractTableDaoTest {
         assertTrue(tables.contains(users));
     }
 
-    @Test
-    public void testRenameTable() throws DaoBusinessLogicException, DaoSystemException {
-        String newName = "new_name";
-        TABLE_DAO.rename(users.getId(), newName);
-        Table.Id updateTableId = new Table.Id(users.getId().getContainerId(), newName);
-        Table result = TABLE_DAO.read(updateTableId);
-        assertTrue(result.getName().equalsIgnoreCase(newName));
-    }
-
     @Test(expected = DaoBusinessLogicException.class)
     public void testDeleteTable() throws DaoSystemException, DaoBusinessLogicException {
-        TABLE_DAO.delete(orders.getId());
+        TABLE_DAO.delete(orders);
         TABLE_DAO.read(orders.getId());
         assertTrue(false);
+    }
+
+    @Test
+    public void testRenameTable() throws DaoSystemException {
+        renameMetaData(TABLE_DAO, users, new Table.Id(users.getId().getContainerId(), "new_name"));
+    }
+
+    private <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    void renameMetaData(MetaDataDao<I, E, C> dao, E entity, I updatedId)
+            throws DaoSystemException {
+        dao.rename(entity, updatedId.getName());
+        E result = dao.read(updatedId);
+        assertTrue(result.getName().equalsIgnoreCase(updatedId.getName()));
+    }
+
+    @Test
+    public void testRenameColumn() throws DaoSystemException {
+        renameMetaData(COLUMN_DAO, customers.getColumn("name"), new Column.Id(customers.getId(), "new_name"));
+    }
+
+    @Test
+    public void testRenamePrimaryKey() throws DaoSystemException {
+        renameMetaData(PRIMARY_KEY_DAO, customers.getPrimaryKey(), new PrimaryKey.Id(customers.getId(), "new_name"));
+    }
+
+    @Test
+    public void testRenameForeignKey() throws DaoSystemException, DaoBusinessLogicException {
+        renameMetaData(FOREIGN_KEY_DAO, orders.getForeignKeyList().get(0), new ForeignKey.Id(orders.getId(), "new_name"));
+    }
+
+    @Test
+    public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
+        renameMetaData(UNIQUE_KEY_DAO, customers.getUniqueKeyList().get(0), new UniqueKey.Id(customers.getId(), "new_name"));
     }
 
     @Test
@@ -216,126 +276,70 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testReadColumn() throws DaoBusinessLogicException, DaoSystemException {
+    public void testReadColumn() throws DaoSystemException {
         Column testCol = customers.getColumn("name");
         Column readCol = COLUMN_DAO.read(testCol.getId());
         assertTrue(testCol.equals(readCol));
     }
 
-    @Test
-    public void testRenameColumn() throws DaoSystemException, DaoBusinessLogicException {
-        Column testCol = customers.getColumn("name");
-        testCol.setNewName("test");
-        COLUMN_DAO.update(testCol);
-        Column readCol = COLUMN_DAO.read(new Column.Id(customers.getId(), "test"));
-        assertTrue(readCol.getNewName().equalsIgnoreCase(testCol.getNewName()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testDeleteColumn() throws DaoSystemException, DaoBusinessLogicException {
-        COLUMN_DAO.delete(customers.getColumn("address").getId());
+    @Test(expected = DaoBusinessLogicException.class)
+    public void testDeleteColumn() throws DaoSystemException {
+        COLUMN_DAO.delete(customers.getColumn("address"));
         COLUMN_DAO.read(customers.getColumn("address").getId());
         assertTrue(false);
     }
 
     @Test
-    public void testDeleteAddReadPrimaryKey() throws DaoSystemException, DaoBusinessLogicException {
-        PRIMARY_KEY_DAO.delete(users.getPrimaryKey().getId());
-        PrimaryKey pkTest = new PrimaryKey.Builder(users.getId(), "password").build();
-        PRIMARY_KEY_DAO.create(pkTest);
-        PrimaryKey pkRead = PRIMARY_KEY_DAO.read(pkTest.getId());
-        assertTrue(pkRead.equals(pkTest));
+    public void testReadDeleteAddPrimaryKey() throws DaoSystemException, DaoBusinessLogicException {
+        Table testTable = TABLE_DAO.read(users.getId());
+        readDeleteAddMetaData(PRIMARY_KEY_DAO, testTable.getPrimaryKey().getId(), users.getPrimaryKey());
+    }
+
+    protected <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    void readDeleteAddMetaData(MetaDataDao<I, E, C> dao, I mdId, E newMd)
+            throws DaoSystemException {
+        E md = dao.read(mdId);
+        assertTrue(md.getId().equals(mdId));
+        dao.delete(md);
+        try {
+            dao.read(mdId);
+            assertTrue(false);
+        } catch (DaoBusinessLogicException e) {/*NOP*/}
+        dao.create(newMd);
+        E result = dao.read(newMd.getId());
+        assertTrue(result.equals(md));
     }
 
     @Test
-    public void testRenamePrimaryKey() throws DaoSystemException, DaoBusinessLogicException {
-        PrimaryKey testPk = customers.getPrimaryKey();
-        testPk.setNewName("test");
-        PRIMARY_KEY_DAO.update(testPk);
-        PrimaryKey readPk = PRIMARY_KEY_DAO.read(testPk.getId());
-        assertTrue(readPk.equals(testPk));
-    }
-
-    @Test
-    public void testDeleteAddReadForeignKey() throws DaoSystemException, DaoBusinessLogicException {
+    public void testReadDeleteAddForeignKey() throws DaoSystemException {
+        Table testTable = TABLE_DAO.read(orders.getId());
         ForeignKey fk = orders.getForeignKeyList().get(0);
-        FOREIGN_KEY_DAO.delete(fk.getId());
-        try {
-            FOREIGN_KEY_DAO.read(fk.getId());
-            assertTrue(false);
-        } catch (IllegalArgumentException e) {/*NOP*/}
-        FOREIGN_KEY_DAO.create(fk);
-        Table readTable = TABLE_DAO.read(orders.getId());
-        assertTrue(readTable.getForeignKeyList().contains(fk));
+        readDeleteAddMetaData(FOREIGN_KEY_DAO, testTable.getForeignKey(fk.getName()).getId(), fk);
     }
 
     @Test
-    public void testRenameForeignKey() throws DaoSystemException, DaoBusinessLogicException {
-        ForeignKey testFk = orders.getForeignKeyList().get(0);
-        testFk.setNewName("test");
-        FOREIGN_KEY_DAO.update(testFk);
-        ForeignKey readFk = FOREIGN_KEY_DAO.read(new ForeignKey.Id(orders.getId(), "test"));
-        assertTrue(readFk.equals(testFk));
-        assertTrue(readFk.getName().equalsIgnoreCase(testFk.getNewName()));
-    }
-
-    @Test
-    public void testDeleteAddReadUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
+    public void testReadDeleteAddUniqueKey() throws DaoSystemException {
+        Table testTable = TABLE_DAO.read(customers.getId());
         UniqueKey uk = customers.getUniqueKeyList().get(0);
-        UNIQUE_KEY_DAO.delete(uk.getId());
-        try {
-            UNIQUE_KEY_DAO.read(uk.getId());
-            assertTrue(false);
-        } catch (IllegalArgumentException e) {/*NOP*/}
-        UNIQUE_KEY_DAO.create(uk);
-        Table readTable = TABLE_DAO.read(customers.getId());
-        assertTrue(readTable.getUniqueKeyList().contains(uk));
+        readDeleteAddMetaData(UNIQUE_KEY_DAO, testTable.getUniqueKey(uk.getName()).getId(), uk);
     }
 
     @Test
-    public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
-        UniqueKey testUk = customers.getUniqueKeyList().get(0);
-        testUk.setNewName("test");
-        UNIQUE_KEY_DAO.update(testUk);
-        UniqueKey readUk = UNIQUE_KEY_DAO.read(new UniqueKey.Id(customers.getId(), "test"));
-        assertTrue(readUk.equals(testUk));
-        assertTrue(readUk.getName().equalsIgnoreCase(testUk.getNewName()));
-    }
-
-    @Test
-    public void testDeleteAddReadIndex() throws DaoSystemException, DaoBusinessLogicException {
+    public void testDeleteAddReadIndex() throws DaoSystemException {
+        Table testTable = TABLE_DAO.read(customers.getId());
         Index index = customers.getIndexList().get(0);
-        INDEX_DAO.delete(index.getId());
-        try {
-            INDEX_DAO.read(index.getId());
-            assertTrue(false);
-        } catch (IllegalArgumentException e) {/*NOP*/}
-        INDEX_DAO.create(index);
-        Table readTable = TABLE_DAO.read(customers.getId());
-        assertTrue(readTable.getIndexList().contains(index));
+        readDeleteAddMetaData(INDEX_DAO, testTable.getIndex(index.getName()).getId(), index);
     }
 
     @After
     public void tearDown() throws DaoSystemException, DaoBusinessLogicException {
         List<Table> tables = TABLE_DAO.readAll(schemaId);
         if (tables.contains(orders)) {
-            TABLE_DAO.delete(orders.getId());
+            TABLE_DAO.delete(orders);
             tables.remove(orders);
         }
         for (Table table : tables) {
-            TABLE_DAO.delete(table.getId());
+            TABLE_DAO.delete(table);
         }
-    }
-
-    public Table getCustomers() {
-        return customers;
-    }
-
-    public Table getProducts() {
-        return products;
-    }
-
-    public Table getOrders() {
-        return orders;
     }
 }

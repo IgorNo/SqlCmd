@@ -1,21 +1,18 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.dao.statement.AbstractColumnSqlStatements;
-import ua.com.nov.model.dao.statement.AbstractConstraintSqlStatements;
-import ua.com.nov.model.dao.statement.AbstractMetaDataSqlStatements;
-import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
+import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
+import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.*;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.schema.Schema;
-import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
-import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
-import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
-import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
+import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -43,38 +40,41 @@ public abstract class Database extends BaseDataSource
 
     public abstract String getAutoIncrementDefinition();
 
-    public DataDefinitionSqlStmtSource getSqlStmtSource(String mdName) {
+    public OptionsSqlStmtSource getOptionsSqlStmtSource(String mdName) {
         switch (mdName) {
            case "DATABASE":
-              return getDatabaseSqlStmtSource();
+              return getDatabaseOptionsSqlStmtSource();
+
+           case "TABLE":
+              return getTableOptionsSqlStmtSource();
 
             default:
                 throw new IllegalArgumentException();
         }
     }
 
-    public abstract AbstractMetaDataSqlStatements<Database.Id, Database, Database> getDatabaseSqlStmtSource();
-
-    public AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource(){
-        return new AbstractMetaDataSqlStatements<Table.Id, Table, Schema.Id>() { };
+    protected OptionsSqlStmtSource<Id, ? extends Database> getDatabaseOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Id, Database>() {};
     }
 
-    public abstract AbstractColumnSqlStatements getColumnSqlStmtSource();
-
-    public AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey> getPrimaryKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<PrimaryKey.Id, PrimaryKey>(){};
+    protected OptionsSqlStmtSource<Table.Id, Table> getTableOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Table.Id, Table>() {};
     }
 
-    public AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey> getForeignKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<ForeignKey.Id, ForeignKey>(){};
+    public abstract AbstractDatabaseMdSqlStatements<Id, Database, Database> getDatabaseSqlStmtSource();
+
+    public <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    AbstractDatabaseMdSqlStatements<I, E, C> getDatabaseMdSqlStmtSource(){
+        return new AbstractDatabaseMdSqlStatements() { };
     }
 
-    public AbstractConstraintSqlStatements<UniqueKey.Id, UniqueKey> getUniqueKeySqlStmtSource() {
-        return new AbstractConstraintSqlStatements<UniqueKey.Id, UniqueKey>(){};
+    public <I extends TableMd.Id, E extends TableMd>
+    AbstractTableMdSqlStatements<I,E> getTableMdSqlStmtSource(){
+        return new AbstractTableMdSqlStatements<I,E>() { };
     }
 
-    public AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id> getIndexSqlStmtSource() {
-        return new AbstractMetaDataSqlStatements<Index.Id, Index, Table.Id> (){};
+    public AbstractTableMdSqlStatements<Column.Id, Column> getColumnSqlStmtSource() {
+        return new AbstractTableMdSqlStatements<Column.Id, Column>() {};
     }
 
     // convert 'parameter' to database format (to upper or lower case)

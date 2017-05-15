@@ -18,34 +18,28 @@ public class Check extends Constraint {
             this(null, name, expression);
         }
 
+        @Override
+        public String generateName(String postfix) {
+            return getName();
+        }
+
         public Check build() {
+            if (getName() == null) setName("");
             return new Check(this);
         }
     }
 
-    public static class Id extends Constraint.Id {
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public String getMdName() {
-            return "CHECK";
-        }
-
-    }
-
     public Check(Builder builder) {
-        super(new Id(builder.getTableId(), builder.getName()));
+        super(builder);
         this.expression = builder.expression;
     }
 
-    public String getExpression() {
-        return expression;
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        return String.format(super.getCreateStmtDefinition(conflictOption), getExpression());
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + " CHECK(" + expression + ')';
+    public String getExpression() {
+        return "(" + expression + ")";
     }
 }

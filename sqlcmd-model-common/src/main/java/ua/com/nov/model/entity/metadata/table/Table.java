@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
-import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.schema.SchemaMd;
@@ -19,7 +19,7 @@ public class Table extends SchemaMd<Table.Id> {
     private final Set<Index> indices; // table indices list
 
     public Table(Builder builder) {
-        super(builder.id, builder.type);
+        super(builder.id, builder.type, builder.options);
         setViewName(builder.viewName);
         this.constraints = builder.constraints;
         this.columns = builder.columns;
@@ -139,30 +139,28 @@ public class Table extends SchemaMd<Table.Id> {
         return (Set<Check>) constraints.get(Check.class);
     }
 
-
     @Override
-    public String toString() {
+    public String getCreateStmtDefinition(String conflictOption) {
         StringBuilder sb = new StringBuilder();
         if (columns.size() != 0) {
-            sb.append("(\n");
+            sb.append(" (\n");
             String s = "";
             for (TableMd md : getMetaData()) {
-                sb.append(s).append('\t').append(md.toString());
+                sb.append(s).append('\t').append(md.getCreateStmtDefinition(null));
                 if (s.isEmpty()) s = ",\n";
             }
             sb.append("\n)");
         }
-        return super.toString() + sb.toString();
+        return String.format(super.getCreateStmtDefinition(conflictOption), sb.toString());
     }
 
     public static class Builder implements Buildable<Table> {
         private final Id id;     // table object identifier
-        private String type;
-        private MetaDataOptions<Table> options;
-
         private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
                 new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks, etc)
+        private String type;
+        private Optional<Table> options;
         private Set<Index> indices = new HashSet<>(); // table indices list
 
         private String viewName;
@@ -236,26 +234,22 @@ public class Table extends SchemaMd<Table.Id> {
             }
         }
 
-        public <V extends Constraint<?>> Builder addConstraint(V.Builder<V> builder) {
+        public <V extends Constraint> Builder addConstraint(V.Builder<V> builder) {
             builder.setTableId(getId());
             addConstraint(builder.build());
             return this;
         }
 
-        public <V extends Constraint<?>> Builder addConstraint(V constraint) {
+        public <V extends Constraint> Builder addConstraint(V constraint) {
             checkTableId(constraint);
-            if (constraint instanceof Key<?>) {
-                checkColumnsInKey(((Key<?>) constraint).getColumnsList());
+            if (constraint instanceof Key) {
+                checkColumnsInKey(((Key) constraint).getColumnsList());
             }
 
             Set<V> constraintSet = (Set<V>) constraints.get(constraint.getClass());
             if (constraintSet == null) {
-                if (!(constraint.getClass() == Index.class)) {
-                    constraintSet = new LinkedHashSet<>();
-                    constraints.put(constraint.getClass(), constraintSet);
-                } else {
-                    throw new IllegalArgumentException("Index isn't constraint");
-                }
+                constraintSet = new LinkedHashSet<>();
+                constraints.put(constraint.getClass(), constraintSet);
             } else {
                 if (constraint.getClass() == PrimaryKey.class) {
                     if (constraintSet.isEmpty()) {
@@ -276,7 +270,7 @@ public class Table extends SchemaMd<Table.Id> {
             return this;
         }
 
-        public <V extends Constraint<?>> Builder addConstraintList(List<V> constraintList) {
+        public <V extends Constraint> Builder addConstraintList(List<V> constraintList) {
             for (V check : constraintList) {
                 addConstraint(check);
             }
@@ -312,7 +306,7 @@ public class Table extends SchemaMd<Table.Id> {
             return false;
         }
 
-        public Builder options(MetaDataOptions<Table> options) {
+        public Builder options(Optional<Table> options) {
             this.options = options;
             return this;
         }

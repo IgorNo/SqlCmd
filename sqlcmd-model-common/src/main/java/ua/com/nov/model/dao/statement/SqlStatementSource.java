@@ -6,7 +6,7 @@ public interface SqlStatementSource<I, E, C> {
 
     SqlStatement getUpdateStmt(E entity);
 
-    SqlStatement getDeleteStmt(I eId);
+    SqlStatement getDeleteStmt(E entity);
 
     default SqlStatement getReadOneStmt(I eId) {
         throw new UnsupportedOperationException();

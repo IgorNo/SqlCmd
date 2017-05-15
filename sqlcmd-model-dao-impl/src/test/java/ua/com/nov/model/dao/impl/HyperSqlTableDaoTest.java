@@ -6,11 +6,11 @@ import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
+import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import java.sql.SQLException;
-
-import static org.junit.Assert.assertTrue;
 
 public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     public static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
@@ -20,8 +20,18 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         HyperSqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
-        dataSource = new SingleConnectionDataSource(testDb, null, null);
+        dataSource = new SingleConnectionDataSource(testDb, "root", "root");
         createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY", null);
+    }
+
+    @Override
+    protected Optional<?> getCreateOptions() {
+        return null;
+    }
+
+    @Override
+    protected Optional<Table> getUpdateOptions() {
+        return null;
     }
 
     @Override
@@ -30,39 +40,18 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         super.testReadAllTables();
     }
 
-    @Test
-    public void testUpdateTable() throws DaoSystemException, DaoBusinessLogicException {
-        Table updateTable = new Table.Builder(users.getId()).viewName("New comment").build();
-        TABLE_DAO.update(updateTable);
-        Table result = TABLE_DAO.read(users.getId());
-        assertTrue(updateTable.getViewName().equals(result.getViewName()));
+    @Override
+    @Test(expected = DaoBusinessLogicException.class)
+    public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
+        super.testRenameUniqueKey();
     }
 
     @Override
-    @Test
-    public void testRenamePrimaryKey() throws DaoSystemException {
-//        PrimaryKey testPk = customers.getPrimaryKey();
-//        testPk.setNewName("test");
-//        PRIMARY_KEY_DAO.update(testPk);
-//        assertTrue(false);
-    }
-
-    @Override
-    @Test
-    public void testRenameForeignKey() throws DaoSystemException {
-//        ForeignKey testPk = orders.getForeignKeyList().get(0);
-//        testPk.setNewName("test");
-//        FOREIGN_KEY_DAO.update(testPk);
-//        assertTrue(false);
-    }
-
-    @Override
-    @Test
-    public void testRenameUniqueKey() throws DaoSystemException {
-//        UniqueKey testUk = customers.getUniqueKeyList().get(0);
-//        testUk.setNewName("test");
-//        UNIQUE_KEY_DAO.update(testUk);
-//        assertTrue(false);
+    @Test(expected = DaoSystemException.class)
+    public void testReadDeleteAddUniqueKey() throws DaoSystemException {
+        Table testTable = TABLE_DAO.read(customers.getId());
+        UniqueKey uk = customers.getUniqueKeyList().get(0);
+        readDeleteAddMetaData(UNIQUE_KEY_DAO, testTable.getUniqueKeyList().get(0).getId(), uk);
     }
 
     @AfterClass

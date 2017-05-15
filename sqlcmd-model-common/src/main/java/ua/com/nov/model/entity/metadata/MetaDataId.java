@@ -43,13 +43,15 @@ public abstract class MetaDataId<C extends Hierarchical> implements Hierarchical
 
         MetaDataId<?> that = (MetaDataId<?>) o;
 
+        if (!getMdName().equals(that.getMdName())) return false;
         if (!containerId.equals(that.containerId)) return false;
         return getFullName().equals(that.getFullName());
     }
 
     @Override
     public int hashCode() {
-        int result = containerId.hashCode();
+        int result = getMdName().hashCode();
+        result = 31 * result + containerId.hashCode();
         result = 31 * result + getFullName().hashCode();
         return result;
     }

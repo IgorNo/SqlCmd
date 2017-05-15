@@ -8,19 +8,15 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
     private final I id;
     private final String type;
     private String viewName;
-    private String newName; // This field uses for renaming metadata
     private final Optional<? extends MetaData> options;
 
     public MetaData(I id, String type, Optional<? extends MetaData> options) {
         this.id = id;
         if (type != null) {
-            if (type.toUpperCase().contains(id.getMdName())) {
-                this.type = type;
-            } else {
-                this.type = type + " " + id.getMdName();
-            }
+            this.type = type.toUpperCase();
+            this.type.replaceAll(id.getMdName(), "").trim();
         } else {
-            this.type = id.getMdName();
+            this.type = null;
         }
         checkMatch(id, options);
         this.options = options;
@@ -32,10 +28,6 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
                 throw new IllegalArgumentException("Mismatch between database and options class.");
         }
         return true;
-    }
-
-    public MetaData(I id, String type) {
-        this(id, type, null);
     }
 
     @Override
@@ -57,14 +49,6 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
 
     protected void setViewName(String viewName) {
         this.viewName = viewName;
-    }
-
-    public String getNewName() {
-        return getId().getDb().convert(newName);
-    }
-
-    public void setNewName(String newName) {
-        this.newName = newName;
     }
 
     @Override
@@ -89,11 +73,13 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
 
     @Override
     public String getCreateStmtDefinition(String conflictOption) {
-        StringBuilder sb = new StringBuilder(type).append(' ');
+        StringBuilder sb = new StringBuilder();
+        if (type != null) sb.append(type).append(' ');
+        sb.append(id.getMdName()).append(' ');
         if (conflictOption != null) sb.append(conflictOption).append(' ');
-        sb.append(id.getFullName());
+        sb.append(id.getFullName()).append("%s");
         if (options != null)
-            sb.append(' ').append(options);
+            sb.append('\n').append(options);
         return sb.toString();
     }
 

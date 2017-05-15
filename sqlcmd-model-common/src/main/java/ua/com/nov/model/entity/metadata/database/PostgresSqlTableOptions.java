@@ -17,14 +17,18 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
     @Override
     public String getCreateOptionsDefinition() {
         final StringBuilder sb = new StringBuilder();
-        if (getStorageParameters() != null || isOids() != null) {
-            sb.append("\nWITH (");
-            if (isOids() != null) sb.append("\n\tOIDS = ").append(isOids()).append(',');
-            if (getStorageParameters() != null) sb.append("\n\t").append(getStorageParameters());
-            sb.append("\n)");
+        String s = "\nWITH (";
+        for (Map.Entry<String, String> entry : getStorageParameters().entrySet()) {
+            sb.append(s);
+            sb.append("\n\t").append(entry.getKey()).append(" = ").append(entry.getValue());
+            s = ",";
         }
-        if (getTableSpace() != null) sb.append("\nSET TABLESPACE ").append(getTableSpace());
+        if (isOids() != null) sb.append(s).append("\n\t").append("OIDS = ").append(isOids());
+        if (sb.length() > 0) sb.append("\n)");
+
         if (getOnCommit() != null) sb.append("\nON COMMIT ").append(getOnCommit());
+        if (getTableSpace() != null) sb.append("\nTABLESPACE ").append(getTableSpace());
+
         return sb.toString();
     }
 
@@ -32,8 +36,17 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
     public List<String> getUpdateOptionsDefinition() {
         final StringBuilder sb = new StringBuilder();
 
+        String s = "\nSET (";
+        for (Map.Entry<String, String> entry : getStorageParameters().entrySet()) {
+            sb.append(s);
+            sb.append("\n\t").append(entry.getKey()).append(" = ").append(entry.getValue());
+            s = ",";
+        }
+        if (sb.length() > 0) sb.append("\n)");
+
         if (isOids() != null) {
-            sb.append("\n SET ");
+            if (sb.length() > 0) sb.append(",\n");
+            sb.append(" SET ");
             if (isOids())
                 sb.append("WITH ");
             else
@@ -41,16 +54,9 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
             sb.append("OIDS");
         }
 
-        if (getStorageParameters() != null) {
-            if (sb.length() > 0) sb.append(",\n\t");
-            sb.append("\n SET (");
-            sb.append('\n').append(getStorageParameters());
-            sb.append("\n)");
-        }
-
         if (getTableSpace() != null) {
             if (sb.length() > 0) sb.append(",\n");
-            sb.append("TABLESPACE ").append(getTableSpace());
+            sb.append("SET TABLESPACE ").append(getTableSpace());
         }
 
         if (getOwner() != null) {
@@ -79,12 +85,15 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
         return Boolean.valueOf(getOption("OIDS"));
     }
 
-    public String getStorageParameters() {
-        return getOption("STORAGE PARAMETERS");
+    private Map<String, String> getStorageParameters() {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
+            if (entry.getKey().matches("^[a-z|_]+")) result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 
     public static class Builder extends MetaDataOptions.Builder<PostgresSqlTableOptions> {
-        private Map<String, String> storageParameters = new HashMap<>();
 
         public Builder() {
             super(PostgresSqlDb.class);
@@ -96,15 +105,9 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
         }
 
         public Builder addStorageParameter(String name, String value) {
-            this.storageParameters.put(name, value);
+            addOption(name.toLowerCase(), value);
             return this;
         }
-
-        public Builder storageParameters(String parameters) {
-            addOption("STORAGE PARAMETERS", parameters);
-            return this;
-        }
-
 
         public Builder tableSpace(String tableSpace) {
             addOption("TABLESPACE", tableSpace);
@@ -123,15 +126,6 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
 
         @Override
         public PostgresSqlTableOptions build() {
-            if (storageParameters.size() > 0) {
-                StringBuilder sb = new StringBuilder();
-                String s = "";
-                for (Map.Entry<String, String> entry : storageParameters.entrySet()) {
-                    sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
-                    s = ",\n ";
-                }
-                addOption("STORAGE PARAMETERS", sb.toString());
-            }
             return new PostgresSqlTableOptions(this);
         }
     }
