@@ -5,7 +5,6 @@ import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Table;
 
@@ -26,14 +25,14 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    public String getAutoIncrementDefinition() {
-        return "";
-    }
-
-    @Override
     public String convert(String parameter) {
         if (parameter != null) return parameter.toLowerCase();
         return parameter;
+    }
+
+    @Override
+    public ColumnOptions.Builder<? extends ColumnOptions> createColumnOptions() {
+        return new PostgresSqlColumnOptions.Builder();
     }
 
     @Override
@@ -73,16 +72,15 @@ public class PostgresSqlDb extends Database {
             }
 
             @Override
-            public RowMapper<Optional<PostgresSqlDb>> getOptionsRowMapper() {
-                return new RowMapper<Optional<PostgresSqlDb>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<PostgresSqlDb>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<PostgresSqlDb>>>() {
                     @Override
-                    public Optional<PostgresSqlDb> mapRow(ResultSet rs, int i) throws SQLException {
+                    public Options.Builder mapRow(ResultSet rs, int i) throws SQLException {
                         return new PostgresSqlDb.Options.Builder()
                                 .encoding(rs.getString(1)).lcCollate(rs.getString(2))
                                 .lcType(rs.getString(3)).isTemplate(rs.getBoolean(4))
                                 .allowConn(rs.getBoolean(5)).connLimit(rs.getInt(6))
-                                .owner(rs.getString(7)).tableSpace(rs.getString(8))
-                                .build();
+                                .owner(rs.getString(7)).tableSpace(rs.getString(8));
                     }
                 };
             }
@@ -104,10 +102,10 @@ public class PostgresSqlDb extends Database {
             }
 
             @Override
-            public RowMapper<Optional<Table>> getOptionsRowMapper() {
-                return new RowMapper<Optional<Table>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>>() {
                     @Override
-                    public Optional<Table> mapRow(ResultSet rs, int i) throws SQLException {
+                    public PostgresSqlTableOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
                         PostgresSqlTableOptions.Builder builder = new PostgresSqlTableOptions.Builder()
                                 .owner(rs.getString(1))
                                 .oids(rs.getBoolean(3));
@@ -124,7 +122,7 @@ public class PostgresSqlDb extends Database {
                                         option.substring(equalPosition + 1));
                             }
                         }
-                        return builder.build();
+                        return builder;
                     }
                 };
             }

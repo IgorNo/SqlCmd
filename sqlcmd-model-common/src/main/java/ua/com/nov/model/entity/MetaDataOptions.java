@@ -8,9 +8,9 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     private final Class<? extends Database> dbClass;
     private final Map<String, String> options;
 
-    protected abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
-        private Class<? extends Database> dbClass;
-        private final Map<String, String> options = new HashMap<>();
+    public abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
+        protected Class<? extends Database> dbClass;
+        protected Map<String, String> options = new HashMap<>();
 
         public Builder(Class<? extends Database> dbClass) {
             this.dbClass = dbClass;
@@ -32,7 +32,7 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
 
     protected MetaDataOptions(Builder builder) {
         this.dbClass = builder.dbClass;
-        options = builder.options;
+        this.options = Collections.unmodifiableMap(builder.options);
     }
 
     @Override
@@ -58,7 +58,7 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
 
     @Override
     public Map<String, String> getOptionsMap() {
-        return Collections.unmodifiableMap(options);
+        return options;
     }
 
     @Override

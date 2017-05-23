@@ -35,10 +35,12 @@ public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
         return result;
     }
 
-    private Database createDatabase(Database db, String dbName) throws SQLException{
+    private Database createDatabase(Database db, String dbName) throws SQLException {
         Class[] paramTypes = new Class[]{String.class, String.class, MetaDataOptions.class};
         Database result = null;
-        Optional<? extends Database> options = new OptionsDao<Id, Database>(getDataSource()).read(db.new Id(db.getDbUrl(), dbName));
+        MetaDataOptions.Builder<?> builder = new OptionsDao<Id, Database>(getDataSource()).read(db.new Id(db.getDbUrl(), dbName));
+        Optional<Database> options = null;
+        if (builder != null) options = builder.build();
         try {
             Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
             return constructor.newInstance(new Object[]{db.getDbUrl(), dbName,

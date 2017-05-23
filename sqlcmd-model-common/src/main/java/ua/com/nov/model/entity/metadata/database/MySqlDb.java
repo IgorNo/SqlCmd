@@ -7,7 +7,6 @@ import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -40,8 +39,8 @@ public final class MySqlDb extends Database {
     }
 
     @Override
-    public String getAutoIncrementDefinition() {
-        return " AUTO_INCREMENT";
+    public ColumnOptions.Builder<MySqlColumnOptions> createColumnOptions() {
+        return new MySqlColumnOptions.Builder();
     }
 
     @Override
@@ -81,14 +80,14 @@ public final class MySqlDb extends Database {
                                 "WHERE SCHEMA_NAME = '" + eId.getName() + "'").build();
             }
 
+
             @Override
-            public RowMapper<Optional<MySqlDb>> getOptionsRowMapper() {
-                return new RowMapper<Optional<MySqlDb>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<MySqlDb>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<MySqlDb>>>() {
                     @Override
-                    public Optional<MySqlDb> mapRow(ResultSet rs, int i) throws SQLException {
+                    public Options.Builder mapRow(ResultSet rs, int i) throws SQLException {
                         return new MySqlDb.Options.Builder()
-                                .characterSet(rs.getString(1)).collate(rs.getString(2))
-                                .build();
+                                .characterSet(rs.getString(1)).collate(rs.getString(2));
                     }
                 };
             }
@@ -159,11 +158,12 @@ public final class MySqlDb extends Database {
                         .build();
             }
 
+
             @Override
-            public RowMapper<Optional<Table>> getOptionsRowMapper() {
-                return new RowMapper<Optional<Table>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>>() {
                     @Override
-                    public MySqlTableOptions mapRow(ResultSet rs, int i) throws SQLException {
+                    public MySqlTableOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
                         String collate = rs.getString(4);
                         MySqlTableOptions.Builder builder = new MySqlTableOptions.Builder()
                                 .engine(rs.getString(1)).avgRowLength(rs.getInt(2))
@@ -179,7 +179,7 @@ public final class MySqlDb extends Database {
                                         option.substring(equalPosition + 1));
                             }
                         }
-                        return builder.build();
+                        return builder;
                     }
                 };
             }
@@ -196,6 +196,13 @@ public final class MySqlDb extends Database {
                 builder.setName(newName);
                 return new SqlStatement.Builder(String.format("ALTER TABLE %s CHANGE COLUMN %s %s",
                         col.getTableId().getFullName(), col.getName(), builder.build().getCreateStmtDefinition(null)))
+                        .build();
+            }
+
+            @Override
+            public SqlStatement getUpdateStmt(Column col) {
+                return new SqlStatement.Builder(String.format("ALTER TABLE %s MODIFY COLUMN %s",
+                        col.getTableId().getFullName(), col.getCreateStmtDefinition(null)))
                         .build();
             }
         };

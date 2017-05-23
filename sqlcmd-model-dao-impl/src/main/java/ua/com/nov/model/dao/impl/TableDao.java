@@ -4,6 +4,7 @@ import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
+import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.MySqlDb;
@@ -47,10 +48,14 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                 Table.Builder builder = new Table.Builder(tableId).type(rs.getString("TABLE_TYPE"))
                         .viewName(rs.getString("REMARKS"));
                 try {
-                    Optional<Table> options = new OptionsDao<Table.Id, Table>(getDataSource()).read(tableId);
-                    builder.options(options);
-                    if (tableId.getDb().getClass() == MySqlDb.class) {
-                        builder.viewName(((MySqlTableOptions)options).getComment());
+                    MetaDataOptions.Builder<?> optionsBuilder = new OptionsDao<Table.Id, Table>(getDataSource())
+                            .read(tableId);
+                    if (optionsBuilder != null) {
+                        Optional<Table> options = optionsBuilder.build();
+                        builder.options(options);
+                        if (tableId.getDb().getClass() == MySqlDb.class) {
+                            builder.viewName(((MySqlTableOptions) options).getComment());
+                        }
                     }
                     Collection<Column> columns = new ColumnDao().setDataSource(getDataSource()).readAll(tableId);
                     builder.columns(columns);
@@ -60,14 +65,14 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                     builder.addConstraintList(uniqueKeys);
                     List<PrimaryKey> pkList = new PrimaryKeyDao().setDataSource(getDataSource()).readAll(tableId);
                     PrimaryKey pk = null;
-                    if (pkList.size() == 1)  {
+                    if (pkList.size() == 1) {
                         pk = pkList.get(0);
                         builder.addConstraint(pk);
                     }
                     List<Index> indices = new IndexDao().setDataSource(getDataSource()).readAll(tableId);
                     builder.indexList(indices);
                 } catch (DaoSystemException e) {
-                    throw new SQLException("",e);
+                    throw new SQLException("", e);
                 }
                 return builder.build();
             }

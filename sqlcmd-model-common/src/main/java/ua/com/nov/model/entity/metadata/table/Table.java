@@ -3,6 +3,7 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.schema.SchemaMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -212,7 +213,17 @@ public class Table extends SchemaMd<Table.Id> {
 
         public Builder addColumn(Column.Builder columnBuilder) {
             columnBuilder.setTableId(getId());
-            addColumn(columnBuilder.build());
+            for (Constraint.Builder<? extends Constraint> constraintBuilder : columnBuilder.getConstraints()) {
+                if (constraintBuilder instanceof Key.Builder) {
+                    if (constraintBuilder.getClass() == PrimaryKey.Builder.class)
+                        columnBuilder.nullable(DataType.NOT_NULL);
+                    addConstraint(((Key.Builder)constraintBuilder).addColumn(columnBuilder.getName()));
+                } else {
+                    addConstraint(constraintBuilder);
+                }
+            }
+            Column col = columnBuilder.build();
+            addColumn(col);
             return this;
         }
 

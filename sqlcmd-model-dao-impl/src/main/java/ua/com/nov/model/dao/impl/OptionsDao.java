@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
-import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 
 import javax.sql.DataSource;
@@ -20,11 +20,11 @@ public class OptionsDao<I extends MetaDataId, E> {
         this.dataSource = dataSource;
     }
 
-    public Optional<E> read(I eId) throws SQLException {
+    public MetaDataOptions.Builder<? extends MetaDataOptions<E>> read(I eId) throws SQLException {
         OptionsSqlStmtSource<I,E> stmtSource = eId.getDb().getOptionsSqlStmtSource(eId.getMdName());
         SqlStatement sqlStmt = stmtSource.getReadOptionsStmt(eId);
         if (sqlStmt != null) {
-            List<Optional<E>> result;
+            List<MetaDataOptions.Builder<? extends MetaDataOptions<E>>> result;
             Statement stmt = dataSource.getConnection().createStatement();
             ResultSet rs = stmt.executeQuery(sqlStmt.getSql());
             result = new RowMapperResultSetExtractor<>(stmtSource.getOptionsRowMapper()).extractData(rs);
@@ -32,4 +32,5 @@ public class OptionsDao<I extends MetaDataId, E> {
         }
         return null;
     }
+
 }

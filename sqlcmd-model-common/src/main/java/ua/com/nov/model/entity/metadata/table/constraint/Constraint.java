@@ -11,8 +11,10 @@ public abstract class Constraint extends TableMd<TableMd.Id> {
 
     @Override
     public String getCreateStmtDefinition(String conflictOption) {
-        StringBuilder sb = new StringBuilder(getId().getMdName()).append(' ');
-        sb.append(getId().getName()).append(' ').append(getType()).append(" %s");
+        StringBuilder sb = new StringBuilder();
+        if (getName() != null && !getName().isEmpty())
+            sb.append(getId().getMdName()).append(' ').append(getId().getName()).append(' ');
+        sb.append(getType()).append(" %s");
         if (getOptions() != null)
             sb.append('\n').append(getOptions());
         return sb.toString();

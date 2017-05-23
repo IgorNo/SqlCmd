@@ -1,22 +1,27 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
+import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.constraint.Constraint;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
+import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
+import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Column extends TableMd<Column.Id> {
-    private int ordinalPosition; // index of column in table (starting at 1)
     private final DataType dataType;
     private final Integer columnSize;
     private final Integer precision;    // the number of fractional digits. Null is returned for data types where
-                                        // precision is not applicable
-    private final int nullable;    // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
-    private final String defaultValue; //default value for the column, which should be interpreted as a string when
-    // the value is enclosed in single quotes
-    private final String remarks;       // comment describing column
-    private final boolean autoIncrement; // Indicates whether this column is auto incremented
-    private final boolean generatedColumn; // Indicates whether this is a generated column
-
+    // precision is not applicable
+    private int ordinalPosition; // index of column in table (starting at 1)
+    private ColumnOptions options;
     /*
      * The size attribute specifies the column size for the given column.
      * For numeric data, this is the maximum precision.
@@ -28,24 +33,102 @@ public class Column extends TableMd<Column.Id> {
      * Null is returned for data types where the column size is not applicable.
     */
 
+    private Column(Builder builder) {
+        super(new Id(builder.getTableId(), builder.getName()), builder);
+        if (builder.precision != null && builder.precision > builder.columnSize) {
+            throw new IllegalArgumentException("Precision can not be greater than column size.");
+        }
+        this.ordinalPosition = builder.ordinalPosition;
+        this.dataType = builder.dataType;
+        this.columnSize = builder.columnSize;
+        this.precision = builder.precision;
+        setViewName(builder.viewName);
+        if (builder.options == null)
+            builder.options = builder.getTableId().getDb().createColumnOptions();
+        builder.options.notNull(builder.nullable).defaultValue(builder.defaultValue).autoIncrement(builder.autoIncrement);
+        this.options = builder.options.build();
+        if (options.getOptionsMap().size() == 0 && options.getGeneratedExpression() == null)
+            this.options = null;
+    }
+
+    @Override
+    public Column.Id getId() {
+        return super.getId();
+    }
+
+    public String getName() {
+        return getId().getName();
+    }
+
+    public Integer getColumnSize() {
+        return columnSize;
+    }
+
+    public Integer getPrecision() {
+        return precision;
+    }
+
+    public boolean isAutoIncrement() {
+        return options == null ? false : options.isAutoIncrement();
+    }
+
+    public boolean isNotNull() {
+        return options == null ? false : options.isNotNull();
+    }
+
+    public DataType getDataType() {
+        return dataType;
+    }
+
+    public String getDefaultValue() {
+        return options == null ? null : options.getDefaultValue();
+    }
+
+    public int getOrdinalPosition() {
+        return ordinalPosition;
+    }
+
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        final StringBuilder sb = new StringBuilder(getName());
+        sb.append(" ").append(getFullTypeDeclaration());
+        if (options != null) sb.append(' ').append(options.getCreateOptionsDefinition());
+        return sb.toString();
+    }
+
+    public String getFullTypeDeclaration() {
+        StringBuilder sb = new StringBuilder(dataType.getTypeName());
+        if (columnSize != null) {
+            sb.append('(').append(columnSize);
+            if (precision != null && precision > 0) sb.append(',').append(precision);
+            sb.append(')');
+        }
+        return sb.toString();
+    }
+
     public static class Builder extends TableMd.Builder {
         private final DataType dataType;
 
-        private int ordinalPosition ; // index of column in table (starting at 1)
+        private int ordinalPosition; // index of column in table (starting at 1)
         private Integer columnSize;
         private Integer precision;  // the number of fractional digits. Null is returned for data types where
-                                    // precision is not applicable
+        // precision is not applicable
         private int nullable = DataType.NULL; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
         private String defaultValue; //default value for the column, which should be interpreted as a string when
-                                     // the value is enclosed in single quotes
-        private String remarks;      // comment describing column
+        // the value is enclosed in single quotes
+        private String viewName;      // comment describing column
         private boolean autoIncrement;   // Indicates whether this column is auto incremented
-        private boolean generatedColumn; // Indicates whether this is a generated column
+        private ColumnOptions.Builder<? extends ColumnOptions> options;
+        private Map<Class<? extends Constraint.Builder>, Constraint.Builder<? extends Constraint>> constraints = new HashMap<>();
 
 
         public Builder(Table.Id tableId, String name, DataType dataType) {
             super(name, tableId);
             this.dataType = dataType;
+        }
+
+        public Builder(Id id, DataType dataType) {
+            this(id.getTableId(), id.getName(), dataType);
         }
 
         public Builder(String name, DataType dataType) {
@@ -56,11 +139,7 @@ public class Column extends TableMd<Column.Id> {
             this(col.getTableId(), col.getName(), col.dataType);
             this.columnSize = col.columnSize;
             this.precision = col.precision;
-            this.nullable = col.nullable;
-            this.defaultValue = col.defaultValue;
-            this.remarks = col.remarks;
-            this.autoIncrement = col.autoIncrement;
-            this.generatedColumn = col.generatedColumn;
+            this.viewName = col.getViewName();
             this.ordinalPosition = col.ordinalPosition;
         }
 
@@ -95,8 +174,8 @@ public class Column extends TableMd<Column.Id> {
             return this;
         }
 
-        public Builder remarks(String remarks) {
-            this.remarks = remarks;
+        public Builder viewName(String viewName) {
+            this.viewName = viewName;
             return this;
         }
 
@@ -108,13 +187,52 @@ public class Column extends TableMd<Column.Id> {
             return this;
         }
 
-        public Builder generatedColumn(boolean generatedColumn) {
-            this.generatedColumn = generatedColumn;
+        public Builder options(ColumnOptions.Builder<? extends ColumnOptions> options) {
+            this.options = options;
             return this;
         }
 
         public Builder ordinalPosition(int ordinalPosition) {
             this.ordinalPosition = ordinalPosition;
+            return this;
+        }
+
+        public Builder addConstraint(Constraint.Builder<? extends Constraint> constraint) {
+            constraints.put(constraint.getClass(), constraint);
+            return this;
+        }
+
+        public Collection<Constraint.Builder<? extends Constraint>> getConstraints() {
+            return constraints.values();
+        }
+
+        public Builder primaryKey(MetaDataOptions<Index> indexOptions) {
+            addConstraint(new PrimaryKey.Builder(getName()).options(indexOptions));
+            return this;
+        }
+
+        public Builder primaryKey() {
+            addConstraint(new PrimaryKey.Builder(getName()));
+            return this;
+        }
+
+        public Builder unique(MetaDataOptions<Index> indexOptions) {
+            addConstraint(new UniqueKey.Builder(getName()).options(indexOptions));
+            return this;
+        }
+
+        public Builder unique() {
+            addConstraint(new UniqueKey.Builder(getName()));
+            return this;
+        }
+
+        public Builder references(Column.Id pkColumn, ForeignKey.Rule deleteRule, ForeignKey.Rule updareRule) {
+            addConstraint(new ForeignKey.Builder(getName(), pkColumn).deleteRule(deleteRule).updateRule(updareRule));
+            return this;
+        }
+
+        public Builder references(Column.Id pkColumn) {
+            references(pkColumn, null, null);
             return this;
         }
 
@@ -130,7 +248,7 @@ public class Column extends TableMd<Column.Id> {
     }
 
     public static class Id extends TableMd.Id {
-         public Id(Table.Id containerId, String name) {
+        public Id(Table.Id containerId, String name) {
             super(containerId, name);
         }
 
@@ -140,92 +258,4 @@ public class Column extends TableMd<Column.Id> {
         }
     }
 
-    private Column(Builder builder) {
-        super(new Id(builder.getTableId(), builder.getName()), builder);
-        if (builder.precision != null && builder.precision > builder.columnSize) {
-            throw new IllegalArgumentException("Precision can not be greater than column size.");
-        }
-        this.ordinalPosition = builder.ordinalPosition;
-        this.dataType = builder.dataType;
-        this.columnSize = builder.columnSize;
-        this.precision = builder.precision;
-        this.nullable = builder.nullable;
-        this.defaultValue = builder.defaultValue;
-        this.remarks = builder.remarks;
-        this.autoIncrement = builder.autoIncrement;
-        this.generatedColumn = builder.generatedColumn;
-    }
-
-    @Override
-    public Column.Id getId() {
-        return super.getId();
-    }
-
-    public String getName() {
-        return getId().getName();
-    }
-
-    public Integer getColumnSize() {
-        return columnSize;
-    }
-
-    public Integer getPrecision() {
-        return precision;
-    }
-
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public int getNullable() {
-        return nullable;
-    }
-
-    public DataType getDataType() {
-        return dataType;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public int getOrdinalPosition() {
-        return ordinalPosition;
-    }
-
-    public boolean isGeneratedColumn() {
-        return generatedColumn;
-    }
-
-    @Override
-    public String getCreateStmtDefinition(String conflictOption) {
-        final StringBuilder sb = new StringBuilder(getName());
-        sb.append(" ");
-        sb.append(getFullTypeDeclaration());
-        if (nullable == 0) sb.append(" NOT NULL");
-        if (defaultValue != null) sb.append(" DEFAULT '").append(defaultValue).append("'");
-        if (autoIncrement) sb.append(getId().getDb().getAutoIncrementDefinition());
-        return sb.toString();
-    }
-
-    public String getFullTypeDeclaration() {
-        StringBuilder sb = new StringBuilder(dataType.getTypeName());
-        if (columnSize != null) {
-            sb.append('(').append(columnSize);
-            if (precision != null && precision > 0) sb.append(',').append(precision);
-            sb.append(')');
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + ordinalPosition;
-        return result;
-    }
 }

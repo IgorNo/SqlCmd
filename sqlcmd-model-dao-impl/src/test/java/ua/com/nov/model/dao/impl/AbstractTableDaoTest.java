@@ -203,11 +203,10 @@ public abstract class AbstractTableDaoTest {
             if (testCol.getPrecision() != null) {
                 assertTrue(testCol.getPrecision().equals(col.getPrecision()));
             }
-            assertTrue(col.getNullable() == testCol.getNullable());
+            assertTrue(col.isNotNull() == testCol.isNotNull());
             assertTrue(col.isAutoIncrement() == testCol.isAutoIncrement());
-            assertTrue(col.isGeneratedColumn() == testCol.isGeneratedColumn());
-            if (testCol.getRemarks() != null)
-                assertTrue(testCol.getRemarks().equals(col.getRemarks()));
+            if (testCol.getViewName() != null)
+                assertTrue(testCol.getViewName().equals(col.getViewName()));
         }
     }
 

@@ -2,6 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -19,23 +20,26 @@ public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
     }
 
     @Override
-    protected AbstractDao.AbstractRowMapper<Column, Table.Id> getRowMapper(Table.Id id) {
-        return new AbstractDao.AbstractRowMapper<Column, Table.Id>(id) {
+    protected AbstractDao.AbstractRowMapper<Column, Table.Id> getRowMapper(Table.Id tableId) {
+        return new AbstractDao.AbstractRowMapper<Column, Table.Id>(tableId) {
             @Override
             public Column mapRow(ResultSet rs, int i) throws SQLException {
-                DataType dataType = id.getContainerId().getDb().getDataType(rs.getString("TYPE_NAME"));
+                DataType dataType = tableId.getDb().getDataType(rs.getString("TYPE_NAME"));
+                Column.Id id = new Column.Id(tableId, rs.getString("COLUMN_NAME"));
 
-                Column.Builder column = new Column.Builder(id, rs.getString("COLUMN_NAME"), dataType)
+                Column.Builder builder = new Column.Builder(id, dataType)
                         .ordinalPosition(rs.getInt("ORDINAL_POSITION"))
                         .size(rs.getInt("COLUMN_SIZE")).precision(rs.getInt("DECIMAL_DIGITS"))
-                        .nullable(rs.getInt("NULLABLE")).remarks(rs.getString("REMARKS"))
+                        .nullable(rs.getInt("NULLABLE")).viewName(rs.getString("REMARKS"))
                         .defaultValue(rs.getString("COLUMN_DEF"))
                         .autoIncrement(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-                try {
-                    column.generatedColumn(rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES"));
-                } catch (SQLException e) {/*NOP*/}
 
-                return  column.build();
+                ColumnOptions.Builder<?> optionsBuilder =
+                        (ColumnOptions.Builder<?>) new OptionsDao<Column.Id, Column>(getDataSource()).read(id);
+                builder.options(optionsBuilder);
+//                    rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES");
+
+                return builder.build();
             }
         };
     }
