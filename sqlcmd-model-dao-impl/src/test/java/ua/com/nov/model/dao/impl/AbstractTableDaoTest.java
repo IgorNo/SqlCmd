@@ -10,6 +10,7 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -41,10 +42,15 @@ public abstract class AbstractTableDaoTest {
     protected static Table customers, products, orders, users, temp;
     protected static Schema.Id schemaId;
 
+    protected static MetaDataOptions<Table> tableOptions;
+    protected static ColumnOptions.Builder numberColumnOptions;
+    protected static ColumnOptions.Builder charColumnOptions;
+    protected static ColumnOptions.Builder geeratedColumnOptions;
+
     protected static DataType integer;
 
-    protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType,
-                                         MetaDataOptions<Table> options)
+
+    protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType)
             throws DaoSystemException, DaoBusinessLogicException {
         testDb = new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
         schemaId = new Schema.Id(testDb.getId(), catalog, schema);
@@ -65,48 +71,46 @@ public abstract class AbstractTableDaoTest {
 
         Table.Id customersId = new Table.Id(testDb.getId(), "Customers", catalog, schema);
         customers = new Table.Builder(customersId).viewName("Покупатели")
-                .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(DataType.NOT_NULL))
-                .addColumn(new Column.Builder("name", varchar).size(100).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("id", serial).primaryKey().autoIncrement())
+                .addColumn(new Column.Builder("name", varchar).size(100).notNull())
                 .addColumn(new Column.Builder("phone", varchar).size(20).defaultValue("0"))
                 .addColumn(new Column.Builder("address", varchar).size(150))
                 .addColumn(new Column.Builder("rating", integer))
-                .addConstraint(new PrimaryKey.Builder("id"))
                 .addConstraint(new UniqueKey.Builder("name", "phone"))
                 .addIndex(new Index.Builder("address"))
                 .build();
 
         Table.Id productsId = new Table.Id(testDb.getId(), "Products", catalog, schema);
         products = new Table.Builder(productsId).viewName("Продукция")
-                .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(DataType.NOT_NULL))
-                .addColumn(new Column.Builder("description", varchar).size(100).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("id", serial).autoIncrement(true).primaryKey())
+                .addColumn(new Column.Builder("description", varchar).size(100).notNull())
                 .addColumn(new Column.Builder("details", text))
                 .addColumn(new Column.Builder("price", numeric).size(8).precision(0).defaultValue("0"))
-                .addConstraint(new PrimaryKey.Builder("id"))
                 .build();
 
         Table.Id ordersId = new Table.Id(testDb.getId(), "Orders", catalog, schema);
         orders = new Table.Builder(ordersId).viewName("Заказы")
-                .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("id", serial).autoIncrement().nullable(DataType.NOT_NULL))
                 .addColumn(new Column.Builder("date", date))
-                .addColumn(new Column.Builder("product_id", integer).nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("product_id", integer).notNull()
+                .references(products.getColumn("id").getId(),
+                        ForeignKey.Rule.NO_ACTION, ForeignKey.Rule.NO_ACTION))
                 .addColumn(new Column.Builder("qty", integer))
                 .addColumn(new Column.Builder("amount", numeric).size(10).precision(2))
                 .addColumn(new Column.Builder("customer_id", integer))
                 .addConstraint(new PrimaryKey.Builder("id"))
-                .addConstraint(new ForeignKey.Builder("product_id", products.getColumn("id").getId())
-                        .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
                 .addConstraint(new ForeignKey.Builder("customer_id", customers.getColumn("id").getId())
                         .deleteRule(ForeignKey.Rule.NO_ACTION).updateRule(ForeignKey.Rule.NO_ACTION))
                 .build();
 
         Table.Id usersId = new Table.Id(testDb.getId(), "Users", catalog, schema);
         users = new Table.Builder(usersId).viewName("Пользователи")
-                .addColumn(new Column.Builder("id", serial).autoIncrement(true).nullable(DataType.NOT_NULL))
-                .addColumn(new Column.Builder("login", varchar).size(25).nullable(DataType.NOT_NULL))
-                .addColumn(new Column.Builder("password", varchar).size(25))
+                .addColumn(new Column.Builder("id", serial).unique().options(numberColumnOptions))
+                .addColumn(new Column.Builder("login", varchar).size(25).notNull().viewName("Логин"))
+                .addColumn(new Column.Builder("password", varchar).size(25).options(charColumnOptions).viewName("Пароль"))
+                .addColumn(new Column.Builder("login_", varchar).size(50).options(geeratedColumnOptions))
                 .addConstraint(new PrimaryKey.Builder("login"))
-                .addConstraint(new UniqueKey.Builder("id"))
-                .options(options)
+                .options(tableOptions)
                 .build();
 
         Table.Id tempId = new Table.Id(testDb.getId(), "Temporary", catalog, schema);
@@ -119,9 +123,12 @@ public abstract class AbstractTableDaoTest {
         dataSource.getConnection().close();
     }
 
-    protected static void compareOptions(Optional<?> options, Optional<?> rOptions) {
-        for (Map.Entry<String, String> entry : options.getOptionsMap().entrySet()) {
-            assertTrue(entry.getValue().equalsIgnoreCase(rOptions.getOption(entry.getKey())));
+    protected static void compareOptions(Optional<?> options1, Optional<?> options2) {
+        for (Map.Entry<String, String> entry : options1.getOptionsMap().entrySet()) {
+            String option1 = entry.getValue().replace("'", "");
+            String option2 = options2.getOption(entry.getKey()).replace("'", "");
+            if (!entry.getValue().contains("nextval"))
+                assertTrue(option1.equalsIgnoreCase(option2));
         }
     }
 
@@ -132,7 +139,6 @@ public abstract class AbstractTableDaoTest {
         TABLE_DAO.create(products);
         TABLE_DAO.create(orders);
         TABLE_DAO.create(users);
-//        TABLE_DAO.create(temp);
     }
 
     @Test
@@ -141,7 +147,7 @@ public abstract class AbstractTableDaoTest {
         assertTrue(table.equals(customers));
         assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));
         assertTrue(table.getColumns().size() == customers.getColumns().size());
-        compareColumns(table, customers);
+        compareColumns(customers, table);
         assertTrue(customers.getUniqueKeyList().size() == table.getUniqueKeyList().size());
         for (UniqueKey key : customers.getUniqueKeyList()) {
             assertTrue(table.getUniqueKeyList().contains(key));
@@ -155,11 +161,11 @@ public abstract class AbstractTableDaoTest {
         table = TABLE_DAO.read(products.getId());
         assertTrue(table.equals(products));
         assertTrue(table.getColumns().size() == products.getColumns().size());
-        compareColumns(table, products);
+        compareColumns(products, table);
 
         table = TABLE_DAO.read(orders.getId());
         assertTrue(table.equals(orders));
-        compareColumns(table, orders);
+        compareColumns(orders, table);
         assertTrue(table.getColumns().size() == orders.getColumns().size());
         assertTrue(orders.getForeignKeyList().size() == table.getForeignKeyList().size());
         for (ForeignKey key : orders.getForeignKeyList()) {
@@ -168,24 +174,23 @@ public abstract class AbstractTableDaoTest {
 
         Table result = TABLE_DAO.read(users.getId());
         assertTrue(users.equals(result));
-        compareColumns(result, users);
-        if (getCreateOptions() != null)
-            compareOptions(getCreateOptions(), result.getOptions());
+        compareColumns(users, result);
+        if (users.getOptions() != null)
+            compareOptions(users.getOptions(), result.getOptions());
     }
 
-    protected abstract Optional<?> getCreateOptions();
 
     @Test
     public void testUpdateTable() throws DaoSystemException, DaoBusinessLogicException {
-        Table table = new Table.Builder(users.getId()).viewName("New Comment").options(getUpdateOptions()).build();
+        Table table = new Table.Builder(users.getId()).viewName("New Comment").options(getUpdateTableOptions()).build();
         TABLE_DAO.update(table);
         Table result = TABLE_DAO.read(users.getId());
         assertTrue(result.getViewName().equalsIgnoreCase(table.getViewName()));
-        if (getUpdateOptions() != null)
-            compareOptions(getUpdateOptions(), result.getOptions());
+        if (getUpdateTableOptions() != null)
+            compareOptions(getUpdateTableOptions(), result.getOptions());
     }
 
-    protected abstract Optional<Table> getUpdateOptions();
+    protected abstract Optional<Table> getUpdateTableOptions();
 
     protected void compareColumns(Table table1, Table table2) {
         for (Column col : table1.getColumns()) {
@@ -193,20 +198,19 @@ public abstract class AbstractTableDaoTest {
             assertTrue(col.equals(testCol));
             if (!testCol.getName().equalsIgnoreCase("id") && !testCol.getName().equalsIgnoreCase("details")) {
                 assertTrue(testCol.getDataType().equals(col.getDataType()));
-                if (testCol.getDefaultValue() != null) {
-                    assertTrue(col.getDefaultValue().contains(col.getDefaultValue()));
-                }
             }
-            if (testCol.getColumnSize() != null) {
+            if (col.getColumnSize() != null) {
                 assertTrue(testCol.getColumnSize().equals(col.getColumnSize()));
             }
-            if (testCol.getPrecision() != null) {
+            if (col.getPrecision() != null) {
                 assertTrue(testCol.getPrecision().equals(col.getPrecision()));
             }
             assertTrue(col.isNotNull() == testCol.isNotNull());
             assertTrue(col.isAutoIncrement() == testCol.isAutoIncrement());
-            if (testCol.getViewName() != null)
-                assertTrue(testCol.getViewName().equals(col.getViewName()));
+            if (col.getViewName() != null)
+                assertTrue(col.getViewName().equals(testCol.getViewName()));
+            if (col.getOptions() != null)
+                compareOptions(col.getOptions(), testCol.getOptions());
         }
     }
 

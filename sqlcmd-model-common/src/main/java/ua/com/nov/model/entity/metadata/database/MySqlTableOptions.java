@@ -35,7 +35,7 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
         }
 
         public Builder collate(String collate) {
-            addOption("COLLATE", collate);
+            addOption("collate", collate);
             return this;
         }
 

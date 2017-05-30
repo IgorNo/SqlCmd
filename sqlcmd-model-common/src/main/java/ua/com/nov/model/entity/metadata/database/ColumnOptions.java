@@ -7,24 +7,24 @@ import java.util.Map;
 
 public abstract class ColumnOptions extends MetaDataOptions<Column> {
     private final boolean autoIncrement;   // Indicates whether this column is auto incremented
-    private final String generatedExpression;
+    private final String generationExpression;
 
     protected ColumnOptions(Builder builder) {
         super(builder);
         this.autoIncrement = builder.autoIncrement;
-        this.generatedExpression = builder.generatedExpression;
+        this.generationExpression = builder.generationExpression;
     }
 
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
 
-    public String getGeneratedExpression() {
-        return generatedExpression;
+    public String getGenerationExpression() {
+        return generationExpression;
     }
 
     public boolean isGeneratedColumn() {
-        return generatedExpression != null;
+        return generationExpression != null;
     }
 
     public String getDefaultValue() {
@@ -40,12 +40,12 @@ public abstract class ColumnOptions extends MetaDataOptions<Column> {
         String s = "";
         StringBuilder sb = new StringBuilder();
         if (isGeneratedColumn()) {
-            sb.append("AS ").append(getGeneratedExpression());
+            sb.append("AS ").append(getGenerationExpression());
             s = " ";
         }
         for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
-            sb.append(s).append(entry.getKey());
-            if (entry.getValue() != null )
+            sb.append(s).append(entry.getKey().trim());
+            if (!entry.getValue().isEmpty())
                 sb.append(' ').append(entry.getValue());
             s = " ";
         }
@@ -55,36 +55,54 @@ public abstract class ColumnOptions extends MetaDataOptions<Column> {
 
     public abstract static class Builder<T extends ColumnOptions> extends MetaDataOptions.Builder<T> {
         private boolean autoIncrement;
-        private String generatedExpression;
+        private String generationExpression;
 
         public Builder(Class<? extends Database> dbClass) {
             super(dbClass);
         }
 
         public Builder autoIncrement(boolean autoIncrement) {
-            this.autoIncrement = autoIncrement;
-            if (autoIncrement) addOption(getAutoIncrementDefinition(), null);
+            if (autoIncrement) {
+                this.autoIncrement = true;
+                addOption(getAutoIncrementDefinition(), "");
+            }
             return this;
+        }
+
+        public Builder comment(String comment) {
+            return this;
+        }
+
+        public Builder autoIncrement() {
+           return autoIncrement(true);
         }
 
         protected abstract String getAutoIncrementDefinition();
 
-        protected Builder generatedExpression(String expression) {
+        protected Builder generationExpression(String expression) {
             if (expression != null && !expression.isEmpty()) {
-                this.generatedExpression = expression;
+                this.generationExpression = "(" + expression + ")";
                 options.remove("DEFAULT");
             }
             return this;
         }
 
         public Builder defaultValue(String defaultExpression) {
-            if (defaultExpression != null) addOption("DEFAULT", defaultExpression);
+            if (defaultExpression != null && !defaultExpression.isEmpty()) addOption("DEFAULT", defaultExpression);
             return this;
         }
 
-        public Builder notNull(int notNull) {
-            if (notNull == 0) addOption("NOT NULL", null);
+        public Builder nullable(int nullable) {
+            if (nullable == 0) addOption("NOT NULL", "");
             return this;
+        }
+
+        public Builder notNull() {
+            return nullable(0);
+        }
+
+        public String getComment() {
+            return options.get("COMMENT");
         }
     }
 }

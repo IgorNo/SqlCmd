@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class Column extends TableMd<Column.Id> {
     private final DataType dataType;
-    private final Integer columnSize;
+    private final Integer size; // column size
     private final Integer precision;    // the number of fractional digits. Null is returned for data types where
     // precision is not applicable
     private int ordinalPosition; // index of column in table (starting at 1)
@@ -40,15 +40,22 @@ public class Column extends TableMd<Column.Id> {
         }
         this.ordinalPosition = builder.ordinalPosition;
         this.dataType = builder.dataType;
-        this.columnSize = builder.columnSize;
+        this.size = builder.columnSize;
         this.precision = builder.precision;
-        setViewName(builder.viewName);
-        if (builder.options == null)
+        if (builder.options == null) {
             builder.options = builder.getTableId().getDb().createColumnOptions();
-        builder.options.notNull(builder.nullable).defaultValue(builder.defaultValue).autoIncrement(builder.autoIncrement);
+        }
+        if (builder.viewName == null || builder.viewName.isEmpty()) {
+            builder.viewName = builder.options.getComment();
+        } else {
+            builder.options.comment(builder.viewName);
+        }
+        setViewName(builder.viewName);
+        builder.options.nullable(builder.nullable).defaultValue(builder.defaultValue).autoIncrement(builder.autoIncrement);
         this.options = builder.options.build();
-        if (options.getOptionsMap().size() == 0 && options.getGeneratedExpression() == null)
+        if (options.getOptionsMap().size() == 0 && options.getGenerationExpression() == null)
             this.options = null;
+        setOptions(this.options);
     }
 
     @Override
@@ -61,7 +68,7 @@ public class Column extends TableMd<Column.Id> {
     }
 
     public Integer getColumnSize() {
-        return columnSize;
+        return size;
     }
 
     public Integer getPrecision() {
@@ -89,6 +96,11 @@ public class Column extends TableMd<Column.Id> {
     }
 
     @Override
+    public ColumnOptions getOptions() {
+        return this.options;
+    }
+
+    @Override
     public String getCreateStmtDefinition(String conflictOption) {
         final StringBuilder sb = new StringBuilder(getName());
         sb.append(" ").append(getFullTypeDeclaration());
@@ -98,8 +110,8 @@ public class Column extends TableMd<Column.Id> {
 
     public String getFullTypeDeclaration() {
         StringBuilder sb = new StringBuilder(dataType.getTypeName());
-        if (columnSize != null) {
-            sb.append('(').append(columnSize);
+        if (size != null) {
+            sb.append('(').append(size);
             if (precision != null && precision > 0) sb.append(',').append(precision);
             sb.append(')');
         }
@@ -137,7 +149,7 @@ public class Column extends TableMd<Column.Id> {
 
         public Builder(Column col) {
             this(col.getTableId(), col.getName(), col.dataType);
-            this.columnSize = col.columnSize;
+            this.columnSize = col.size;
             this.precision = col.precision;
             this.viewName = col.getViewName();
             this.ordinalPosition = col.ordinalPosition;
@@ -169,6 +181,11 @@ public class Column extends TableMd<Column.Id> {
             return this;
         }
 
+        public Builder notNull() {
+            nullable(DataType.NOT_NULL);
+            return this;
+        }
+
         public Builder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
             return this;
@@ -185,6 +202,10 @@ public class Column extends TableMd<Column.Id> {
             }
             this.autoIncrement = autoIncrement;
             return this;
+        }
+
+        public Builder autoIncrement() {
+            return autoIncrement(true);
         }
 
         public Builder options(ColumnOptions.Builder<? extends ColumnOptions> options) {
@@ -234,6 +255,14 @@ public class Column extends TableMd<Column.Id> {
         public Builder references(Column.Id pkColumn) {
             references(pkColumn, null, null);
             return this;
+        }
+
+        public boolean isPrimaryKey() {
+            return constraints.containsKey(PrimaryKey.Builder.class);
+        }
+
+        public boolean isUnique() {
+            return constraints.containsKey(UniqueKey.Builder.class);
         }
 
         @Override

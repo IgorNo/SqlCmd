@@ -3,12 +3,13 @@ package ua.com.nov.model.entity.metadata;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
+import ua.com.nov.model.entity.metadata.database.Database;
 
 public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persistent {
     private final I id;
     private final String type;
     private String viewName;
-    private final Optional<? extends MetaData> options;
+    private Optional<? extends MetaData> options;
 
     public MetaData(I id, String type, Optional<? extends MetaData> options) {
         this.id = id;
@@ -39,6 +40,18 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
         return id.getName();
     }
 
+    public String getFullName() {
+        return id.getFullName();
+    }
+
+    public String getMdName() {
+        return id.getMdName();
+    }
+
+    public Database getDb() {
+        return id.getDb();
+    }
+
     public String getType() {
         return type;
     }
@@ -54,6 +67,10 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
     @Override
     public Optional<? extends MetaData> getOptions() {
         return options;
+    }
+
+    protected void setOptions(Optional<? extends MetaData> options) {
+        this.options = options;
     }
 
     @Override
@@ -75,9 +92,9 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
     public String getCreateStmtDefinition(String conflictOption) {
         StringBuilder sb = new StringBuilder();
         if (type != null) sb.append(type).append(' ');
-        sb.append(id.getMdName()).append(' ');
+        sb.append(getMdName()).append(' ');
         if (conflictOption != null) sb.append(conflictOption).append(' ');
-        sb.append(id.getFullName()).append("%s");
+        sb.append(getFullName()).append("%s");
         if (options != null)
             sb.append('\n').append(options);
         return sb.toString();

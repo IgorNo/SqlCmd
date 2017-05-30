@@ -7,6 +7,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.HyperSqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
@@ -21,16 +22,12 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, "root", "root");
-        createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY", null);
+        numberColumnOptions = new HyperSqlColumnOptions.Builder().autoIncrement();
+        createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY");
     }
 
     @Override
-    protected Optional<?> getCreateOptions() {
-        return null;
-    }
-
-    @Override
-    protected Optional<Table> getUpdateOptions() {
+    protected Optional<Table> getUpdateTableOptions() {
         return null;
     }
 

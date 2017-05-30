@@ -11,8 +11,9 @@ public abstract class AbstractDatabaseMdSqlStatements
 
     @Override
     public SqlStatement getCreateStmt(E entity) {
-        return new SqlStatement.Builder("CREATE " + entity.getCreateStmtDefinition(null) + ";" +
-                getCommentStmt(entity)).build();
+        String comment = getCommentStmt(entity).isEmpty() ? "" : ";" + getCommentStmt(entity);
+        String definition = entity.getCreateStmtDefinition(null);
+        return new SqlStatement.Builder("CREATE " + definition + comment).build();
     }
 
     protected String getCommentStmt(E entity) {
@@ -23,19 +24,21 @@ public abstract class AbstractDatabaseMdSqlStatements
 
     @Override
     public SqlStatement getCreateIfNotExistsStmt(E entity) {
-        return new SqlStatement.Builder("CREATE " + entity.getCreateStmtDefinition("IF NOT EXISTS") +
-                ";" + getCommentStmt(entity)).build();
+        String comment = getCommentStmt(entity).isEmpty() ? "" : ";" + getCommentStmt(entity);
+        String definition = entity.getCreateStmtDefinition("IF NOT EXISTS");
+        return new SqlStatement.Builder("CREATE " + definition + comment).build();
     }
 
     @Override
     public SqlStatement getUpdateStmt(E entity) {
         StringBuilder sql = new StringBuilder();
-        if (!getCommentStmt(entity).isEmpty()) sql.append('\n').append(getCommentStmt(entity)).append(';');
         if (entity.getOptions() != null) {
             for (String s : entity.getOptions().getUpdateOptionsDefinition()) {
-                sql.append(String.format("\nALTER %s %s %s ;", entity.getId().getMdName(), entity.getId().getFullName(), s));
+                sql.append(String.format("ALTER %s %s %s", entity.getId().getMdName(), entity.getId().getFullName(), s));
+                sql.append(";\n");
             }
         }
+        sql.append(getCommentStmt(entity));
         return new SqlStatement.Builder(sql.toString()).build();
     }
 

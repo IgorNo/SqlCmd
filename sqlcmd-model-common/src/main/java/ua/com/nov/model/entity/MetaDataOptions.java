@@ -10,7 +10,7 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
 
     public abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
         protected Class<? extends Database> dbClass;
-        protected Map<String, String> options = new HashMap<>();
+        protected Map<String, String> options = new TreeMap<>();
 
         public Builder(Class<? extends Database> dbClass) {
             this.dbClass = dbClass;

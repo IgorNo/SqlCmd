@@ -13,7 +13,7 @@ public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
     }
 
     public Table.Id getTableId() {
-        return getId().getContainerId();
+        return getId().getTableId();
     }
 
     public abstract static class Builder<V> implements Buildable<V> {
@@ -82,9 +82,5 @@ public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
             return getTableId().getSchema();
         }
 
-        @Override
-        public String getFullName() {
-            return super.getName();
-        }
     }
 }

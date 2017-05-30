@@ -8,8 +8,15 @@ public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E exten
 
     @Override
     public SqlStatement getCreateStmt(E entity) {
-        return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s",
-                entity.getTableId().getFullName(), entity.getCreateStmtDefinition(null))).build();
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s %s",
+                entity.getTableId().getFullName(), entity.getCreateStmtDefinition(null),
+                getCommentStmt(entity))).build();
+    }
+
+    public String getCommentStmt(E entity) {
+        if (entity.getViewName() == null) return "";
+        return String.format(";\nCOMMENT ON %s %s IS '%s'",
+                entity.getId().getMdName(), entity.getFullName(), entity.getViewName());
     }
 
     @Override

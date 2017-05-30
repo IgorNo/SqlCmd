@@ -213,17 +213,11 @@ public class Table extends SchemaMd<Table.Id> {
 
         public Builder addColumn(Column.Builder columnBuilder) {
             columnBuilder.setTableId(getId());
+            if (columnBuilder.isPrimaryKey() || columnBuilder.isUnique()) columnBuilder.nullable(DataType.NOT_NULL);
+            addColumn(columnBuilder.build());
             for (Constraint.Builder<? extends Constraint> constraintBuilder : columnBuilder.getConstraints()) {
-                if (constraintBuilder instanceof Key.Builder) {
-                    if (constraintBuilder.getClass() == PrimaryKey.Builder.class)
-                        columnBuilder.nullable(DataType.NOT_NULL);
-                    addConstraint(((Key.Builder)constraintBuilder).addColumn(columnBuilder.getName()));
-                } else {
-                    addConstraint(constraintBuilder);
-                }
+                addConstraint(constraintBuilder);
             }
-            Column col = columnBuilder.build();
-            addColumn(col);
             return this;
         }
 

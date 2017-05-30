@@ -7,6 +7,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.MySqlColumnOptions;
 import ua.com.nov.model.entity.metadata.database.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -18,10 +19,6 @@ import static org.junit.Assert.assertTrue;
 
 public class MySqlTableDaoTest extends AbstractTableDaoTest {
     private static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
-    private static final  MySqlTableOptions options = new MySqlTableOptions.Builder()
-            .checkSum(false).engine("InnoDB").avgRowLength(200).autoIncrement(100)
-            .defaultCharset("utf8").collate("utf8_slovenian_ci").rowFormat("DYNAMIC")
-            .minRows(2).maxRows(100).build();
     private static final MySqlTableOptions uOptions = new MySqlTableOptions.Builder()
             .checkSum(true).autoIncrement(200).avgRowLength(300).engine("MyISAM")
             .defaultCharset("cp1251").collate("cp1251_ukrainian_ci").rowFormat("FIXED").build();
@@ -32,16 +29,19 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, "root", "root");
-        createTestData(testDb.getName(), null, "INT", "TEMPORARY", options);
+        tableOptions = new MySqlTableOptions.Builder()
+                .checkSum(false).engine("InnoDB").avgRowLength(200).autoIncrement(100)
+                .defaultCharset("utf8").collate("utf8_slovenian_ci").rowFormat("DYNAMIC")
+                .minRows(2).maxRows(100).build();
+        numberColumnOptions = new MySqlColumnOptions.Builder().autoIncrement().zeroFill().unsigned();
+        charColumnOptions = new MySqlColumnOptions.Builder().charSet("ucs2").collation("ucs2_bin").binari();
+        geeratedColumnOptions = new MySqlColumnOptions.Builder()
+                .generationExpression("concat('login: ',login)", MySqlColumnOptions.GenerationColumnType.VIRTUAL);
+        createTestData(testDb.getName(), null, "INT", "TEMPORARY");
     }
 
     @Override
-    protected Optional<?> getCreateOptions() {
-        return options;
-    }
-
-    @Override
-    protected Optional<Table> getUpdateOptions() {
+    protected Optional<Table> getUpdateTableOptions() {
         return uOptions;
     }
 

@@ -52,6 +52,11 @@ public class Index extends TableMd<Index.Id> {
         public String getMdName() {
             return "INDEX";
         }
+
+        @Override
+        public String getFullName() {
+            return getName();
+        }
     }
 
     private Index(Builder builder) {

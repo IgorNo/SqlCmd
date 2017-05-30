@@ -10,6 +10,7 @@ import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -75,6 +76,21 @@ public abstract class Database extends BaseDataSource
     public <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
     AbstractDatabaseMdSqlStatements<I, E, C> getDatabaseMdSqlStmtSource() {
         return new AbstractDatabaseMdSqlStatements() {
+        };
+    }
+
+    public AbstractDatabaseMdSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource() {
+        return new AbstractDatabaseMdSqlStatements<Table.Id, Table, Schema.Id>() {
+            @Override
+            protected String getCommentStmt(Table table) {
+                AbstractTableMdSqlStatements sqlStmtSource = table.getDb().getTableMdSqlStmtSource();
+                StringBuilder sb = new StringBuilder(super.getCommentStmt(table));
+                String s = "";
+                for (Column column : table.getColumns()) {
+                   sb.append(s).append(sqlStmtSource.getCommentStmt(column));
+                }
+                return sb.toString();
+            }
         };
     }
 

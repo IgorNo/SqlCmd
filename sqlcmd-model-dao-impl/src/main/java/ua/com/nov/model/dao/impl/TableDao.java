@@ -81,6 +81,6 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
 
     @Override
     protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Database db) {
-        return db.getDatabaseMdSqlStmtSource();
+        return db.getTableSqlStmtSource();
     }
 }

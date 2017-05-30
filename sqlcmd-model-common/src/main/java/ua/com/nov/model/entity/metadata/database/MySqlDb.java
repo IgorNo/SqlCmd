@@ -10,6 +10,7 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -108,10 +109,16 @@ public final class MySqlDb extends Database {
                     return super.getDeleteStmt(entity);
             }
 
+        };
+    }
+
+    @Override
+    public AbstractDatabaseMdSqlStatements<Table.Id, Table, Schema.Id> getTableSqlStmtSource() {
+        return new AbstractDatabaseMdSqlStatements<Table.Id, Table, Schema.Id>() {
             @Override
-            protected String getCommentStmt(E entity) {
-                if (entity.getViewName() == null || !entity.getId().getMdName().equals("TABLE")) return "";
-                return String.format("\nALTER TABLE %s COMMENT '%s'", entity.getId().getFullName(), entity.getViewName());
+            protected String getCommentStmt(Table table) {
+                if (table.getViewName() == null) return "";
+                return String.format("\nALTER TABLE %s COMMENT '%s'", table.getId().getFullName(), table.getViewName());
             }
         };
     }
@@ -204,6 +211,65 @@ public final class MySqlDb extends Database {
                 return new SqlStatement.Builder(String.format("ALTER TABLE %s MODIFY COLUMN %s",
                         col.getTableId().getFullName(), col.getCreateStmtDefinition(null)))
                         .build();
+            }
+
+            @Override
+            public String getCommentStmt(Column column) {
+                if (column.getViewName() == null) return "";
+                return "/n" + getUpdateStmt(column).getSql();
+            }
+        };
+    }
+
+    @Override
+    protected OptionsSqlStmtSource<Column.Id, Column> getColumnOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<Column.Id, Column>() {
+            @Override
+            public SqlStatement getReadOptionsStmt(Column.Id eId) {
+                return new SqlStatement.Builder(
+                        "SELECT CHARACTER_SET_NAME, COLLATION_NAME, COLUMN_TYPE, EXTRA, " +
+                                "GENERATION_EXPRESSION, COLUMN_COMMENT \n" +
+                                "FROM information_schema.COLUMNS \n" +
+                                "WHERE TABLE_SCHEMA = '" + eId.getCatalog() +
+                                "' AND TABLE_NAME = '" + eId.getTableId().getName() +
+                                "' AND COLUMN_NAME = '" + eId.getName() + "'")
+                        .build();
+            }
+
+            @Override
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Column>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Column>>>() {
+                    @Override
+                    public MetaDataOptions.Builder<? extends MetaDataOptions<Column>> mapRow(ResultSet rs, int i)
+                            throws SQLException {
+                        String collName = rs.getString(2);
+                        MySqlColumnOptions.Builder builder = new MySqlColumnOptions.Builder()
+                                .charSet(rs.getString(1)).collation(collName)
+                                .comment(rs.getString(6));
+
+                        if (collName != null && collName.contains("_bin")) {
+                            builder.binari();
+                        }
+                        String colType = rs.getString(3);
+                        if (colType != null && !colType.isEmpty()) {
+                            if (colType.contains("unsigned")) builder.unsigned();
+                            if (colType.contains("zerofill")) builder.zeroFill();
+                        }
+                        String genExpr = rs.getString(5);
+                        if (genExpr != null && !genExpr.isEmpty()) {
+                            String extra = rs.getString(4);
+                            switch (extra) {
+                                case "VIRTUAL GENERATED":
+                                    builder.generationExpression(genExpr, MySqlColumnOptions.GenerationColumnType.VIRTUAL);
+                                    break;
+                                case "STORED GENERATED":
+                                    builder.generationExpression(genExpr, MySqlColumnOptions.GenerationColumnType.STORAGE);
+                            }
+                        }
+
+                        return builder;
+                    }
+                };
             }
         };
     }

@@ -6,6 +6,10 @@ public class MySqlColumnOptions extends ColumnOptions {
         super(builder);
     }
 
+    public enum GenerationColumnType {
+        STORAGE, VIRTUAL
+    }
+
     public static class Builder extends ColumnOptions.Builder<MySqlColumnOptions> {
 
         public Builder() {
@@ -24,46 +28,61 @@ public class MySqlColumnOptions extends ColumnOptions {
         }
 
         @Override
+        public Builder autoIncrement() {
+            super.autoIncrement();
+            return this;
+        }
+
+        @Override
         public Builder defaultValue(String expression) {
             super.defaultValue(expression);
             return this;
         }
 
-        public Builder generatedExpression(String expression, GeneratedColumnType type) {
-            super.generatedExpression(expression);
-            addOption(type.toString(), null);
+        @Override
+        public Builder comment(String comment) {
+            if (comment != null && !comment.isEmpty())
+                addOption("COMMENT", "'" + comment + "'");
+            return this;
+        }
+
+        public Builder generationExpression(String expression, GenerationColumnType type) {
+            super.generationExpression(expression);
+            addOption(type.toString(), "");
             return this;
         }
 
 
         @Override
-        public ColumnOptions.Builder notNull(int notNull) {
-            super.notNull(notNull);
+        public ColumnOptions.Builder nullable(int notNull) {
+            super.nullable(notNull);
             return this;
         }
 
         public Builder charSet(String charSet) {
-            addOption("CHARACTER SET", charSet);
+            if (charSet != null && !charSet.isEmpty())
+                addOption("CHARACTER SET", charSet);
             return this;
         }
 
         public Builder collation(String collation) {
-            addOption("COLLATE", collation);
+            if (collation != null && !collation.isEmpty())
+                addOption("collate", collation);
             return this;
         }
 
-        public Builder unsigned(Boolean unsigned) {
-            addOption("UNSIGNED", unsigned.toString());
+        public Builder unsigned() {
+            addOption(" unsigned", "");
             return this;
         }
 
-        public Builder zeroFill(Boolean zeroFill) {
-            addOption("ZEROFILL", zeroFill.toString());
+        public Builder zeroFill() {
+            addOption(" zerofill", "");
             return this;
         }
 
-        public Builder binari(Boolean binary) {
-            addOption("BINARY", binary.toString());
+        public Builder binari() {
+            addOption(" BINARY", "");
             return this;
         }
 
@@ -71,9 +90,5 @@ public class MySqlColumnOptions extends ColumnOptions {
         public MySqlColumnOptions build() {
             return new MySqlColumnOptions(this);
         }
-    }
-
-    public enum GeneratedColumnType {
-        STORAGE, VIRTUAL
     }
 }

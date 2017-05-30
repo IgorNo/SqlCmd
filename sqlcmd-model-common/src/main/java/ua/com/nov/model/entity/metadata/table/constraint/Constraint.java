@@ -29,6 +29,11 @@ public abstract class Constraint extends TableMd<TableMd.Id> {
         public String getMdName() {
             return "CONSTRAINT";
         }
+
+        @Override
+        public String getFullName() {
+            return getName();
+        }
     }
 
 }
