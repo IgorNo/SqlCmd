@@ -7,6 +7,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.HyperSqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -14,7 +15,7 @@ import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import java.sql.SQLException;
 
 public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
-    public static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
+    private static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException, DaoBusinessLogicException {
@@ -28,6 +29,11 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
 
     @Override
     protected Optional<Table> getUpdateTableOptions() {
+        return null;
+    }
+
+    @Override
+    protected ColumnOptions.Builder<HyperSqlColumnOptions> getUpdateColumnOptions() {
         return null;
     }
 

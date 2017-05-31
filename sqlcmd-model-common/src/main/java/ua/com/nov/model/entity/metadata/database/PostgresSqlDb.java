@@ -2,11 +2,13 @@ package ua.com.nov.model.entity.metadata.database;
 
 import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
+import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.column.Column;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -129,6 +131,25 @@ public class PostgresSqlDb extends Database {
         };
     }
 
+    @Override
+    public AbstractTableMdSqlStatements<Column.Id, Column> getColumnSqlStmtSource() {
+        return new AbstractTableMdSqlStatements<Column.Id, Column>() {
+            @Override
+            public SqlStatement getUpdateStmt(Column col) {
+                String alterSql = String.format("ALTER TABLE %s ALTER COLUMN %s",
+                        col.getTableId().getFullName(), col.getName());
+                String sql = "";
+                if (col.getDataType() != null) {
+                    sql = alterSql + " SET DATA TYPE " + col.getFullTypeDeclaration() + ";\n";
+                }
+                for (String set : col.getOptions().getUpdateOptionsDefinition()) {
+                    sql += alterSql + " " + set + ";\n";
+                }
+                sql += getCommentStmt(col);
+                return new SqlStatement.Builder(sql).build();
+            }
+        };
+    }
 
     public static class Options extends MetaDataOptions<PostgresSqlDb> {
 

@@ -6,6 +6,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.PostgresSqlColumnOptions;
 import ua.com.nov.model.entity.metadata.database.PostgresSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -37,6 +38,11 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     @Override
     protected Optional<Table> getUpdateTableOptions() {
         return uOptions;
+    }
+
+    @Override
+    protected ColumnOptions.Builder<? extends ColumnOptions> getUpdateColumnOptions() {
+        return null;
     }
 
     @AfterClass

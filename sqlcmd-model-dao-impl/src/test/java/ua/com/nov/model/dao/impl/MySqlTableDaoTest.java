@@ -7,6 +7,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.MySqlColumnOptions;
 import ua.com.nov.model.entity.metadata.database.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -19,9 +20,11 @@ import static org.junit.Assert.assertTrue;
 
 public class MySqlTableDaoTest extends AbstractTableDaoTest {
     private static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
-    private static final MySqlTableOptions uOptions = new MySqlTableOptions.Builder()
+    private static final MySqlTableOptions UPDATE_TABLE_OPTION = new MySqlTableOptions.Builder()
             .checkSum(true).autoIncrement(200).avgRowLength(300).engine("MyISAM")
             .defaultCharset("cp1251").collate("cp1251_ukrainian_ci").rowFormat("FIXED").build();
+    public static final ColumnOptions.Builder<MySqlColumnOptions> UPDATE_COLUMN_OPTIONS =
+            new MySqlColumnOptions.Builder().charSet("utf8").collation("utf8_estonian_ci");
 
     @BeforeClass
     public static void setUpClass() throws SQLException, DaoSystemException, DaoBusinessLogicException {
@@ -42,7 +45,12 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
 
     @Override
     protected Optional<Table> getUpdateTableOptions() {
-        return uOptions;
+        return UPDATE_TABLE_OPTION;
+    }
+
+    @Override
+    protected ColumnOptions.Builder<MySqlColumnOptions> getUpdateColumnOptions() {
+        return UPDATE_COLUMN_OPTIONS;
     }
 
     @Test

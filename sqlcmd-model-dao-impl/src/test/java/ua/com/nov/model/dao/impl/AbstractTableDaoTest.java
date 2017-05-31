@@ -47,7 +47,7 @@ public abstract class AbstractTableDaoTest {
     protected static ColumnOptions.Builder charColumnOptions;
     protected static ColumnOptions.Builder geeratedColumnOptions;
 
-    protected static DataType integer;
+    protected static DataType integer, character;
 
 
     protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType)
@@ -63,6 +63,7 @@ public abstract class AbstractTableDaoTest {
 
         DataType serial = testDb.getDataType(aiTypeName);
         integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
+        character = testDb.getMostApproximateDataTypes(JdbcDataTypes.CHAR);
         DataType varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
         DataType text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
         DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
@@ -147,7 +148,7 @@ public abstract class AbstractTableDaoTest {
         assertTrue(table.equals(customers));
         assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));
         assertTrue(table.getColumns().size() == customers.getColumns().size());
-        compareColumns(customers, table);
+        compareAllColumns(customers, table);
         assertTrue(customers.getUniqueKeyList().size() == table.getUniqueKeyList().size());
         for (UniqueKey key : customers.getUniqueKeyList()) {
             assertTrue(table.getUniqueKeyList().contains(key));
@@ -161,11 +162,11 @@ public abstract class AbstractTableDaoTest {
         table = TABLE_DAO.read(products.getId());
         assertTrue(table.equals(products));
         assertTrue(table.getColumns().size() == products.getColumns().size());
-        compareColumns(products, table);
+        compareAllColumns(products, table);
 
         table = TABLE_DAO.read(orders.getId());
         assertTrue(table.equals(orders));
-        compareColumns(orders, table);
+        compareAllColumns(orders, table);
         assertTrue(table.getColumns().size() == orders.getColumns().size());
         assertTrue(orders.getForeignKeyList().size() == table.getForeignKeyList().size());
         for (ForeignKey key : orders.getForeignKeyList()) {
@@ -174,7 +175,7 @@ public abstract class AbstractTableDaoTest {
 
         Table result = TABLE_DAO.read(users.getId());
         assertTrue(users.equals(result));
-        compareColumns(users, result);
+        compareAllColumns(users, result);
         if (users.getOptions() != null)
             compareOptions(users.getOptions(), result.getOptions());
     }
@@ -192,26 +193,33 @@ public abstract class AbstractTableDaoTest {
 
     protected abstract Optional<Table> getUpdateTableOptions();
 
-    protected void compareColumns(Table table1, Table table2) {
+    protected void compareAllColumns(Table table1, Table table2) {
         for (Column col : table1.getColumns()) {
             Column testCol = table2.getColumn(col.getName());
-            assertTrue(col.equals(testCol));
-            if (!testCol.getName().equalsIgnoreCase("id") && !testCol.getName().equalsIgnoreCase("details")) {
-                assertTrue(testCol.getDataType().equals(col.getDataType()));
-            }
-            if (col.getColumnSize() != null) {
-                assertTrue(testCol.getColumnSize().equals(col.getColumnSize()));
-            }
-            if (col.getPrecision() != null) {
-                assertTrue(testCol.getPrecision().equals(col.getPrecision()));
-            }
-            assertTrue(col.isNotNull() == testCol.isNotNull());
-            assertTrue(col.isAutoIncrement() == testCol.isAutoIncrement());
-            if (col.getViewName() != null)
-                assertTrue(col.getViewName().equals(testCol.getViewName()));
-            if (col.getOptions() != null)
-                compareOptions(col.getOptions(), testCol.getOptions());
+            compareColumns(col, testCol);
         }
+    }
+
+    private void compareColumns(Column column1, Column column2) {
+        assertTrue(column1.equals(column2));
+        if (!column2.getName().equalsIgnoreCase("id") && !column2.getName().equalsIgnoreCase("details")) {
+            if (!"bpchar".equals(column2.getDataType().getTypeName()))
+                assertTrue(column2.getDataType().equals(column1.getDataType()));
+            else
+                assertTrue(column2.getDataType().getJdbcDataType() == column1.getDataType().getJdbcDataType());
+        }
+        if (column1.getColumnSize() != null) {
+            assertTrue(column2.getColumnSize().equals(column1.getColumnSize()));
+        }
+        if (column1.getPrecision() != null) {
+            assertTrue(column2.getPrecision().equals(column1.getPrecision()));
+        }
+        assertTrue(column1.isNotNull() == column2.isNotNull());
+        assertTrue(column1.isAutoIncrement() == column2.isAutoIncrement());
+        if (column1.getViewName() != null)
+            assertTrue(column1.getViewName().equals(column2.getViewName()));
+        if (column1.getOptions() != null)
+            compareOptions(column1.getOptions(), column2.getOptions());
     }
 
     @Test
@@ -284,6 +292,17 @@ public abstract class AbstractTableDaoTest {
         Column readCol = COLUMN_DAO.read(testCol.getId());
         assertTrue(testCol.equals(readCol));
     }
+
+    @Test
+    public void testUpdateColumn() throws DaoSystemException, DaoBusinessLogicException {
+        Column col = new Column.Builder(users.getColumn("password").getId(), character).size(20)
+                .viewName("Changed column").notNull().options(getUpdateColumnOptions()).build();
+        COLUMN_DAO.update(col);
+        Column result = COLUMN_DAO.read(col.getId());
+        compareColumns(col, result);
+    }
+
+    protected abstract ColumnOptions.Builder<? extends ColumnOptions> getUpdateColumnOptions();
 
     @Test(expected = DaoBusinessLogicException.class)
     public void testDeleteColumn() throws DaoSystemException {

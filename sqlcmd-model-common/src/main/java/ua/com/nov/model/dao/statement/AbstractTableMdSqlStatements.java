@@ -8,14 +8,14 @@ public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E exten
 
     @Override
     public SqlStatement getCreateStmt(E entity) {
-        return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s %s",
+        return new SqlStatement.Builder(String.format("ALTER TABLE %s ADD %s;%s",
                 entity.getTableId().getFullName(), entity.getCreateStmtDefinition(null),
                 getCommentStmt(entity))).build();
     }
 
     public String getCommentStmt(E entity) {
         if (entity.getViewName() == null) return "";
-        return String.format(";\nCOMMENT ON %s %s IS '%s'",
+        return String.format("\nCOMMENT ON %s %s IS '%s'",
                 entity.getId().getMdName(), entity.getFullName(), entity.getViewName());
     }
 
@@ -43,6 +43,6 @@ public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E exten
     @Override
     public SqlStatement getRenameStmt(E entity, String newName) {
         return new SqlStatement.Builder(String.format("ALTER TABLE %s RENAME %s %s TO %s",
-                entity.getTableId().getFullName(), entity.getId().getMdName(), entity.getName(), newName)).build();
+                entity.getTableId().getFullName(), entity.getMdName(), entity.getName(), newName)).build();
     }
 }

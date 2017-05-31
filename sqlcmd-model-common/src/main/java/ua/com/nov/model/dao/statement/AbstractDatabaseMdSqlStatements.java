@@ -11,9 +11,10 @@ public abstract class AbstractDatabaseMdSqlStatements
 
     @Override
     public SqlStatement getCreateStmt(E entity) {
-        String comment = getCommentStmt(entity).isEmpty() ? "" : ";" + getCommentStmt(entity);
-        String definition = entity.getCreateStmtDefinition(null);
-        return new SqlStatement.Builder("CREATE " + definition + comment).build();
+        String comment = getCommentStmt(entity);
+        String sql = "CREATE " + entity.getCreateStmtDefinition(null);
+        if (!comment.isEmpty()) sql += ";" + comment;
+        return new SqlStatement.Builder(sql).build();
     }
 
     protected String getCommentStmt(E entity) {
@@ -24,9 +25,10 @@ public abstract class AbstractDatabaseMdSqlStatements
 
     @Override
     public SqlStatement getCreateIfNotExistsStmt(E entity) {
-        String comment = getCommentStmt(entity).isEmpty() ? "" : ";" + getCommentStmt(entity);
-        String definition = entity.getCreateStmtDefinition("IF NOT EXISTS");
-        return new SqlStatement.Builder("CREATE " + definition + comment).build();
+        String comment = getCommentStmt(entity);
+        String sql = "CREATE " + entity.getCreateStmtDefinition("IF NOT EXISTS");
+        if (!comment.isEmpty()) sql += ";" + comment;
+        return new SqlStatement.Builder(sql).build();
     }
 
     @Override

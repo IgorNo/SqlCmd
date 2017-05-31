@@ -88,6 +88,7 @@ public abstract class Database extends BaseDataSource
                 String s = "";
                 for (Column column : table.getColumns()) {
                    sb.append(s).append(sqlStmtSource.getCommentStmt(column));
+                   s = ";";
                 }
                 return sb.toString();
             }

@@ -83,6 +83,21 @@ public class HyperSqlDb extends Database {
                 return new SqlStatement.Builder(String.format("ALTER TABLE %s ALTER COLUMN %s RENAME TO %s",
                         col.getTableId().getFullName(), col.getName(), newName)).build();
             }
+
+            @Override
+            public SqlStatement getUpdateStmt(Column col) {
+                String alterSql = String.format("ALTER TABLE %s ALTER COLUMN %s",
+                        col.getTableId().getFullName(), col.getName());
+                String sql = "";
+                if (col.getDataType() != null) {
+                    sql = alterSql + " SET DATA TYPE " + col.getFullTypeDeclaration() + ";\n";
+                }
+                for (String set : col.getOptions().getUpdateOptionsDefinition()) {
+                    sql += alterSql + " " + set + ";\n";
+                }
+                sql += getCommentStmt(col);
+                return new SqlStatement.Builder(sql).build();
+            }
         };
     }
 }
