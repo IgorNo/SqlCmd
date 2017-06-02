@@ -143,7 +143,7 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testReadTableMetaData() throws DaoSystemException, DaoBusinessLogicException {
+    public void testReadTableMetaData() throws DaoSystemException {
         Table table = TABLE_DAO.read(customers.getId());
         assertTrue(table.equals(customers));
         assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));

@@ -37,17 +37,6 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         return null;
     }
 
-    @Override
-    @Test
-    public void testReadAllTables() throws DaoSystemException {
-        super.testReadAllTables();
-    }
-
-    @Override
-    @Test(expected = DaoBusinessLogicException.class)
-    public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
-        super.testRenameUniqueKey();
-    }
 
     @Override
     @Test(expected = DaoSystemException.class)

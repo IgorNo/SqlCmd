@@ -8,21 +8,30 @@ import ua.com.nov.model.entity.metadata.database.Database;
 
 public class Schema extends MetaData<Schema.Id> {
 
+    public Schema(Id id, Optional<Schema> options) {
+        super(id, null, options);
+    }
+
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        return String.format(super.getCreateStmtDefinition(conflictOption), "");
+    }
+
     public static class Id extends MetaDataId<Database.Id> implements Schematic {
         private final String catalog;
 
-        public Id(Database.Id containerId, String catalog, String schema) {
-            super(containerId, schema);
+        public Id(Database.Id dbId, String catalog, String schema) {
+            super(dbId, schema);
             this.catalog = catalog;
         }
 
-        public Id(Database.Id db, String name) {
-            this(db, name, null);
+        public Id(Database.Id dbId, String catalog) {
+            this(dbId, catalog, null);
         }
 
         @Override
         public String getMdName() {
-            return "SHEMA";
+            return "SCHEMA";
         }
 
         @Override
@@ -45,10 +54,6 @@ public class Schema extends MetaData<Schema.Id> {
         public String getSchema() {
             return getDb().convert(getName());
         }
-    }
-
-    public Schema(Id id, Optional<Schema> options) {
-        super(id, null, options);
     }
 
 }
