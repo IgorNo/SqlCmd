@@ -6,11 +6,11 @@ import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.MySqlDb;
-import ua.com.nov.model.entity.metadata.database.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.schema.Schema;
+import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Index;
+import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -35,7 +35,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
 
     @Override
     protected ResultSet getResultSet(Schema.Id id, String name) throws SQLException {
-        return getDbMetaData().getTables(id.getCatalog(), id.getSchema(), name, id.getDb().getTableTypes());
+        return getDbMetaData().getTables(id.getCatalog(), id.getSchema(), name, id.getServer().getTableTypes());
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                     if (optionsBuilder != null) {
                         Optional<Table> options = optionsBuilder.build();
                         builder.options(options);
-                        if (tableId.getDb().getClass() == MySqlDb.class) {
+                        if (tableId.getServer().getClass() == MySqlServer.class) {
                             builder.viewName(((MySqlTableOptions) options).getComment());
                         }
                     }
@@ -80,7 +80,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
     }
 
     @Override
-    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Database db) {
+    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Server db) {
         return db.getTableSqlStmtSource();
     }
 }

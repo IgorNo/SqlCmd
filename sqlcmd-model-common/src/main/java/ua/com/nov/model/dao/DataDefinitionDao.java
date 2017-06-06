@@ -10,5 +10,7 @@ public interface DataDefinitionDao<E> {
     void deleteIfExist(E entity) throws DaoSystemException;
 
     //Rename entity
-    void rename(E entity, String newName) throws DaoSystemException;
+    default void rename(E entity, String newName) throws DaoSystemException {
+        throw new UnsupportedOperationException();
+    }
 }

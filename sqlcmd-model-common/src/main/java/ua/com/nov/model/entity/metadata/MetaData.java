@@ -3,7 +3,7 @@ package ua.com.nov.model.entity.metadata;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persistent {
     private final I id;
@@ -25,7 +25,7 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
 
     private boolean checkMatch(I eId, Optional<? extends MetaData> options) {
         if (options != null) {
-            if (options.getDbClass() != eId.getDb().getClass())
+            if (options.getServerClass() != eId.getServer().getClass())
                 throw new IllegalArgumentException("Mismatch between database and options class.");
         }
         return true;
@@ -48,8 +48,8 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
         return id.getMdName();
     }
 
-    public Database getDb() {
-        return id.getDb();
+    public Server getServer() {
+        return id.getServer();
     }
 
     public String getType() {

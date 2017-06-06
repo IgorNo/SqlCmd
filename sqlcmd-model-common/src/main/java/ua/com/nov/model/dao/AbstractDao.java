@@ -6,15 +6,14 @@ import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.dao.statement.SqlStatementSource;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import javax.sql.DataSource;
 import java.util.List;
 
 public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>, C extends Hierarchical>
-        implements Dao<I, E,C> {
+        implements Dao<I,E,C> {
 
-    private DataSource dataSource;
     private SqlExecutor<E> executor;
 
     public AbstractDao() {
@@ -26,12 +25,11 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
 
     @Override
     public DataSource getDataSource() {
-        return dataSource;
+        return executor.getDataSource();
     }
 
     @Override
     public AbstractDao<I,E,C> setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
         this.executor = getExecutor(dataSource);
         return this;
     }
@@ -44,38 +42,38 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
 
     @Override
     public void create(E value)  throws DaoSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getDb()).getCreateStmt(value));
+        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getCreateStmt(value));
     }
 
-    protected abstract SqlStatementSource<I, E,C> getSqlStmtSource(Database db);
+    protected abstract SqlStatementSource<I, E,C> getSqlStmtSource(Server db);
 
     @Override
     public void update(E value) throws DaoSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getDb()).getUpdateStmt(value));
+        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getUpdateStmt(value));
     }
 
     @Override
     public void delete(E entity) throws DaoSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getDeleteStmt(entity));
+        executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getDeleteStmt(entity));
     }
 
     protected abstract AbstractRowMapper<E,C> getRowMapper(C id);
 
     @Override
     public E read(I key) throws DaoSystemException {
-        SqlStatement sqlStmt = getSqlStmtSource(key.getDb()).getReadOneStmt(key);
+        SqlStatement sqlStmt = getSqlStmtSource(key.getServer()).getReadOneStmt(key);
         return executor.executeQueryStmt(sqlStmt, getRowMapper(key.getContainerId())).get(0);
     }
 
 //    @Override
 //    public <T extends FetchParametersSource<C>> List<E> readFetch(T params) throws DaoSystemException {
-//        SqlStatement sqlStmt = getOptionsSqlStmtSource(params.getContainerId().getDb()).getReadFetchStmt(params);
+//        SqlStatement sqlStmt = getOptionsSqlStmtSource(params.getContainerId().getServer()).getReadFetchStmt(params);
 //        return executor.executeQueryStmt(sqlStmt, getRowMapper(params.getContainerId()));
 //    }
 //
     @Override
     public List<E> readAll(C cId)  throws DaoSystemException{
-        SqlStatement sqlStmt = getSqlStmtSource(cId.getDb()).getReadAllStmt(cId);
+        SqlStatement sqlStmt = getSqlStmtSource(cId.getServer()).getReadAllStmt(cId);
         return executor.executeQueryStmt(sqlStmt, getRowMapper(cId));
     }
 

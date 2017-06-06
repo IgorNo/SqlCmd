@@ -4,31 +4,22 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.Dao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.Database.Id;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractDatabaseDaoTest {
-    private static final String DROP_DB_IF_EXISTS_SQL = "DROP DATABASE IF EXISTS ";
-
-    public static final Dao<Id, Database, Database> DAO = new DatabaseDao();
-
-    protected static DataSource dataSource;
+    protected static final DatabaseDao DAO = new DatabaseDao();
 
     public abstract Database getTestDatabase();
 
     @Before
     public void setUp() throws SQLException, DaoSystemException {
         tearDown();
-        DAO.setDataSource(dataSource);
         DAO.create(getTestDatabase());
     }
 
@@ -49,7 +40,7 @@ public abstract class AbstractDatabaseDaoTest {
         return db;
     }
 
-        @Test(expected = SQLException.class)
+    @Test(expected = SQLException.class)
     public void testDeleteDataBase() throws SQLException, DaoSystemException {
         DAO.delete(getTestDatabase());
         Connection conn = getTestDatabase().getConnection(getUserName(), getPassword());
@@ -58,14 +49,12 @@ public abstract class AbstractDatabaseDaoTest {
     }
 
     @After
-    public void tearDown() throws SQLException{
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate(DROP_DB_IF_EXISTS_SQL + getTestDatabase().getName());
-        statement.close();
+    public void tearDown() throws DaoSystemException {
+        DAO.deleteIfExist(getTestDatabase());
     }
 
     @AfterClass
     public static void tearDownClass() throws SQLException{
-        dataSource.getConnection().close();
+        DAO.getDataSource().getConnection().close();
     }
 }

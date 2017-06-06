@@ -1,7 +1,7 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.server.MySqlServer;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +11,7 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
     public static class Builder extends MetaDataOptions.Builder<MySqlTableOptions> {
 
         public Builder() {
-            super(MySqlDb.class);
+            super(MySqlServer.class);
         }
 
         public Builder engine(String engine) {

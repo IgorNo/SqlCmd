@@ -6,8 +6,8 @@ import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.MySqlDb;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertTrue;
@@ -20,15 +20,16 @@ public class MySqlSchemaDaoTest extends AbstractSchemaDaoTest {
         MySqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
-        dataSource = new SingleConnectionDataSource(testDb, "root", "root");
+        DataSource dataSource = new SingleConnectionDataSource(testDb, "root", "root");
+        DAO.setDataSource(dataSource);
         createTestData(null, null);
     }
 
     @Test
     @Override
     public void testReadSchema() throws DaoSystemException {
-        Database db = new MySqlDb(testDb.getDbUrl(), "tmp_schema");
-        Database result = new DatabaseDao().setDataSource(dataSource).read(db.getId());
+        Database db = new Database(testDb.getServer(), "tmp_schema");
+        Database result = new DatabaseDao().setDataSource(DAO.getDataSource()).read(db.getId());
         assertTrue(result.equals(db));
     }
 
@@ -44,7 +45,7 @@ public class MySqlSchemaDaoTest extends AbstractSchemaDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException {
+    public static void tearDownClass() throws SQLException, DaoSystemException {
         AbstractSchemaDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }

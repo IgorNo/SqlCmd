@@ -7,9 +7,9 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.database.ColumnOptions;
-import ua.com.nov.model.entity.metadata.database.HyperSqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.HyperSqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import java.sql.SQLException;
@@ -24,6 +24,8 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, "root", "root");
         numberColumnOptions = new HyperSqlColumnOptions.Builder().autoIncrement();
+        charColumnOptions = null;
+        generatedColumnOptions = null;
         createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY");
     }
 
@@ -46,8 +48,14 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         readDeleteAddMetaData(UNIQUE_KEY_DAO, testTable.getUniqueKeyList().get(0).getId(), uk);
     }
 
+    @Override
+    @Test(expected = DaoBusinessLogicException.class)
+    public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
+        super.testRenameUniqueKey();
+    }
+
     @AfterClass
-    public static void tearDownClass() throws SQLException {
+    public static void tearDownClass() throws SQLException, DaoSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }

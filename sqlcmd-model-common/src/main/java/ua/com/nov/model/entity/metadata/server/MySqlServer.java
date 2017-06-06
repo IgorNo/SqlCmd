@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.server;
 
 import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
@@ -9,12 +9,18 @@ import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.grantee.User;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
+import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.MySqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -22,15 +28,11 @@ import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public final class MySqlDb extends Database {
+public final class MySqlServer extends Server {
 
-    public MySqlDb(String dbUrl, String dbName, MetaDataOptions<MySqlDb> options) {
-        super(dbUrl, dbName, options);
+    public MySqlServer(String dbUrl) {
+        super(dbUrl);
         initTypesMap();
-    }
-
-    public MySqlDb(String dbUrl, String dbName) {
-        this(dbUrl, dbName, null);
     }
 
     private void initTypesMap() {
@@ -52,44 +54,44 @@ public final class MySqlDb extends Database {
 
     @Override
     public AbstractDatabaseMdSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<Id, MySqlDb, Database>() {
+        return new AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id>() {
             @Override
-            public SqlStatement getReadAllStmt(Database cId) {
+            public SqlStatement getReadAllStmt(Server.Id cId) {
                 return new SqlStatement.Builder("SHOW DATABASES").build();
             }
 
             @Override
-            public SqlStatement getRenameStmt(MySqlDb eId, String newName) {
+            public SqlStatement getRenameStmt(Database eId, String newName) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            protected String getCommentStmt(MySqlDb entity) {
+            protected String getCommentStmt(Database entity) {
                 return "";
             }
         };
     }
 
     @Override
-    protected OptionsSqlStmtSource<Id, MySqlDb> getDatabaseOptionsSqlStmtSource() {
-        return new OptionsSqlStmtSource<Id, MySqlDb>() {
+    protected OptionsSqlStmtSource<Database.Id, Database> getDatabaseOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Database.Id, Database>() {
             @Override
-            public SqlStatement getReadOptionsStmt(Id eId) {
+            public SqlStatement getReadOptionsStmt(Database.Id eId) {
                 return new SqlStatement.Builder(
                         "SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME  " +
                                 "FROM information_schema.SCHEMATA " +
                                 "WHERE SCHEMA_NAME = '" + eId.getName() + "'").build();
             }
 
-
             @Override
-            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<MySqlDb>>> getOptionsRowMapper() {
-                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<MySqlDb>>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>>() {
                     @Override
-                    public Options.Builder mapRow(ResultSet rs, int i) throws SQLException {
-                        return new MySqlDb.Options.Builder()
-                                .characterSet(rs.getString(1)).collate(rs.getString(2));
-                    }
+                    public MetaDataOptions.Builder<? extends MetaDataOptions<Database>> mapRow(ResultSet rs, int i)
+                            throws SQLException {
+
+                        return new MySqlDbOptions.Builder()
+                                .characterSet(rs.getString(1)).collate(rs.getString(2));                    }
                 };
             }
 
@@ -109,6 +111,26 @@ public final class MySqlDb extends Database {
                     return super.getDeleteStmt(entity);
             }
 
+        };
+    }
+
+    @Override
+    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<User.Id, User>() {
+            @Override
+            public SqlStatement getReadAllOptionsStmt() {
+                return null;
+            }
+
+            @Override
+            public SqlStatement getReadOptionsStmt(User.Id eId) {
+                return null;
+            }
+
+            @Override
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
+                return null;
+            }
         };
     }
 
@@ -274,40 +296,5 @@ public final class MySqlDb extends Database {
         };
     }
 
-    public static class Options extends MetaDataOptions<MySqlDb> {
-        public Options(Builder builder) {
-            super(builder);
-        }
-
-        public String getCharacterSet() {
-            return getOption("CHARACTER SET");
-        }
-
-        public String getCollate() {
-            return getOption("COLLATE");
-        }
-
-        public static class Builder extends MetaDataOptions.Builder<Options> {
-            public Builder() {
-                super(MySqlDb.class);
-            }
-
-            public Builder characterSet(String characterSet) {
-                addOption("CHARACTER SET", characterSet);
-                return this;
-            }
-
-            public Builder collate(String collate) {
-                addOption("COLLATE", collate);
-                return this;
-            }
-
-            @Override
-            public Options build() {
-                return new Options(this);
-            }
-        }
-
-    }
 }
 

@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
@@ -45,7 +45,7 @@ public class IndexDao extends MetaDataDao<Index.Id, Index, Table.Id> {
     }
 
     @Override
-    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Database db) {
+    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Server db) {
         return db.getDatabaseMdSqlStmtSource();
     }
 

@@ -4,6 +4,7 @@ import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +12,7 @@ import java.sql.SQLException;
 public class SchemaDao extends MetaDataDao<Schema.Id, Schema, Database.Id> {
 
     @Override
-    protected DataDefinitionSqlStmtSource<Schema.Id, Schema, Database.Id> getSqlStmtSource(Database db) {
+    protected DataDefinitionSqlStmtSource<Schema.Id, Schema, Database.Id> getSqlStmtSource(Server db) {
         return db.getDatabaseMdSqlStmtSource();
     }
 

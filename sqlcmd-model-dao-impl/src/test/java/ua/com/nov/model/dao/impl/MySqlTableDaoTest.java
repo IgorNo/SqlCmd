@@ -7,11 +7,11 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.database.ColumnOptions;
-import ua.com.nov.model.entity.metadata.database.MySqlColumnOptions;
-import ua.com.nov.model.entity.metadata.database.MySqlTableOptions;
+import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.MySqlColumnOptions;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
                 .minRows(2).maxRows(100).build();
         numberColumnOptions = new MySqlColumnOptions.Builder().autoIncrement().zeroFill().unsigned();
         charColumnOptions = new MySqlColumnOptions.Builder().charSet("ucs2").collation("ucs2_bin").binari();
-        geeratedColumnOptions = new MySqlColumnOptions.Builder()
+        generatedColumnOptions = new MySqlColumnOptions.Builder()
                 .generationExpression("concat('login: ',login)", MySqlColumnOptions.GenerationColumnType.VIRTUAL);
         createTestData(testDb.getName(), null, "INT", "TEMPORARY");
     }
@@ -89,7 +89,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException {
+    public static void tearDownClass() throws SQLException, DaoSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }

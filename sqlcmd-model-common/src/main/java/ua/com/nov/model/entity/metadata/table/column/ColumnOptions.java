@@ -1,7 +1,7 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public abstract class ColumnOptions extends MetaDataOptions<Column> {
         private boolean autoIncrement;
         private String generationExpression;
 
-        public Builder(Class<? extends Database> dbClass) {
+        public Builder(Class<? extends Server> dbClass) {
             super(dbClass);
         }
 

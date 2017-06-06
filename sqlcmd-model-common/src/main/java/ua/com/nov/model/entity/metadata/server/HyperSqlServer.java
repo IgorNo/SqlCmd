@@ -1,30 +1,32 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.server;
 
+import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
+import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.grantee.User;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.HyperSqlColumnOptions;
 
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HyperSqlDb extends Database {
+public class HyperSqlServer extends Server {
 
-    public HyperSqlDb(String dbUrl, String dbName, MetaDataOptions<HyperSqlDb> options) {
-        super(dbUrl, dbName, null);
+    public HyperSqlServer(String dbUrl) {
+        super(dbUrl);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "LONGVARCHAR");
         List<DataType> dataTypeList = new ArrayList<>();
         dataTypeList.add(new DataType.Builder("LONGVARCHAR", Types.LONGVARCHAR).build());
         addDataTypes(dataTypeList);
-    }
-
-    public HyperSqlDb(String dbUrl, String dbName) {
-        this(dbUrl, dbName, null);
     }
 
     @Override
@@ -40,25 +42,25 @@ public class HyperSqlDb extends Database {
 
     @Override
     public AbstractDatabaseMdSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<Id, HyperSqlDb, Database>() {
+        return new AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id>() {
 
             @Override
-            public SqlStatement getCreateStmt(HyperSqlDb db) {
+            public SqlStatement getCreateStmt(Database db) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public SqlStatement getUpdateStmt(HyperSqlDb db) {
+            public SqlStatement getUpdateStmt(Database db) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public SqlStatement getDeleteStmt(HyperSqlDb db) {
+            public SqlStatement getDeleteStmt(Database db) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public SqlStatement getRenameStmt(HyperSqlDb db, String newName) {
+            public SqlStatement getRenameStmt(Database db, String newName) {
                 throw new UnsupportedOperationException();
             }
         };
@@ -97,6 +99,26 @@ public class HyperSqlDb extends Database {
                 }
                 sql += getCommentStmt(col);
                 return new SqlStatement.Builder(sql).build();
+            }
+        };
+    }
+
+    @Override
+    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<User.Id, User>() {
+            @Override
+            public SqlStatement getReadAllOptionsStmt() {
+                return null;
+            }
+
+            @Override
+            public SqlStatement getReadOptionsStmt(User.Id eId) {
+                return null;
+            }
+
+            @Override
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
+                return null;
             }
         };
     }

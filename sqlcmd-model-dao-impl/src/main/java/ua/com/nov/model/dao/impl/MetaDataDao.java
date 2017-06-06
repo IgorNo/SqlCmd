@@ -10,7 +10,7 @@ import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
@@ -27,21 +27,21 @@ public abstract class MetaDataDao<I extends MetaDataId<C>, E extends MetaData<I>
     }
 
     @Override
-    protected abstract DataDefinitionSqlStmtSource<I, E, C> getSqlStmtSource(Database db);
+    protected abstract DataDefinitionSqlStmtSource<I, E, C> getSqlStmtSource(Server db);
 
     @Override
     public void createIfNotExist(E entity) throws DaoSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getCreateIfNotExistsStmt(entity));
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getCreateIfNotExistsStmt(entity));
     }
 
     @Override
     public void deleteIfExist(E entity) throws DaoSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getDeleteIfExistStmt(entity));
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getDeleteIfExistStmt(entity));
     }
 
     @Override
     public void rename(E entity, String newName) throws DaoSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getDb()).getRenameStmt(entity, newName));
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getRenameStmt(entity, newName));
     }
 
     @Override

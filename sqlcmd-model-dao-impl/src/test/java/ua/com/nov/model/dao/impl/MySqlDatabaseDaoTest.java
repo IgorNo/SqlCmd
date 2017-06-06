@@ -5,19 +5,23 @@ import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.MySqlDb;
+import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
+import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.util.DbUtil;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static ua.com.nov.model.util.DbUtil.MY_SQL_LOCAL_URL;
 
 public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    public static final MySqlDb.Options OPTIONS = new MySqlDb.Options.Builder()
+    private static Server server = new MySqlServer(DbUtil.MY_SQL_LOCAL_URL);
+
+    public static final MySqlDbOptions OPTIONS = new MySqlDbOptions.Builder()
             .characterSet("utf8").collate("utf8_general_ci").build();
-    public static final Database TEST_DATABASE = new MySqlDb(MY_SQL_LOCAL_URL, "tmp", OPTIONS);
+    public static final Database TEST_DATABASE = new Database(server, "tmp", OPTIONS);
 
     @Override
     public Database getTestDatabase() {
@@ -36,31 +40,31 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws SQLException {
-        dataSource = new SingleConnectionDataSource(new MySqlDb(DbUtil.MY_SQL_LOCAL_URL, ""),
-                "root", "root");
+        DataSource dataSource = new SingleConnectionDataSource(new Database(server, ""), "root", "root");
+        DAO.setDataSource(dataSource);
     }
 
     @Test
     public void testRead() throws DaoSystemException {
-        MySqlDb.Options options = (MySqlDb.Options) readDatabase().getOptions();
+        MySqlDbOptions options = (MySqlDbOptions) readDatabase().getOptions();
         assertTrue(OPTIONS.getCollate().equalsIgnoreCase(options.getCollate()));
         assertTrue(OPTIONS.getCharacterSet().equalsIgnoreCase(options.getCharacterSet()));
     }
 
     @Test
     public void testReadAll() throws DaoSystemException {
-        List<Database> databases = DAO.readAll(new MySqlDb(MY_SQL_LOCAL_URL, ""));
+        List<Database> databases = DAO.readAll(server.getId());
         assertTrue(databases.size() > 1);
         assertTrue(databases.contains(TEST_DATABASE));
     }
 
     @Test
     public void testUpdateDatabase() throws DaoSystemException {
-        MySqlDb updateDb = new MySqlDb(MY_SQL_LOCAL_URL, TEST_DATABASE.getName(),
-                new MySqlDb.Options.Builder().characterSet("cp1251").collate("cp1251_general_ci").build());
+        Database updateDb = new Database(server, TEST_DATABASE.getName(),
+                new MySqlDbOptions.Builder().characterSet("cp1251").collate("cp1251_general_ci").build());
         DAO.update(updateDb);
         Database readDb = DAO.read(TEST_DATABASE.getId());
-        MySqlDb.Options options = (MySqlDb.Options) readDb.getOptions();
+        MySqlDbOptions options = (MySqlDbOptions) readDb.getOptions();
         assertTrue(options.getCharacterSet().equalsIgnoreCase(updateDb.getOptions().getOption("CHARACTER SET")));
         assertTrue(options.getCollate().equalsIgnoreCase(updateDb.getOptions().getOption("COLLATE")));
     }

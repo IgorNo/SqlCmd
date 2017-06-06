@@ -21,7 +21,7 @@ public class OptionsDao<I extends MetaDataId, E> {
     }
 
     public MetaDataOptions.Builder<? extends MetaDataOptions<E>> read(I eId) throws SQLException {
-        OptionsSqlStmtSource<I,E> stmtSource = eId.getDb().getOptionsSqlStmtSource(eId.getMdName());
+        OptionsSqlStmtSource<I,E> stmtSource = eId.getServer().getOptionsSqlStmtSource(eId.getMdName());
         SqlStatement sqlStmt = stmtSource.getReadOptionsStmt(eId);
         if (sqlStmt != null) {
             List<MetaDataOptions.Builder<? extends MetaDataOptions<E>>> result;

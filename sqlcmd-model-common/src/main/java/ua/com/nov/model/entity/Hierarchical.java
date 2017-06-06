@@ -1,10 +1,10 @@
 package ua.com.nov.model.entity;
 
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 public interface Hierarchical<C> {
 
-   Database getDb();
+   Server getServer();
 
    String getMdName();
 

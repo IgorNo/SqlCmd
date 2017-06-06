@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
@@ -33,7 +33,7 @@ public class PrimaryKeyDao extends MetaDataDao<TableMd.Id, PrimaryKey, Table.Id>
     }
 
     @Override
-    protected DataDefinitionSqlStmtSource<TableMd.Id, PrimaryKey, Table.Id> getSqlStmtSource(Database db) {
+    protected DataDefinitionSqlStmtSource<TableMd.Id, PrimaryKey, Table.Id> getSqlStmtSource(Server db) {
         return db.getTableMdSqlStmtSource();
     }
 

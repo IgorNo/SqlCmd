@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -29,10 +29,8 @@ public class ForeignKeyDao extends MetaDataDao<TableMd.Id, ForeignKey, Table.Id>
                         rs.previous();
                         break;
                     }
-                    Table.Id tableIdPk = new Table.Id(id.getDb().getId(), rs.getString("PKTABLE_NAME"),
+                    Table.Id tableIdPk = new Table.Id(id.getContainerId().getContainerId(), rs.getString("PKTABLE_NAME"),
                             rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_SCHEM"));
-                    Table.Id tableIdFk = new Table.Id(id.getDb().getId(), rs.getString("FKTABLE_NAME"),
-                            rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_SCHEM"));
                     Column.Id pkColumn = new Column.Id(tableIdPk, rs.getString("PKCOLUMN_NAME"));
                     fk.addColumnPair(rs.getInt("KEY_SEQ"), rs.getString("FKCOLUMN_NAME"), pkColumn);
                     fk.deleteRule(rs.getInt("DELETE_RULE")).updateRule(rs.getInt("UPDATE_RULE"));
@@ -43,7 +41,7 @@ public class ForeignKeyDao extends MetaDataDao<TableMd.Id, ForeignKey, Table.Id>
     }
 
     @Override
-    protected DataDefinitionSqlStmtSource<TableMd.Id, ForeignKey, Table.Id> getSqlStmtSource(Database db) {
+    protected DataDefinitionSqlStmtSource<TableMd.Id, ForeignKey, Table.Id> getSqlStmtSource(Server db) {
         return db.getTableMdSqlStmtSource();
     }
 

@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity;
 
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.util.List;
 import java.util.Map;
@@ -14,5 +14,5 @@ public interface Optional<E> {
 
     String getOption(String name);
 
-    Class<? extends Database> getDbClass();
+    Class<? extends Server> getServerClass();
 }

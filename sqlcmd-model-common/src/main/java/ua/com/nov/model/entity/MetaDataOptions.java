@@ -1,19 +1,19 @@
 package ua.com.nov.model.entity;
 
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.util.*;
 
 public abstract class MetaDataOptions<E> implements Optional<E> {
-    private final Class<? extends Database> dbClass;
+    private final Class<? extends Server> serverClass;
     private final Map<String, String> options;
 
     public abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
-        protected Class<? extends Database> dbClass;
+        protected Class<? extends Server> serverClass;
         protected Map<String, String> options = new TreeMap<>();
 
-        public Builder(Class<? extends Database> dbClass) {
-            this.dbClass = dbClass;
+        public Builder(Class<? extends Server> serverClass) {
+            this.serverClass = serverClass;
         }
 
         public void addOption(String optionName, String optionValue) {
@@ -31,7 +31,7 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     }
 
     protected MetaDataOptions(Builder builder) {
-        this.dbClass = builder.dbClass;
+        this.serverClass = builder.serverClass;
         this.options = Collections.unmodifiableMap(builder.options);
     }
 
@@ -43,8 +43,10 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     @Override
     public String getCreateOptionsDefinition() {
         StringBuilder sb = new StringBuilder();
+        String s = "";
         for (Map.Entry<String, String> entry : options.entrySet()) {
-            sb.append(entry.getKey()).append(" = ").append(entry.getValue()).append('\n');
+            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
+            s = "\n";
         }
         return sb.toString();
     }
@@ -62,8 +64,8 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     }
 
     @Override
-    public Class<? extends Database> getDbClass() {
-        return dbClass;
+    public Class<? extends Server> getServerClass() {
+        return serverClass;
     }
 
     @Override

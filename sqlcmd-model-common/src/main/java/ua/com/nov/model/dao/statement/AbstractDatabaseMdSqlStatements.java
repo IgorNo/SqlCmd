@@ -34,11 +34,14 @@ public abstract class AbstractDatabaseMdSqlStatements
     @Override
     public SqlStatement getUpdateStmt(E entity) {
         StringBuilder sql = new StringBuilder();
+        String s = "";
         if (entity.getOptions() != null) {
-            for (String s : entity.getOptions().getUpdateOptionsDefinition()) {
-                sql.append(String.format("ALTER %s %s %s", entity.getId().getMdName(), entity.getId().getFullName(), s));
-                sql.append(";\n");
+            for (String option : entity.getOptions().getUpdateOptionsDefinition()) {
+                sql.append(s);
+                sql.append(String.format("ALTER %s %s %s", entity.getId().getMdName(), entity.getId().getFullName(), option));
+                s = ";\n";
             }
+            sql.append(';');
         }
         sql.append(getCommentStmt(entity));
         return new SqlStatement.Builder(sql.toString()).build();
@@ -61,4 +64,5 @@ public abstract class AbstractDatabaseMdSqlStatements
         return new SqlStatement.Builder(String.format("ALTER %s %s RENAME TO %s",
                 entity.getId().getMdName(), entity.getId().getFullName(), newName)).build();
     }
+
 }

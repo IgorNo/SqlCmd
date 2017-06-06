@@ -3,9 +3,9 @@ package ua.com.nov.model.dao.impl;
 import org.junit.Test;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
-import ua.com.nov.model.entity.metadata.database.HyperSqlDb;
-import ua.com.nov.model.entity.metadata.database.MySqlDb;
-import ua.com.nov.model.entity.metadata.database.PostgresSqlDb;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.util.DbUtil;
 
 import javax.sql.DataSource;
@@ -17,8 +17,9 @@ import static org.junit.Assert.assertTrue;
 public class GetConnectionTest {
 
     @Test
-    public void testGetMySqlLocalConnection() throws SQLException{
-        DataSource dataSource = new SingleConnectionDataSource(new MySqlDb(DbUtil.MY_SQL_LOCAL_URL, "sys"),
+    public void testGetMySqlLocalConnection() throws SQLException {
+        Server server = new MySqlServer(DbUtil.MY_SQL_LOCAL_URL);
+        DataSource dataSource = new SingleConnectionDataSource(new Database(server, ""),
                 "root", "root");
         Connection conn = dataSource.getConnection();
         System.out.println(conn.getMetaData().getDatabaseProductName());
@@ -28,9 +29,9 @@ public class GetConnectionTest {
     }
 
     @Test
-    public void testGetPostgreSqlLocalConnection() throws SQLException{
-        String dbUrl = DbUtil.POSTGRE_SQL_LOCAL_URL;
-        DataSource dataSource = new SingleThreadConnectionDataSource(new PostgresSqlDb(dbUrl , "postgres"),
+    public void testGetPostgreSqlLocalConnection() throws SQLException {
+        Server server = new MySqlServer(DbUtil.POSTGRE_SQL_LOCAL_URL);
+        DataSource dataSource = new SingleThreadConnectionDataSource(new Database(server , ""),
                 "postgres", "postgres");
         Connection conn = dataSource.getConnection();
         System.out.println(conn.getMetaData().getDatabaseProductName());
@@ -40,9 +41,9 @@ public class GetConnectionTest {
     }
 
     @Test
-    public void testGetHyperSqlFileConnection() throws SQLException{
-        String dbUrl = DbUtil.HYPER_SQL_FILE_URL;
-        DataSource dataSource = new HyperSqlDb(dbUrl, "hsql");
+    public void testGetHyperSqlFileConnection() throws SQLException {
+        Server server = new MySqlServer(DbUtil.HYPER_SQL_FILE_URL);
+        DataSource dataSource = new Database(server, "");
         Connection conn = dataSource.getConnection(null, null);
         System.out.println(conn.getMetaData().getDatabaseProductName());
         assertTrue(conn != null);
@@ -52,8 +53,8 @@ public class GetConnectionTest {
 
     @Test
     public void testGetHyperSqlMemoryConnection() throws SQLException{
-        String dbUrl = DbUtil.HYPER_SQL_MEMORY_URL;
-        DataSource dataSource = new HyperSqlDb(dbUrl, "hsql");
+        Server server = new MySqlServer(DbUtil.HYPER_SQL_MEMORY_URL);
+        DataSource dataSource = new Database(server, "hsql");
         Connection conn = dataSource.getConnection("anyName", "anyPassword");
         System.out.println(conn.getMetaData().getDatabaseProductName());
         assertTrue(conn != null);

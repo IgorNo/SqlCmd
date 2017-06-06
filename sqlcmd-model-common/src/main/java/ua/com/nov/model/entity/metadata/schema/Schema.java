@@ -47,12 +47,12 @@ public class Schema extends MetaData<Schema.Id> {
 
         @Override
         public String getCatalog() {
-            return getDb().convert(catalog);
+            return getServer().convert(catalog);
         }
 
         @Override
         public String getSchema() {
-            return getDb().convert(getName());
+            return getServer().convert(getName());
         }
     }
 

@@ -1,7 +1,6 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -43,7 +42,7 @@ public class Column extends TableMd<Column.Id> {
         this.size = builder.columnSize;
         this.precision = builder.precision;
         if (builder.options == null) {
-            builder.options = builder.getTableId().getDb().createColumnOptions();
+            builder.options = builder.getTableId().getServer().createColumnOptions();
         }
         if (builder.viewName == null || builder.viewName.isEmpty()) {
             builder.viewName = builder.options.getComment();

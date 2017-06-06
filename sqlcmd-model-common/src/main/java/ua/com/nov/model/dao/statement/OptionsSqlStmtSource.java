@@ -8,6 +8,10 @@ public interface OptionsSqlStmtSource<I,E> {
         return null;
     }
 
+    default SqlStatement getReadAllOptionsStmt() {
+        return null;
+    }
+
     default RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<E>>> getOptionsRowMapper() {
         throw new UnsupportedOperationException();
     }

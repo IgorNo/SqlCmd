@@ -6,10 +6,10 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.database.ColumnOptions;
-import ua.com.nov.model.entity.metadata.database.PostgresSqlColumnOptions;
-import ua.com.nov.model.entity.metadata.database.PostgresSqlTableOptions;
+import ua.com.nov.model.entity.metadata.table.PostgresSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.PostgresSqlColumnOptions;
 
 import java.sql.SQLException;
 
@@ -32,6 +32,8 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
                 .addStorageParameter("autovacuum_enabled", "true")
                 .build();
         numberColumnOptions = new PostgresSqlColumnOptions.Builder().autoIncrement();
+        charColumnOptions = null;
+        generatedColumnOptions = null;
         createTestData(null, "public", "serial", null);
     }
 
@@ -46,7 +48,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException {
+    public static void tearDownClass() throws SQLException, DaoSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }

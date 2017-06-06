@@ -10,7 +10,6 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
-import ua.com.nov.model.entity.metadata.database.ColumnOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
@@ -18,6 +17,7 @@ import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import ua.com.nov.model.entity.metadata.table.constraint.PrimaryKey;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
@@ -45,7 +45,7 @@ public abstract class AbstractTableDaoTest {
     protected static MetaDataOptions<Table> tableOptions;
     protected static ColumnOptions.Builder numberColumnOptions;
     protected static ColumnOptions.Builder charColumnOptions;
-    protected static ColumnOptions.Builder geeratedColumnOptions;
+    protected static ColumnOptions.Builder generatedColumnOptions;
 
     protected static DataType integer, character;
 
@@ -61,13 +61,13 @@ public abstract class AbstractTableDaoTest {
         UNIQUE_KEY_DAO.setDataSource(dataSource);
         INDEX_DAO.setDataSource(dataSource);
 
-        DataType serial = testDb.getDataType(aiTypeName);
-        integer = testDb.getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
-        character = testDb.getMostApproximateDataTypes(JdbcDataTypes.CHAR);
-        DataType varchar = testDb.getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
-        DataType text = testDb.getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
-        DataType numeric = testDb.getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
-        DataType date = testDb.getMostApproximateDataTypes(JdbcDataTypes.DATE);
+        DataType serial = testDb.getServer().getDataType(aiTypeName);
+        integer = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
+        character = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.CHAR);
+        DataType varchar = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
+        DataType text = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
+        DataType numeric = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
+        DataType date = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.DATE);
 
 
         Table.Id customersId = new Table.Id(testDb.getId(), "Customers", catalog, schema);
@@ -109,7 +109,7 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("id", serial).unique().options(numberColumnOptions))
                 .addColumn(new Column.Builder("login", varchar).size(25).notNull().viewName("Логин"))
                 .addColumn(new Column.Builder("password", varchar).size(25).options(charColumnOptions).viewName("Пароль"))
-                .addColumn(new Column.Builder("login_", varchar).size(50).options(geeratedColumnOptions))
+                .addColumn(new Column.Builder("login_", varchar).size(50).options(generatedColumnOptions))
                 .addConstraint(new PrimaryKey.Builder("login"))
                 .options(tableOptions)
                 .build();
@@ -120,7 +120,7 @@ public abstract class AbstractTableDaoTest {
                 .build();
     }
 
-    protected static void tearDownClass() throws SQLException {
+    protected static void tearDownClass() throws SQLException, DaoSystemException {
         dataSource.getConnection().close();
     }
 

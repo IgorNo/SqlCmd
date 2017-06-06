@@ -1,4 +1,4 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.server;
 
 import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
@@ -6,24 +6,26 @@ import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.database.PostgesSqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.grantee.User;
+import ua.com.nov.model.entity.metadata.table.PostgresSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
+import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
+import ua.com.nov.model.entity.metadata.table.column.PostgresSqlColumnOptions;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PostgresSqlDb extends Database {
+public class PostgresSqlServer extends Server {
 
-    public PostgresSqlDb(String dbUrl, String dbName, MetaDataOptions<PostgresSqlDb> options) {
-        super(dbUrl, dbName, options);
+    public PostgresSqlServer(String dbUrl) {
+        super(dbUrl);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "text");
-    }
-
-    public PostgresSqlDb(String dbUrl, String dbName) {
-        this(dbUrl, dbName, null);
     }
 
     @Override
@@ -39,19 +41,23 @@ public class PostgresSqlDb extends Database {
 
     @Override
     public String[] getTableTypes() {
-        List<String> result = new LinkedList<>();
-        for (String type : tableTypes) {
-            if (type.toUpperCase().contains("TABLE") || type.toUpperCase().contains("VIEW"))
-                result.add(type);
+        if (tableTypes != null) {
+            List<String> result = new LinkedList<>();
+            for (String type : tableTypes) {
+                if (type.toUpperCase().contains("TABLE") || type.toUpperCase().contains("VIEW"))
+                    result.add(type);
+            }
+            return result.toArray(new String[0]);
+        } else {
+            return null;
         }
-        return result.toArray(new String[0]);
     }
 
     @Override
     public AbstractDatabaseMdSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<Id, PostgresSqlDb, Database>() {
+        return new AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id>() {
             @Override
-            public SqlStatement getReadAllStmt(Database cId) {
+            public SqlStatement getReadAllStmt(Server.Id cId) {
                 return new SqlStatement.Builder("SELECT datname FROM pg_database WHERE datistemplate = false")
                         .build();
             }
@@ -60,10 +66,10 @@ public class PostgresSqlDb extends Database {
     }
 
     @Override
-    protected OptionsSqlStmtSource<Id, PostgresSqlDb> getDatabaseOptionsSqlStmtSource() {
-        return new OptionsSqlStmtSource<Id, PostgresSqlDb>() {
+    protected OptionsSqlStmtSource<Database.Id, Database> getDatabaseOptionsSqlStmtSource() {
+        return new OptionsSqlStmtSource<Database.Id, Database>() {
             @Override
-            public SqlStatement getReadOptionsStmt(Id eId) {
+            public SqlStatement getReadOptionsStmt(Database.Id eId) {
                 return new SqlStatement.Builder(
                         "SELECT pg_encoding_to_char(encoding), datcollate, datctype, datistemplate, datallowconn, " +
                                 "datconnlimit, rolname, spcname\n" +
@@ -74,17 +80,37 @@ public class PostgresSqlDb extends Database {
             }
 
             @Override
-            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<PostgresSqlDb>>> getOptionsRowMapper() {
-                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<PostgresSqlDb>>>() {
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>> getOptionsRowMapper() {
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>>() {
                     @Override
-                    public Options.Builder mapRow(ResultSet rs, int i) throws SQLException {
-                        return new PostgresSqlDb.Options.Builder()
+                    public PostgesSqlDbOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
+                        return new PostgesSqlDbOptions.Builder()
                                 .encoding(rs.getString(1)).lcCollate(rs.getString(2))
                                 .lcType(rs.getString(3)).isTemplate(rs.getBoolean(4))
                                 .allowConn(rs.getBoolean(5)).connLimit(rs.getInt(6))
                                 .owner(rs.getString(7)).tableSpace(rs.getString(8));
                     }
                 };
+            }
+        };
+    }
+
+    @Override
+    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<User.Id, User>() {
+            @Override
+            public SqlStatement getReadAllOptionsStmt() {
+                return null;
+            }
+
+            @Override
+            public SqlStatement getReadOptionsStmt(User.Id eId) {
+                return null;
+            }
+
+            @Override
+            public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
+                return null;
             }
         };
     }
@@ -116,7 +142,7 @@ public class PostgresSqlDb extends Database {
                         builder.tableSpace(tablespace);
                         String s = rs.getString(4);
                         if (s != null) {
-                            s = s.substring(1, s.length()-1);
+                            s = s.substring(1, s.length() - 1);
                             String[] storageParameters = s.split(",");
                             for (String option : storageParameters) {
                                 int equalPosition = option.indexOf('=');
@@ -149,113 +175,6 @@ public class PostgresSqlDb extends Database {
                 return new SqlStatement.Builder(sql).build();
             }
         };
-    }
-
-    public static class Options extends MetaDataOptions<PostgresSqlDb> {
-
-        public static class Builder extends MetaDataOptions.Builder<Options> {
-
-            public Builder() {
-                super(PostgresSqlDb.class);
-            }
-
-            public Builder owner(String owner) {
-                addOption("OWNER", owner);
-                return this;
-            }
-
-            public Builder tableSpace(String tableSpace) {
-                addOption("TABLESPACE", tableSpace);
-                return this;
-            }
-
-            public Builder allowConn(Boolean allowConn) {
-                addOption("ALLOW_CONNECTIONS", allowConn.toString());
-                return this;
-            }
-
-            public Builder connLimit(Integer connLimit) {
-                addOption("CONNECTION LIMIT", connLimit.toString());
-                return this;
-            }
-
-            public Builder isTemplate(Boolean isTemplate) {
-                addOption("IS_TEMPLATE", isTemplate.toString());
-                return this;
-            }
-
-            public Builder encoding(String encoding) {
-                addOption("ENCODING", "'" + encoding + "'");
-                return this;
-            }
-
-            public Builder lcCollate(String lcCollate) {
-                addOption("LC_COLLATE", "'"  + lcCollate + "'");
-                return this;
-            }
-
-            public Builder lcType(String lcType) {
-                addOption("LC_CTYPE", "'" + lcType + "'");
-                return this;
-            }
-
-            @Override
-            public Options build() {
-                return new Options(this);
-            }
-        }
-
-        public Options(Builder builder) {
-            super(builder);
-        }
-
-        @Override
-        public List<String> getUpdateOptionsDefinition() {
-            final StringBuilder sb = new StringBuilder("");
-            if (getAllowConn() != null) sb.append("\n\tALLOW_CONNECTIONS ").append(getAllowConn());
-            if (getConnLimit() != null) sb.append("\n\tCONNECTION LIMIT ").append(getConnLimit());
-            if (isTemplate() != null) sb.append("\n\tIS_TEMPLATE ").append(isTemplate());
-
-            List<String> result = new LinkedList<>();
-            result.add(sb.toString());
-
-            if (getOwner() != null) result.add("OWNER TO " + getOwner());
-            if (getTableSpace() != null) result.add("SET TABLESPACE " + getTableSpace());
-
-            return result;
-        }
-
-        public String getOwner() {
-            return getOption("OWNER");
-        }
-
-        public String getTableSpace() {
-            return getOption("TABLESPACE");
-        }
-
-        public Boolean getAllowConn() {
-            return Boolean.valueOf(getOption("ALLOW_CONNECTIONS"));
-        }
-
-        public Integer getConnLimit() {
-            return Integer.valueOf(getOption("CONNECTION LIMIT"));
-        }
-
-        public Boolean isTemplate() {
-            return Boolean.valueOf(getOption("IS_TEMPLATE"));
-        }
-
-        public String getEncoding() {
-            return getOption("ENCODING");
-        }
-
-        public String getLcCollate() {
-            return getOption("LC_COLLATE");
-        }
-
-        public String getLcType() {
-            return getOption("LC_CTYPE");
-        }
     }
 
 }

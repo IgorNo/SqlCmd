@@ -7,13 +7,15 @@ import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.HyperSqlDb;
+import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.util.DbUtil;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    public static final Database TEST_DATABASE = new HyperSqlDb(DbUtil.HYPER_SQL_FILE_URL, "sys");
+    private static Server server = new HyperSqlServer(DbUtil.HYPER_SQL_FILE_URL);
 
     @Override
     protected String getPassword() {
@@ -27,18 +29,19 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Override
     public Database getTestDatabase() {
-        return TEST_DATABASE;
+        return new Database(server, "tmp");
     }
 
     @BeforeClass
     public static void setUpClass() throws SQLException {
-        dataSource = new SingleConnectionDataSource(DbUtil.HYPER_SQL_FILE_SYSTEM_DB, "root", "root");
+        DataSource dataSource = new SingleConnectionDataSource(new Database(server, "") ,
+                "root", "root");
+        DAO.setDataSource(dataSource);
     }
 
-    @Override
     @Before
-    public void setUp() throws SQLException {
-        DAO.setDataSource(dataSource);
+    public void setUp() throws SQLException, DaoSystemException {
+        tearDown();
     }
 
     @Test
@@ -53,5 +56,5 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @After
-    public void tearDown() throws SQLException{ /*NOP*/ }
+    public void tearDown() throws DaoSystemException { /*NOP*/ }
 }

@@ -6,6 +6,7 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.schema.SchemaMd;
+import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.*;
 
@@ -30,8 +31,8 @@ public class Table extends SchemaMd<Table.Id> {
         }
     }
 
-    public Database getDb() {
-        return getId().getDb();
+    public Server getServer() {
+        return getId().getServer();
     }
 
     public String getFullName() {

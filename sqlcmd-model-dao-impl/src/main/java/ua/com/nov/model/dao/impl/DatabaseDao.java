@@ -1,94 +1,46 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
+import ua.com.nov.model.dao.DataDefinitionDao;
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.Database.Id;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
+public final class DatabaseDao
+        extends AbstractDao<Database.Id, Database, Server.Id> implements DataDefinitionDao<Database> {
 
     @Override
-    public Database read(Database.Id eId) throws DaoSystemException {
-        Database result = null;
+    public void createIfNotExist(Database entity) throws DaoSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getCreateIfNotExistsStmt(entity));
+    }
+
+    @Override
+    public Database read(Id id) throws DaoSystemException {
+        Database.Id dbId = new Database.Id(id.getServer(), id.getName());
+        MetaDataOptions.Builder<?> builder = null;
         try {
-            Connection conn = getDataSource().getConnection();
-            result = createDatabase(eId.getDb(), eId.getName());
-            result.addDataTypes(getDataTypes(conn));
-            result.addTableTypes(getTableTypes(conn));
+            builder = new OptionsDao<Id, Database>(getDataSource()).read(dbId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DaoSystemException(e.getMessage());
         }
-        return result;
+        if (builder != null)
+            return new Database(id.getServer(), dbId.getName(), builder.build());
+        else
+            return  new Database(id.getServer(), dbId.getName());
     }
 
-    private Database createDatabase(Database db, String dbName) throws SQLException {
-        Class[] paramTypes = new Class[]{String.class, String.class, MetaDataOptions.class};
-        Database result = null;
-        MetaDataOptions.Builder<?> builder = new OptionsDao<Id, Database>(getDataSource()).read(db.new Id(db.getDbUrl(), dbName));
-        Optional<Database> options = null;
-        if (builder != null) options = builder.build();
-        try {
-            Constructor<? extends Database> constructor = db.getClass().getConstructor(paramTypes);
-            return constructor.newInstance(new Object[]{db.getDbUrl(), dbName,
-                    options});
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
 
-    private List<DataType> getDataTypes(Connection conn) throws SQLException {
-        ResultSet rs = conn.getMetaData().getTypeInfo();
-        List<DataType> dataTypeList = new ArrayList<>();
-        while (rs.next()) {
-            DataType dataType = new DataType.Builder(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"))
-                    .precision(rs.getInt("PRECISION"))
-                    .literalPrefix(rs.getString("LITERAL_PREFIX"))
-                    .literalSuffix(rs.getString("LITERAL_SUFFIX"))
-                    .createParams(rs.getString("CREATE_PARAMS"))
-                    .nullable(rs.getShort("NULLABLE"))
-                    .caseSensitive(rs.getBoolean("CASE_SENSITIVE"))
-                    .searchable(rs.getShort("SEARCHABLE"))
-                    .unsignedAttribute(rs.getBoolean("UNSIGNED_ATTRIBUTE"))
-                    .fixedPrecScale(rs.getBoolean("FIXED_PREC_SCALE"))
-                    .autoIncrement(rs.getBoolean("AUTO_INCREMENT"))
-                    .localTypeName(rs.getString("LOCAL_TYPE_NAME"))
-                    .minimumScale(rs.getInt("MINIMUM_SCALE"))
-                    .maximumScale(rs.getInt("MAXIMUM_SCALE"))
-                    .numPrecRadix(rs.getInt("NUM_PREC_RADIX"))
-                    .build();
-            dataTypeList.add(dataType);
-        }
-        return dataTypeList;
-    }
-
-    private List<String> getTableTypes(Connection conn) throws SQLException {
-        ResultSet rs = conn.getMetaData().getTableTypes();
-        List<String> result = new ArrayList<>();
-        while (rs.next()) {
-            result.add(rs.getString("TABLE_TYPE"));
-        }
-        return result;
+    @Override
+    public void deleteIfExist(Database entity) throws DaoSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getDeleteIfExistStmt(entity));
     }
 
     @Override
@@ -97,17 +49,19 @@ public final class DatabaseDao extends AbstractDao<Id, Database, Database> {
     }
 
     @Override
-    protected AbstractRowMapper getRowMapper(Database db) {
-        return new AbstractRowMapper(db) {
+    protected AbstractRowMapper getRowMapper(Server.Id id) {
+        return new AbstractRowMapper(id) {
             @Override
             public Database mapRow(ResultSet rs, int i) throws SQLException {
-                return createDatabase(db, rs.getString(1));
+                Database.Id dbId = new Database.Id(id.getServer(), rs.getString(1));
+                MetaDataOptions.Builder<?> builder = new OptionsDao<Id, Database>(getDataSource()).read(dbId);
+                return new Database(id.getServer(), dbId.getName(), builder.build());
             }
         };
     }
 
     @Override
-    protected AbstractDatabaseMdSqlStatements<Id, Database, Database> getSqlStmtSource(Database db) {
+    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Server db) {
         return db.getDatabaseSqlStmtSource();
     }
 }

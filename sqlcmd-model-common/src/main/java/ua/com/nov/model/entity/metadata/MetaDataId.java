@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata;
 
 import ua.com.nov.model.entity.Hierarchical;
-import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.server.Server;
 
 public abstract class MetaDataId<C extends Hierarchical> implements Hierarchical<C> {
     private final C containerId;
@@ -23,17 +23,17 @@ public abstract class MetaDataId<C extends Hierarchical> implements Hierarchical
     }
 
     @Override
-    public Database getDb() {
-        return containerId.getDb();
+    public Server getServer() {
+        return containerId.getServer();
     }
 
     @Override
     public String getFullName() {
-        return getDb().convert(containerId.getFullName() + "." + name);
+        return getServer().convert(containerId.getFullName() + "." + name);
     }
 
     public String getName() {
-        return getDb().convert(name);
+        return getServer().convert(name);
     }
 
     @Override

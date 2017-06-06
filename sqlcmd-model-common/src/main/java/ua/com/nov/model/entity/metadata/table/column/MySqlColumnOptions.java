@@ -1,4 +1,6 @@
-package ua.com.nov.model.entity.metadata.database;
+package ua.com.nov.model.entity.metadata.table.column;
+
+import ua.com.nov.model.entity.metadata.server.MySqlServer;
 
 public class MySqlColumnOptions extends ColumnOptions {
 
@@ -13,7 +15,7 @@ public class MySqlColumnOptions extends ColumnOptions {
     public static class Builder extends ColumnOptions.Builder<MySqlColumnOptions> {
 
         public Builder() {
-            super(MySqlDb.class);
+            super(MySqlServer.class);
         }
 
         @Override
