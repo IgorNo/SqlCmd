@@ -3,7 +3,7 @@ package ua.com.nov.model.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class DbUtil {
+public class DbUtils {
     public static final String HYPER_SQL_FILE_URL = "jdbc:hsqldb:file:lightdb/";
 
     public static final String HYPER_SQL_MEMORY_URL = "jdbc:hsqldb:mem:lightdb/";
@@ -12,6 +12,9 @@ public class DbUtil {
 
     public static final String POSTGRE_SQL_LOCAL_URL = "jdbc:postgresql://localhost:5432/";
 
+
+    private DbUtils() {
+    }
 
     public static String getDatabaseProductName(String url) {
         int beginIndex = url.indexOf(':') + 1;

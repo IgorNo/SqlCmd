@@ -2,8 +2,7 @@ package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.server.Server;
-
-import java.util.Map;
+import ua.com.nov.model.util.CollectionUtils;
 
 public abstract class ColumnOptions extends MetaDataOptions<Column> {
     private final boolean autoIncrement;   // Indicates whether this column is auto incremented
@@ -37,18 +36,11 @@ public abstract class ColumnOptions extends MetaDataOptions<Column> {
 
     @Override
     public String getCreateOptionsDefinition() {
-        String s = "";
         StringBuilder sb = new StringBuilder();
         if (isGeneratedColumn()) {
-            sb.append("AS ").append(getGenerationExpression());
-            s = " ";
+            sb.append("AS ").append(getGenerationExpression()).append(' ');
         }
-        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
-            sb.append(s).append(entry.getKey().trim());
-            if (!entry.getValue().isEmpty())
-                sb.append(' ').append(entry.getValue());
-            s = " ";
-        }
+        sb.append(CollectionUtils.toString(getOptionsMap(), " ", " "));
         return sb.toString();
     }
 

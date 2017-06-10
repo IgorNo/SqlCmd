@@ -6,7 +6,7 @@ import ua.com.nov.model.datasource.SingleThreadConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.server.MySqlServer;
 import ua.com.nov.model.entity.metadata.server.Server;
-import ua.com.nov.model.util.DbUtil;
+import ua.com.nov.model.util.DbUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -18,7 +18,7 @@ public class GetConnectionTest {
 
     @Test
     public void testGetMySqlLocalConnection() throws SQLException {
-        Server server = new MySqlServer(DbUtil.MY_SQL_LOCAL_URL);
+        Server server = new MySqlServer(DbUtils.MY_SQL_LOCAL_URL);
         DataSource dataSource = new SingleConnectionDataSource(new Database(server, ""),
                 "root", "root");
         Connection conn = dataSource.getConnection();
@@ -30,7 +30,7 @@ public class GetConnectionTest {
 
     @Test
     public void testGetPostgreSqlLocalConnection() throws SQLException {
-        Server server = new MySqlServer(DbUtil.POSTGRE_SQL_LOCAL_URL);
+        Server server = new MySqlServer(DbUtils.POSTGRE_SQL_LOCAL_URL);
         DataSource dataSource = new SingleThreadConnectionDataSource(new Database(server , ""),
                 "postgres", "postgres");
         Connection conn = dataSource.getConnection();
@@ -42,7 +42,7 @@ public class GetConnectionTest {
 
     @Test
     public void testGetHyperSqlFileConnection() throws SQLException {
-        Server server = new MySqlServer(DbUtil.HYPER_SQL_FILE_URL);
+        Server server = new MySqlServer(DbUtils.HYPER_SQL_FILE_URL);
         DataSource dataSource = new Database(server, "");
         Connection conn = dataSource.getConnection(null, null);
         System.out.println(conn.getMetaData().getDatabaseProductName());
@@ -53,7 +53,7 @@ public class GetConnectionTest {
 
     @Test
     public void testGetHyperSqlMemoryConnection() throws SQLException{
-        Server server = new MySqlServer(DbUtil.HYPER_SQL_MEMORY_URL);
+        Server server = new MySqlServer(DbUtils.HYPER_SQL_MEMORY_URL);
         DataSource dataSource = new Database(server, "hsql");
         Connection conn = dataSource.getConnection("anyName", "anyPassword");
         System.out.println(conn.getMetaData().getDatabaseProductName());

@@ -1,8 +1,8 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.database.PostgresSqlIndexOptions;
-import ua.com.nov.model.entity.metadata.server.PostgresSqlServer;
+import ua.com.nov.model.entity.metadata.database.PostgreSqlIndexOptions;
+import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 
@@ -111,9 +111,9 @@ public class Index extends TableMd<Index.Id> {
         final StringBuilder sb = new StringBuilder(" ON ");
         sb.append(getId().getTableId().getFullName());
 
-        if (getId().getTableId().getServer().getClass().equals(PostgresSqlServer.class)) {
+        if (getId().getTableId().getServer().getClass().equals(PostgreSqlServer.class)) {
             if (getOptions() != null) {
-                PostgresSqlIndexOptions options = (PostgresSqlIndexOptions) getOptions();
+                PostgreSqlIndexOptions options = (PostgreSqlIndexOptions) getOptions();
                 if (options.getUsing() != null) sb.append(options.getUsing());
             }
         }

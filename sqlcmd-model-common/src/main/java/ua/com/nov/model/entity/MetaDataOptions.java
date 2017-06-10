@@ -40,16 +40,16 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
         return options.get(optionName);
     }
 
-    @Override
-    public String getCreateOptionsDefinition() {
-        StringBuilder sb = new StringBuilder();
-        String s = "";
-        for (Map.Entry<String, String> entry : options.entrySet()) {
-            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
-            s = "\n";
-        }
-        return sb.toString();
-    }
+//    @Override
+//    public String getCreateOptionsDefinition() {
+//        StringBuilder sb = new StringBuilder();
+//        String s = "";
+//        for (Map.Entry<String, String> entry : options.entrySet()) {
+//            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
+//            s = "\n";
+//        }
+//        return sb.toString();
+//    }
 
     @Override
     public List<String> getUpdateOptionsDefinition() {

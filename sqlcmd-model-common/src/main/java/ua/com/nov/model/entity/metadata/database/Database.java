@@ -12,8 +12,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Database extends BaseDataSource
-        implements Unique<Database.Id>, Persistent{
+public class Database extends BaseDataSource implements Unique<Database.Id>, Persistent {
     private final Id id;
     protected MetaDataOptions<Database> options;
 

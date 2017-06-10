@@ -2,6 +2,7 @@ package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.util.CollectionUtils;
 
 public class MySqlDbOptions extends MetaDataOptions<Database> {
 
@@ -15,6 +16,11 @@ public class MySqlDbOptions extends MetaDataOptions<Database> {
 
     public String getCollate() {
         return getOption("COLLATE");
+    }
+
+    @Override
+    public String getCreateOptionsDefinition() {
+        return CollectionUtils.toString(getOptionsMap(), "\n", " = ");
     }
 
     public static class Builder extends MetaDataOptions.Builder<MySqlDbOptions> {

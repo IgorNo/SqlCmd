@@ -1,15 +1,21 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.server.PostgresSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class PostgesSqlDbOptions extends MetaDataOptions<Database> {
+public class PostgreSqlDbOptions extends MetaDataOptions<Database> {
 
-    public PostgesSqlDbOptions(Builder builder) {
+    public PostgreSqlDbOptions(Builder builder) {
         super(builder);
+    }
+
+    @Override
+    public String getCreateOptionsDefinition() {
+        return CollectionUtils.toString(getOptionsMap(), "\n", " = ");
     }
 
     @Override
@@ -60,10 +66,10 @@ public class PostgesSqlDbOptions extends MetaDataOptions<Database> {
         return getOption("LC_CTYPE");
     }
 
-    public static class Builder extends MetaDataOptions.Builder<PostgesSqlDbOptions> {
+    public static class Builder extends MetaDataOptions.Builder<PostgreSqlDbOptions> {
 
         public Builder() {
-            super(PostgresSqlServer.class);
+            super(PostgreSqlServer.class);
         }
 
         public Builder owner(String owner) {
@@ -107,8 +113,8 @@ public class PostgesSqlDbOptions extends MetaDataOptions<Database> {
         }
 
         @Override
-        public PostgesSqlDbOptions build() {
-            return new PostgesSqlDbOptions(this);
+        public PostgreSqlDbOptions build() {
+            return new PostgreSqlDbOptions(this);
         }
     }
 

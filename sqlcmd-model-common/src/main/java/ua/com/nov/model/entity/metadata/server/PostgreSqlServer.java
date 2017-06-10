@@ -7,10 +7,10 @@ import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.database.PostgesSqlDbOptions;
+import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.grantee.User;
-import ua.com.nov.model.entity.metadata.table.PostgresSqlTableOptions;
+import ua.com.nov.model.entity.metadata.table.PostgreSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
@@ -21,9 +21,9 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PostgresSqlServer extends Server {
+public class PostgreSqlServer extends Server {
 
-    public PostgresSqlServer(String dbUrl) {
+    public PostgreSqlServer(String dbUrl) {
         super(dbUrl);
         getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "text");
     }
@@ -83,8 +83,8 @@ public class PostgresSqlServer extends Server {
             public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>> getOptionsRowMapper() {
                 return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Database>>>() {
                     @Override
-                    public PostgesSqlDbOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
-                        return new PostgesSqlDbOptions.Builder()
+                    public PostgreSqlDbOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
+                        return new PostgreSqlDbOptions.Builder()
                                 .encoding(rs.getString(1)).lcCollate(rs.getString(2))
                                 .lcType(rs.getString(3)).isTemplate(rs.getBoolean(4))
                                 .allowConn(rs.getBoolean(5)).connLimit(rs.getInt(6))
@@ -133,8 +133,8 @@ public class PostgresSqlServer extends Server {
             public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>> getOptionsRowMapper() {
                 return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<Table>>>() {
                     @Override
-                    public PostgresSqlTableOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
-                        PostgresSqlTableOptions.Builder builder = new PostgresSqlTableOptions.Builder()
+                    public PostgreSqlTableOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
+                        PostgreSqlTableOptions.Builder builder = new PostgreSqlTableOptions.Builder()
                                 .owner(rs.getString(1))
                                 .oids(rs.getBoolean(3));
                         String tablespace = rs.getString(2);

@@ -9,7 +9,7 @@ import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
-public class PostgresSqlSchemaDaoTest extends AbstractSchemaDaoTest {
+public class PostgreSqlSchemaDaoTest extends AbstractSchemaDaoTest {
     private static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new PostgreSqlDatabaseDaoTest();
 
     @BeforeClass

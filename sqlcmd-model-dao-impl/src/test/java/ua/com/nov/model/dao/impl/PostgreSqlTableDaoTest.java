@@ -6,7 +6,7 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.table.PostgresSqlTableOptions;
+import ua.com.nov.model.entity.metadata.table.PostgreSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
 import ua.com.nov.model.entity.metadata.table.column.PostgresSqlColumnOptions;
@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     private static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new PostgreSqlDatabaseDaoTest();
-    private static final PostgresSqlTableOptions uOptions = new PostgresSqlTableOptions.Builder()
+    private static final PostgreSqlTableOptions uOptions = new PostgreSqlTableOptions.Builder()
             .tableSpace("pg_default").oids(true).addStorageParameter("fillfactor", "95")
             .addStorageParameter("autovacuum_enabled", "false").owner("postgres")
             .build();
@@ -27,7 +27,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
         dataSource = new SingleConnectionDataSource(testDb, "postgres", "postgres");
-        tableOptions = new PostgresSqlTableOptions.Builder()
+        tableOptions = new PostgreSqlTableOptions.Builder()
                 .tableSpace("pg_default").oids(false).addStorageParameter("fillfactor", "75")
                 .addStorageParameter("autovacuum_enabled", "true")
                 .build();

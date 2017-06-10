@@ -2,10 +2,9 @@ package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.util.CollectionUtils;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class MySqlTableOptions extends MetaDataOptions<Table> {
     public static class Builder extends MetaDataOptions.Builder<MySqlTableOptions> {
@@ -117,16 +116,13 @@ public class MySqlTableOptions extends MetaDataOptions<Table> {
     }
 
     @Override
+    public String getCreateOptionsDefinition() {
+        return CollectionUtils.toString(getOptionsMap(), "\n", " = ");
+    }
+
+    @Override
     public List<String> getUpdateOptionsDefinition() {
-        List<String> result = new LinkedList<>();
-        StringBuilder sb = new StringBuilder();
-        String s = "";
-        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
-            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
-            s = " \n";
-        }
-        result.add(sb.toString());
-        return result;
+        return CollectionUtils.toList(getOptionsMap(), " = ", " \n");
     }
 
 }

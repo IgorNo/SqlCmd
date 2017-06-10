@@ -1,10 +1,9 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
+import ua.com.nov.model.util.CollectionUtils;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class HyperSqlColumnOptions extends ColumnOptions {
     private HyperSqlColumnOptions(Builder builder) {
@@ -13,19 +12,12 @@ public class HyperSqlColumnOptions extends ColumnOptions {
 
     @Override
     public List<String> getUpdateOptionsDefinition() {
-        List<String> result = new LinkedList<>();
+        List<String> result = CollectionUtils.toList(getOptionsMap(), " ", "SET");
 
         if (!isNotNull()) result.add("SET NULL");
         if (getDefaultValue() == null) result.add("DROP DEFAULT");
         if (!isAutoIncrement()) result.add("DROP GENERATED");
 
-        for (Map.Entry<String, String> entry : getOptionsMap().entrySet()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SET ").append(entry.getKey().trim());
-            if (!entry.getValue().isEmpty())
-                sb.append(' ').append(entry.getValue());
-            result.add(sb.toString());
-        }
         return result;
     }
 

@@ -1,16 +1,16 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.server.PostgresSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
+public class PostgreSqlTableOptions extends MetaDataOptions<Table> {
 
-    public PostgresSqlTableOptions(Builder builder) {
+    public PostgreSqlTableOptions(Builder builder) {
         super(builder);
     }
 
@@ -93,10 +93,10 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
         return result;
     }
 
-    public static class Builder extends MetaDataOptions.Builder<PostgresSqlTableOptions> {
+    public static class Builder extends MetaDataOptions.Builder<PostgreSqlTableOptions> {
 
         public Builder() {
-            super(PostgresSqlServer.class);
+            super(PostgreSqlServer.class);
         }
 
         public Builder onCommit(String onCommit) {
@@ -125,8 +125,8 @@ public class PostgresSqlTableOptions extends MetaDataOptions<Table> {
         }
 
         @Override
-        public PostgresSqlTableOptions build() {
-            return new PostgresSqlTableOptions(this);
+        public PostgreSqlTableOptions build() {
+            return new PostgreSqlTableOptions(this);
         }
     }
 }

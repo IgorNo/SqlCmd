@@ -9,13 +9,13 @@ import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
 import ua.com.nov.model.entity.metadata.server.Server;
-import ua.com.nov.model.util.DbUtil;
+import ua.com.nov.model.util.DbUtils;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    private static Server server = new HyperSqlServer(DbUtil.HYPER_SQL_FILE_URL);
+    private static Server server = new HyperSqlServer(DbUtils.HYPER_SQL_FILE_URL);
 
     @Override
     protected String getPassword() {
