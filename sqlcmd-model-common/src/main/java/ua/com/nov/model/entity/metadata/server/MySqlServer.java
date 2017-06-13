@@ -12,7 +12,8 @@ import ua.com.nov.model.entity.metadata.MetaDataId;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.grantee.User;
+import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
@@ -115,15 +116,15 @@ public final class MySqlServer extends Server {
     }
 
     @Override
-    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
-        return new OptionsSqlStmtSource<User.Id, User>() {
+    public OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<Grantee.Id, User>() {
             @Override
             public SqlStatement getReadAllOptionsStmt() {
                 return null;
             }
 
             @Override
-            public SqlStatement getReadOptionsStmt(User.Id eId) {
+            public SqlStatement getReadOptionsStmt(Grantee.Id eId) {
                 return null;
             }
 

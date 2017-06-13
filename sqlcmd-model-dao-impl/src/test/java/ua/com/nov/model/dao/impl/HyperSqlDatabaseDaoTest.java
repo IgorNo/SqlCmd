@@ -15,7 +15,15 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    private static Server server = new HyperSqlServer(DbUtils.HYPER_SQL_FILE_URL);
+    private static final Server SERVER = new HyperSqlServer(DbUtils.HYPER_SQL_FILE_URL);
+    public static final Database TEST_DB = new Database(SERVER, "tmp");
+
+    @BeforeClass
+    public static void setUpClass() throws SQLException {
+        DataSource dataSource = new SingleConnectionDataSource(new Database(SERVER, ""),
+                "root", "root");
+        DAO.setDataSource(dataSource);
+    }
 
     @Override
     protected String getPassword() {
@@ -29,14 +37,7 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @Override
     public Database getTestDatabase() {
-        return new Database(server, "tmp");
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws SQLException {
-        DataSource dataSource = new SingleConnectionDataSource(new Database(server, "") ,
-                "root", "root");
-        DAO.setDataSource(dataSource);
+        return TEST_DB;
     }
 
     @Before

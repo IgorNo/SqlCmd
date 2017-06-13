@@ -9,7 +9,8 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.grantee.User;
+import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.table.PostgreSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -96,15 +97,15 @@ public class PostgreSqlServer extends Server {
     }
 
     @Override
-    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
-        return new OptionsSqlStmtSource<User.Id, User>() {
+    public OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<Grantee.Id, User>() {
             @Override
             public SqlStatement getReadAllOptionsStmt() {
                 return null;
             }
 
             @Override
-            public SqlStatement getReadOptionsStmt(User.Id eId) {
+            public SqlStatement getReadOptionsStmt(Grantee.Id eId) {
                 return null;
             }
 

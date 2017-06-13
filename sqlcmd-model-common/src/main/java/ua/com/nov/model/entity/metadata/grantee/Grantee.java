@@ -1,30 +1,44 @@
 package ua.com.nov.model.entity.metadata.grantee;
 
-import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.metadata.MetaData;
 import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.util.*;
 
-public class Grantee<I extends Grantee.Id> extends MetaData<I> {
-    private Map<String, ? extends Grantee> grantees = new HashMap<>();
-    private Map<? extends MetaData, Set<String>> privileges = new HashMap<>();
+public abstract class Grantee extends MetaData<Grantee.Id> {
+    private final List<Privilege> privileges = new ArrayList<>();
+    private Set<Grantee> grantees;
 
-    public Grantee(I id, Optional<? extends Grantee> options) {
-        super(id, null, options);
+    protected Grantee(Builder builder) {
+        super(builder.id, null, builder.options);
+        if (!builder.grantees.isEmpty()) this.grantees = builder.grantees;
+        for (Object privilegeBuilder : builder.privilegeBuilders) {
+            this.privileges.add(((Privilege.Builder) privilegeBuilder).addGrantee(this).build());
+        }
     }
 
-    public List<? extends Grantee> getGrantees() {
-        return new LinkedList<>(grantees.values());
+    public List<Privilege> getAllPrivileges() {
+        List<Privilege> result = new ArrayList<>(privileges);
+        for (Grantee grantee : grantees) {
+            if (grantee.grantees != null) result.addAll(getAllPrivileges());
+        }
+        return result;
     }
 
-    public Map<? extends MetaData, Set<String>> getAllPrivileges() {
-        return Collections.unmodifiableMap(privileges);
+    public List<Grantee> getGranteeList() {
+        return new ArrayList<>(grantees);
     }
 
-    public Collection<String> getPrivileges(MetaData<?> metaData) {
-        return null;
+    public List<Privilege> getPrivilegeList() {
+        return Collections.unmodifiableList(privileges);
+    }
+
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        return String.format(super.getCreateStmtDefinition(null), "");
     }
 
     public abstract static class Id extends MetaDataId<Server.Id> {
@@ -32,5 +46,33 @@ public class Grantee<I extends Grantee.Id> extends MetaData<I> {
         public Id(Server.Id containerId, String name) {
             super(containerId, name);
         }
+
+        @Override
+        public String getFullName() {
+            return getName();
+        }
     }
+
+    public abstract static class Builder<T extends Grantee> implements Buildable<T> {
+        protected GranteeOptions<? extends Grantee> options;
+        protected Set<Grantee> grantees = new HashSet<>();
+        protected List<Privilege.Builder> privilegeBuilders = new ArrayList<>();
+        private Grantee.Id id;
+
+        public Builder(Grantee.Id id, GranteeOptions<? extends Grantee> options) {
+            this.id = id;
+            this.options = options;
+        }
+
+        public Builder addGrantee(Grantee grantee) {
+            grantees.add(grantee);
+            return this;
+        }
+
+        public Builder addPrivelege(Privilege.Builder privilege) {
+            privilegeBuilders.add(privilege);
+            return this;
+        }
+    }
+
 }

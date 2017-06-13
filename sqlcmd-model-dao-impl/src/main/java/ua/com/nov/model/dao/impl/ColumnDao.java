@@ -45,8 +45,8 @@ public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
     }
 
     @Override
-    protected DataDefinitionSqlStmtSource<Column.Id, Column, Table.Id> getSqlStmtSource(Server db) {
-        return db.getColumnSqlStmtSource();
+    protected DataDefinitionSqlStmtSource<Column.Id, Column, Table.Id> getSqlStmtSource(Server server) {
+        return server.getColumnSqlStmtSource();
     }
 }
 

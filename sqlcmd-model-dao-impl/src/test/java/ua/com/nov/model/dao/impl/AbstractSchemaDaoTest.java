@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractSchemaDaoTest {
     protected static final SchemaDao DAO = new SchemaDao();
-    protected static Database testDb;
+    public static Database testDb;
     protected static Schema.Id schemaId;
     protected static Schema schema;
 

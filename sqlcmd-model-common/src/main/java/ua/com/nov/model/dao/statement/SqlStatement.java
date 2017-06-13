@@ -8,6 +8,24 @@ public class SqlStatement {
     private final String sql;
     private final List<Object> parameters;
 
+    private SqlStatement(Builder builder) {
+        this.sql = builder.sql;
+        this.parameters = builder.parameters;
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public List<Object> getParameters() {
+        return Collections.unmodifiableList(parameters);
+    }
+
+    @Override
+    public String toString() {
+        return sql;
+    }
+
     public static class Builder {
         private final String sql;
         private final List<Object> parameters = new ArrayList<>();
@@ -31,23 +49,5 @@ public class SqlStatement {
         public SqlStatement build() {
             return new SqlStatement(this);
         }
-    }
-
-    public SqlStatement(Builder builder) {
-        this.sql = builder.sql;
-        this.parameters = builder.parameters;
-    }
-
-    public String getSql() {
-        return sql;
-    }
-
-    public List<Object> getParameters() {
-        return Collections.unmodifiableList(parameters);
-    }
-
-    @Override
-    public String toString() {
-        return sql;
     }
 }

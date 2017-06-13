@@ -1,6 +1,5 @@
 package ua.com.nov.model.dao;
 
-import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 
 import javax.sql.DataSource;
@@ -22,7 +21,7 @@ public interface Dao<I, E, C> {
     void delete(E entity) throws DaoSystemException;
 
     // Read one entity with identifier = 'eId'
-    E read(I eId) throws DaoSystemException, DaoBusinessLogicException;
+    E read(I eId) throws DaoSystemException;
 
     //Read All from container with identifier = 'cId'
     List<E> readAll(C cId) throws DaoSystemException;

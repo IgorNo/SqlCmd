@@ -9,12 +9,16 @@ import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.grantee.User;
+import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.user.HyperSqlUserOptions;
+import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
 import ua.com.nov.model.entity.metadata.table.column.HyperSqlColumnOptions;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,21 +108,32 @@ public class HyperSqlServer extends Server {
     }
 
     @Override
-    public OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource() {
-        return new OptionsSqlStmtSource<User.Id, User>() {
+    public OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource() {
+        return new OptionsSqlStmtSource<Grantee.Id, User>() {
+            public static final String sql = "SELECT * FROM PUBLIC.INFORMATION_SCHEMA.SYSTEM_USERS";
             @Override
             public SqlStatement getReadAllOptionsStmt() {
-                return null;
+                return new SqlStatement.Builder(sql).build();
             }
 
             @Override
-            public SqlStatement getReadOptionsStmt(User.Id eId) {
-                return null;
+            public SqlStatement getReadOptionsStmt(Grantee.Id eId) {
+                return new SqlStatement.Builder(sql + " WHERE USER_NAME = '" + eId.getName() + "'").build();
             }
 
             @Override
             public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
-                return null;
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>>() {
+                    @Override
+                    public HyperSqlUserOptions.Builder mapRow(ResultSet rs, int i)
+                            throws SQLException {
+                        HyperSqlUserOptions.Builder builder = new HyperSqlUserOptions.Builder(rs.getString("PASSWORD_DIGEST"))
+                                .initialSchema(rs.getString("INITIAL_SCHEMA"));
+                        if (rs.getBoolean("ADMIN")) builder.admin();
+                        if (rs.getString("AUTHENTICATION").equals("LOCAL")) builder.authenticationLocal();
+                        return builder;
+                    }
+                };
             }
         };
     }

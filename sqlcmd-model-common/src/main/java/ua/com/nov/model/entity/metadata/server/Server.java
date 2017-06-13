@@ -1,9 +1,6 @@
 package ua.com.nov.model.entity.metadata.server;
 
-import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
-import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
-import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
-import ua.com.nov.model.dao.statement.SqlStatement;
+import ua.com.nov.model.dao.statement.*;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.MetaData;
@@ -12,7 +9,8 @@ import ua.com.nov.model.entity.metadata.NullMetaData;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
-import ua.com.nov.model.entity.metadata.grantee.User;
+import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -25,8 +23,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 public abstract class Server  implements Unique<Server.Id> {
-    private Id id;
     protected List<String> tableTypes;
+    private Id id;
     private Map<String, DataType> dataTypes = new HashMap<>();
     private Map<JdbcDataTypes, String> typesMap = new HashMap<>();
 
@@ -101,6 +99,9 @@ public abstract class Server  implements Unique<Server.Id> {
             case "COLUMN":
                 return getColumnOptionsSqlStmSource();
 
+            case "USER":
+                return getUserOptionsSqlStmSource();
+
             default:
                 throw new IllegalArgumentException();
         }
@@ -121,14 +122,14 @@ public abstract class Server  implements Unique<Server.Id> {
         };
     }
 
-    public abstract OptionsSqlStmtSource<User.Id, User> getUserOptionsSqlStmSource();
+    public abstract OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource();
 
     public abstract AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id> getDatabaseSqlStmtSource();
 
-    public AbstractDatabaseMdSqlStatements<User.Id, User, Server.Id> getUserSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<User.Id, User, Server.Id>() {
+    public AbstractDatabaseMdSqlStatements<Grantee.Id, User, Server.Id> getUserSqlStmtSource() {
+        return new AbstractDatabaseMdSqlStatements<Grantee.Id, User, Server.Id>() {
             @Override
-            public SqlStatement getReadOneStmt(User.Id eId) {
+            public SqlStatement getReadOneStmt(Grantee.Id eId) {
                 return eId.getServer().getUserOptionsSqlStmSource().getReadOptionsStmt(eId);
             }
 
@@ -172,6 +173,11 @@ public abstract class Server  implements Unique<Server.Id> {
         };
     }
 
+    public AbstractPrivilegeStatements getPrivelegeStmtSource() {
+        return new AbstractPrivilegeStatements() {
+        };
+    }
+
     // convert 'parameter' to database format (to upper or lower case)
     public abstract String convert(String parameter);
 
@@ -181,13 +187,13 @@ public abstract class Server  implements Unique<Server.Id> {
         }
     }
 
+
     public DataType getDataType(String typeName) {
         DataType dataType = dataTypes.get(typeName);
         if (dataType == null)
             throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
         return dataType;
     }
-
 
     public void addTableTypes(Collection<String> tableTypes) {
         this.tableTypes = new ArrayList<>(tableTypes);

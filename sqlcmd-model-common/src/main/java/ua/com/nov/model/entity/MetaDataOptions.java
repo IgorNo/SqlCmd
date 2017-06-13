@@ -8,28 +8,6 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     private final Class<? extends Server> serverClass;
     private final Map<String, String> options;
 
-    public abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
-        protected Class<? extends Server> serverClass;
-        protected Map<String, String> options = new TreeMap<>();
-
-        public Builder(Class<? extends Server> serverClass) {
-            this.serverClass = serverClass;
-        }
-
-        public void addOption(String optionName, String optionValue) {
-            options.put(optionName, optionValue);
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("");
-            for (Map.Entry<String, String> entry : options.entrySet()) {
-                sb.append(entry.getKey()).append(" = ").append(entry.getValue());
-            }
-            return sb.toString();
-        }
-    }
-
     protected MetaDataOptions(Builder builder) {
         this.serverClass = builder.serverClass;
         this.options = Collections.unmodifiableMap(builder.options);
@@ -39,17 +17,6 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     public String getOption(String optionName) {
         return options.get(optionName);
     }
-
-//    @Override
-//    public String getCreateOptionsDefinition() {
-//        StringBuilder sb = new StringBuilder();
-//        String s = "";
-//        for (Map.Entry<String, String> entry : options.entrySet()) {
-//            sb.append(s).append(entry.getKey()).append(" = ").append(entry.getValue());
-//            s = "\n";
-//        }
-//        return sb.toString();
-//    }
 
     @Override
     public List<String> getUpdateOptionsDefinition() {
@@ -71,5 +38,34 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     @Override
     public String toString() {
         return getCreateOptionsDefinition();
+    }
+
+    public abstract static class Builder<T extends MetaDataOptions> implements Buildable<T> {
+        protected Class<? extends Server> serverClass;
+        protected Map<String, String> options;
+
+        public Builder(Class<? extends Server> serverClass) {
+            this.serverClass = serverClass;
+            options = new TreeMap<>();
+        }
+
+        public Builder(MetaDataOptions that) {
+            this.serverClass = that.serverClass;
+            this.options = new TreeMap<>(that.options);
+        }
+
+        public void addOption(String optionName, String optionValue) {
+            options.put(optionName, optionValue);
+        }
+
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("");
+            for (Map.Entry<String, String> entry : options.entrySet()) {
+                sb.append(entry.getKey()).append(" = ").append(entry.getValue());
+            }
+            return sb.toString();
+        }
     }
 }
