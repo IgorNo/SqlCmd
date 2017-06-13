@@ -1,6 +1,7 @@
 package ua.com.nov.model.dao;
 
 import org.springframework.jdbc.core.RowMapper;
+import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.dao.statement.SqlStatementSource;
@@ -60,9 +61,16 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     protected abstract AbstractRowMapper<E,C> getRowMapper(C id);
 
     @Override
-    public E read(I key) throws DaoSystemException {
-        SqlStatement sqlStmt = getSqlStmtSource(key.getServer()).getReadOneStmt(key);
-        return executor.executeQueryStmt(sqlStmt, getRowMapper(key.getContainerId())).get(0);
+    public E read(I eId) throws DaoSystemException {
+        SqlStatement sqlStmt = getSqlStmtSource(eId.getServer()).getReadOneStmt(eId);
+        try {
+            return executor.executeQueryStmt(sqlStmt, getRowMapper(eId.getContainerId())).get(0);
+        } catch (IndexOutOfBoundsException e) {
+            throw new DaoBusinessLogicException(String.format("%s '%s' doesn't exist in %s '%s'.\n",
+                    eId.getMdName(), eId.getFullName(),
+                    eId.getContainerId().getMdName(), eId.getContainerId().getFullName()));
+        }
+
     }
 
 //    @Override

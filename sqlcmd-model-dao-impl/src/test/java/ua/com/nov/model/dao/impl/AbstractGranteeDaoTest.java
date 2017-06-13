@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
@@ -22,6 +23,7 @@ public class AbstractGranteeDaoTest {
     protected static AbstractTableDaoTest tableDaoTest;
 
     protected static User user1;
+    protected static UserOptions updatedUserOptions;
 
     protected static void setUpClass() throws DaoSystemException, SQLException {
         schemaDaoTest.setUp();
@@ -51,6 +53,30 @@ public class AbstractGranteeDaoTest {
     public void readUser() throws DaoSystemException {
         User result = USER_DAO.read(user1.getId());
         assertTrue(user1.equals(result));
+        AbstractTableDaoTest.compareOptions(user1.getOptions(), result.getOptions());
+    }
+
+    @Test
+    public void readAllUsers() throws DaoSystemException {
+        List<User> users = USER_DAO.readAll(user1.getId().getServer().getId());
+        assertTrue(users.contains(user1));
+    }
+
+    @Test(expected = DaoBusinessLogicException.class)
+    public void deleteUser() throws DaoSystemException {
+        USER_DAO.delete(user1);
+        USER_DAO.read(user1.getId());
+        assertTrue(false);
+    }
+
+    @Test
+    public void updateUser() throws DaoSystemException {
+        User updatedUser = new User.Builder(user1.getId(), updatedUserOptions).build();
+        USER_DAO.update(updatedUser);
+        User result = USER_DAO.read(updatedUser.getId());
+        assertTrue(updatedUser.equals(result));
+        assertTrue(!result.getPassword().isEmpty());
+        AbstractTableDaoTest.compareOptions(updatedUserOptions, result.getOptions());
     }
 
     @After

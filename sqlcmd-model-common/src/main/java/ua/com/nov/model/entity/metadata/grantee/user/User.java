@@ -5,8 +5,13 @@ import ua.com.nov.model.entity.metadata.server.Server;
 
 public class User extends Grantee {
 
-    public User(Builder builder) {
+    protected User(Builder builder) {
         super(builder);
+    }
+
+    public String getPassword() {
+        if (getOptions() != null) return ((UserOptions) getOptions()).getPassword();
+        else return null;
     }
 
     public static class Id extends Grantee.Id {

@@ -23,8 +23,8 @@ public final class DatabaseDao
     }
 
     @Override
-    public Database read(Id id) throws DaoSystemException {
-        Database.Id dbId = new Database.Id(id.getServer(), id.getName());
+    public Database read(Id eId) throws DaoSystemException {
+        Database.Id dbId = new Database.Id(eId.getServer(), eId.getName());
         MetaDataOptions.Builder<?> builder = null;
         try {
             builder = new OptionsDao<Id, Database>(getDataSource()).read(dbId);
@@ -32,9 +32,9 @@ public final class DatabaseDao
             throw new DaoSystemException(e.getMessage());
         }
         if (builder != null)
-            return new Database(id.getServer(), dbId.getName(), builder.build());
+            return new Database(eId.getServer(), dbId.getName(), builder.build());
         else
-            return  new Database(id.getServer(), dbId.getName());
+            return new Database(eId.getServer(), dbId.getName());
     }
 
 

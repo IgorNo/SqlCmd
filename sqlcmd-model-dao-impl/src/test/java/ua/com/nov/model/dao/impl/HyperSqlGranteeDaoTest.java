@@ -16,6 +16,8 @@ public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
         tableDaoTest = new HyperSqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();
         createTestData(new HyperSqlUserOptions.Builder("").build());
+        updatedUserOptions = new HyperSqlUserOptions.Builder("0000").initialSchema("TMP_SCHEMA")
+                .build();
     }
 
 }

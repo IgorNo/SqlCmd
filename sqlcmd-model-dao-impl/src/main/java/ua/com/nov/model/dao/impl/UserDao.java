@@ -29,7 +29,7 @@ public class UserDao extends AbstractDao<Grantee.Id, User, Server.Id> {
         return new AbstractRowMapper<User, Server.Id>(id) {
             @Override
             public User mapRow(ResultSet rs, int i) throws SQLException {
-                User.Id userId = new User.Id(id, rs.getString("USER_NAME"));
+                User.Id userId = new User.Id(id, rs.getString(1));
                 UserOptions options = (UserOptions) id.getServer().getUserOptionsSqlStmSource().getOptionsRowMapper()
                         .mapRow(rs, 0)
                         .build();
