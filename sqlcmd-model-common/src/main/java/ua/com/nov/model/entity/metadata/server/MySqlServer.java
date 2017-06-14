@@ -13,7 +13,11 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.privelege.MySqlPrivilege;
+import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
+import ua.com.nov.model.entity.metadata.grantee.user.MySqlUserOptions;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
+import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
@@ -28,6 +32,8 @@ import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static ua.com.nov.model.entity.metadata.grantee.user.MySqlUserOptions.ResourceOption.*;
 
 public final class MySqlServer extends Server {
 
@@ -118,19 +124,42 @@ public final class MySqlServer extends Server {
     @Override
     public OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource() {
         return new OptionsSqlStmtSource<Grantee.Id, User>() {
+            private String sql =
+                    "SELECT User, Host, authentication_string, " +
+                            "max_questions, max_updates, max_connections, max_user_connections, account_locked\n" +
+                            "FROM mysql.user\n";
             @Override
             public SqlStatement getReadAllOptionsStmt() {
-                return null;
+                return new SqlStatement.Builder(sql).build();
             }
 
             @Override
             public SqlStatement getReadOptionsStmt(Grantee.Id eId) {
-                return null;
+                int pos = eId.getName().indexOf('@');
+                StringBuilder sb = new StringBuilder("WHERE User = ").append(eId.getName().substring(0, pos))
+                        .append(" AND Host = ").append(eId.getName().substring(pos + 1));
+                return new SqlStatement.Builder(sql + sb.toString()).build();
             }
 
             @Override
             public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
-                return null;
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>>() {
+                    @Override
+                    public MySqlUserOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
+                        MySqlUserOptions.Builder builder = new MySqlUserOptions.Builder()
+                                .host(rs.getString("Host"))
+                                .password(rs.getString("authentication_string"))
+                                .addResourceOption(MAX_CONNECTIONS_PER_HOUR, rs.getInt("max_connections"))
+                                .addResourceOption(MAX_UPDATES_PER_HOUR, rs.getInt("max_updates"))
+                                .addResourceOption(MAX_QUERIES_PER_HOUR, rs.getInt("max_questions"))
+                                .addResourceOption(MAX_USER_CONNECTIONS, rs.getInt("max_user_connections"));
+                        if (rs.getString("account_locked").equals("Y"))
+                            builder.lockOption(MySqlUserOptions.LockOption.LOCK);
+                        else
+                            builder.lockOption(MySqlUserOptions.LockOption.UNLOCK);
+                        return builder;
+                    }
+                };
             }
         };
     }
@@ -293,6 +322,33 @@ public final class MySqlServer extends Server {
                         return builder;
                     }
                 };
+            }
+        };
+    }
+
+    @Override
+    public User.Builder getUserBuilder(Id id, String name, UserOptions options) {
+        return new User.Builder(id, name, options) {
+            @Override
+            public User build() {
+                StringBuilder sb = new StringBuilder();
+                if (!name.contains("@")) {
+                    sb.append("'").append(name).append("'@'");
+                    if (options == null) {
+                        options = new MySqlUserOptions.Builder().host("%").build();
+                    }
+                    sb.append(((MySqlUserOptions) options).getHost()).append("'");
+                } else {
+                    sb.append(name);
+                }
+                id = new User.Id(serverId, sb.toString());
+                for (Grantee grantee : grantees) {
+                    for (Privilege privilege : grantee.getAllPrivileges()) {
+                        if (privilege.isWithGrantOptions())
+                            addPrivelege(new MySqlPrivilege.Builder((MySqlPrivilege) privilege));
+                    }
+                }
+                return new User(this);
             }
         };
     }

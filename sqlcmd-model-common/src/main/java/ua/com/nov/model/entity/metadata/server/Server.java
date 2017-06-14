@@ -11,6 +11,7 @@ import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
+import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -249,6 +250,8 @@ public abstract class Server  implements Unique<Server.Id> {
     protected Map<JdbcDataTypes, String> getTypesMap() {
         return typesMap;
     }
+
+    public abstract User.Builder getUserBuilder(Server.Id id, String name, UserOptions options);
 
     public class Id extends MetaDataId<NullMetaData> {
 

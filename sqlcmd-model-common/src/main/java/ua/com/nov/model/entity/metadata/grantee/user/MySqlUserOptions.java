@@ -9,24 +9,34 @@ import java.util.Map;
 public class MySqlUserOptions extends UserOptions {
     private final Map<String, String> tlsOptions;
     private final Map<String, String> resourceOption;
+    private final String host;
 
 
     public MySqlUserOptions(Builder builder) {
         super(builder);
         tlsOptions = builder.tlsOptions;
         resourceOption = builder.resourceOption;
+        host = builder.host;
+    }
+
+    public String getHost() {
+        return host;
     }
 
     @Override
     public String getCreateOptionsDefinition() {
         StringBuilder sb = new StringBuilder();
         if (getPassword() != null)
-            sb.append("IDENTIFIED BY ").append(getPassword()).append(' ');
-        sb.append("REQUIRE  ").append(CollectionUtils.toString(tlsOptions, " AND ", " "));
-        sb.append("WITH  ").append(CollectionUtils.toString(resourceOption, " ", " "));
-        sb.append(CollectionUtils.toString(getOptionsMap(), "\n", " "));
+            sb.append(" IDENTIFIED BY ").append("'").append(getPassword()).append("'");
+        if (tlsOptions.size() > 0)
+            sb.append("\nREQUIRE  ")
+                    .append(CollectionUtils.toString(tlsOptions, " AND ", " "));
+        if (resourceOption.size() > 0)
+            sb.append("\nWITH  ").append(CollectionUtils.toString(resourceOption, " ", " "));
+        sb.append('\n').append(CollectionUtils.toString(getOptionsMap(), "\n", " "));
         return sb.toString();
     }
+
 
     public enum TlsOption {
         SSL, X509, CIPHER, ISSUER, SUBJECT
@@ -43,9 +53,21 @@ public class MySqlUserOptions extends UserOptions {
     public static class Builder extends UserOptions.Builder {
         private Map<String, String> tlsOptions = new HashMap<>();
         private Map<String, String> resourceOption = new HashMap<>();
+        private String host = "%";
 
         public Builder() {
             super(MySqlServer.class);
+        }
+
+        @Override
+        public Builder password(String password) {
+            super.password(password);
+            return this;
+        }
+
+        public Builder host(String host) {
+            this.host = host;
+            return this;
         }
 
         public Builder addTlsOption(TlsOption name, String value) {

@@ -10,7 +10,9 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.user.PostgreSqlUserOptions;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
+import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.table.PostgreSqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -178,4 +180,19 @@ public class PostgreSqlServer extends Server {
         };
     }
 
+    @Override
+    public User.Builder getUserBuilder(Id id, String name, UserOptions options) {
+        return new User.Builder(id, name, options) {
+            @Override
+            public User build() {
+                id = new User.Id(serverId, name);
+                PostgreSqlUserOptions.Builder builder = new PostgreSqlUserOptions.Builder((PostgreSqlUserOptions) options);
+                for (Grantee grantee : grantees) {
+                    builder.addRole(grantee);
+                }
+                options = builder.build();
+                return new User(this);
+            }
+        };
+    }
 }

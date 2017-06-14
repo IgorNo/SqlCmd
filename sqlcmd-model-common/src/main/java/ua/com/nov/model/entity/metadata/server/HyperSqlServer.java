@@ -10,8 +10,11 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataType;
 import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.privelege.HyperSqlPrivilege;
+import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 import ua.com.nov.model.entity.metadata.grantee.user.HyperSqlUserOptions;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
+import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
@@ -127,13 +130,31 @@ public class HyperSqlServer extends Server {
                     @Override
                     public HyperSqlUserOptions.Builder mapRow(ResultSet rs, int i)
                             throws SQLException {
-                        HyperSqlUserOptions.Builder builder = new HyperSqlUserOptions.Builder(rs.getString("PASSWORD_DIGEST"))
+                        HyperSqlUserOptions.Builder builder = new HyperSqlUserOptions.Builder()
+                                .password(rs.getString("PASSWORD_DIGEST"))
                                 .initialSchema(rs.getString("INITIAL_SCHEMA"));
                         if (rs.getBoolean("ADMIN")) builder.admin();
                         if (rs.getString("AUTHENTICATION").equals("LOCAL")) builder.authenticationLocal();
                         return builder;
                     }
                 };
+            }
+        };
+    }
+
+    @Override
+    public User.Builder getUserBuilder(Id id, String name, UserOptions options) {
+        return new User.Builder(id, name, options) {
+            @Override
+            public User build() {
+                id = new User.Id(serverId, name);
+                for (Grantee grantee : grantees) {
+                    for (Privilege privilege : grantee.getAllPrivileges()) {
+                        if (privilege.isWithGrantOptions())
+                            addPrivelege(new HyperSqlPrivilege.Builder((HyperSqlPrivilege) privilege));
+                    }
+                }
+                return new User(this);
             }
         };
     }

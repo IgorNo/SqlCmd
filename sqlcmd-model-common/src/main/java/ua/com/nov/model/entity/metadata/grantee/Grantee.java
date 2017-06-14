@@ -38,7 +38,7 @@ public abstract class Grantee extends MetaData<Grantee.Id> {
 
     @Override
     public String getCreateStmtDefinition(String conflictOption) {
-        return String.format(super.getCreateStmtDefinition(null), "");
+        return String.format(super.getCreateStmtDefinition(null), " ");
     }
 
     public abstract static class Id extends MetaDataId<Server.Id> {
@@ -54,13 +54,16 @@ public abstract class Grantee extends MetaData<Grantee.Id> {
     }
 
     public abstract static class Builder<T extends Grantee> implements Buildable<T> {
+        protected final Server.Id serverId;
         protected GranteeOptions<? extends Grantee> options;
         protected Set<Grantee> grantees = new HashSet<>();
         protected List<Privilege.Builder> privilegeBuilders = new ArrayList<>();
-        private Grantee.Id id;
+        protected Grantee.Id id;
+        protected String name;
 
-        public Builder(Grantee.Id id, GranteeOptions<? extends Grantee> options) {
-            this.id = id;
+        public Builder(Server.Id id, String name, GranteeOptions<? extends Grantee> options) {
+            this.serverId = id;
+            this.name = name;
             this.options = options;
         }
 

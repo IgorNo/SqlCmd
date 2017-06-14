@@ -96,7 +96,7 @@ public abstract class MetaData<I extends MetaDataId> implements Unique<I>, Persi
         if (conflictOption != null) sb.append(conflictOption).append(' ');
         sb.append(getFullName()).append("%s");
         if (options != null)
-            sb.append('\n').append(options);
+            sb.append(options);
         return sb.toString();
     }
 

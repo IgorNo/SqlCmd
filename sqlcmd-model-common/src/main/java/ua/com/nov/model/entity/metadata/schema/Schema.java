@@ -14,7 +14,7 @@ public class Schema extends MetaData<Schema.Id> {
 
     @Override
     public String getCreateStmtDefinition(String conflictOption) {
-        return String.format(super.getCreateStmtDefinition(conflictOption), "");
+        return String.format(super.getCreateStmtDefinition(conflictOption), " ");
     }
 
     public static class Id extends MetaDataId<Database.Id> implements Schematic {

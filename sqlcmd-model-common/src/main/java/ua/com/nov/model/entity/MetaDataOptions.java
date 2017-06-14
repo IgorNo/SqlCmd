@@ -21,7 +21,8 @@ public abstract class MetaDataOptions<E> implements Optional<E> {
     @Override
     public List<String> getUpdateOptionsDefinition() {
         List<String> result = new LinkedList<>();
-        result.add(getCreateOptionsDefinition());
+        if (!getCreateOptionsDefinition().isEmpty())
+            result.add(getCreateOptionsDefinition());
         return result;
     }
 

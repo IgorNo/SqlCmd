@@ -15,8 +15,8 @@ public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
         schemaDaoTest = new HyperSqlSchemaDaoTest();
         tableDaoTest = new HyperSqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();
-        createTestData(new HyperSqlUserOptions.Builder("").build());
-        updatedUserOptions = new HyperSqlUserOptions.Builder("0000").initialSchema("TMP_SCHEMA")
+        createTestData(new HyperSqlUserOptions.Builder().build());
+        updatedUserOptions = new HyperSqlUserOptions.Builder().password("0000").initialSchema("TMP_SCHEMA")
                 .build();
     }
 

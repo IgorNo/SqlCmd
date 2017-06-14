@@ -27,9 +27,11 @@ public class HyperSqlUserOptions extends UserOptions {
     @Override
     public String getCreateOptionsDefinition() {
         StringBuilder sb = new StringBuilder();
+        sb.append(" PASSWORD ").append('"');
         if (getPassword() != null)
-            sb.append("PASSWORD ").append('"').append(getPassword()).append('"').append(' ');
-        if (getOptionsMap().get("ADMIN") != null) sb.append("ADMIN").append(';');
+            sb.append(getPassword());
+        sb.append('"');
+        if (getOptionsMap().get("ADMIN") != null) sb.append(" ADMIN").append(';');
         return sb.toString();
     }
 
@@ -40,15 +42,21 @@ public class HyperSqlUserOptions extends UserOptions {
         if (getPassword() != null) {
             sb.append("SET PASSWORD ").append('"').append(getPassword()).append('"').append(' ');
         }
-        result.add(sb.toString());
+        if (sb.length() > 0)
+            result.add(sb.toString());
         return result;
     }
 
     public static class Builder extends UserOptions.Builder {
 
-        public Builder(String password) {
+        public Builder() {
             super(HyperSqlServer.class);
+        }
+
+        @Override
+        public Builder password(String password) {
             super.password(password);
+            return this;
         }
 
         public Builder admin() {
