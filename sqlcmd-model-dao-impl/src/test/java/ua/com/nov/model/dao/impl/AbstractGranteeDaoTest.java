@@ -6,12 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
-import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.server.Server;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -20,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractGranteeDaoTest {
     protected static final UserDao USER_DAO = new UserDao();
 
-    protected static AbstractSchemaDaoTest schemaDaoTest;
     protected static AbstractTableDaoTest tableDaoTest;
 
     protected static Server server;
@@ -29,11 +26,9 @@ public abstract class AbstractGranteeDaoTest {
     protected static UserOptions updatedUserOptions;
 
     protected static void setUpClass() throws DaoSystemException, SQLException {
-        schemaDaoTest.setUp();
         tableDaoTest.setUp();
-        server = AbstractSchemaDaoTest.schemaId.getServer();
-        DataSource dataSource = new SingleConnectionDataSource(AbstractSchemaDaoTest.testDb, "root", "root");
-        USER_DAO.setDataSource(dataSource);
+        server = AbstractTableDaoTest.testDb.getServer();
+        USER_DAO.setDataSource(AbstractTableDaoTest.dataSource);
     }
 
     protected static void createTestData(UserOptions options) {
@@ -42,8 +37,8 @@ public abstract class AbstractGranteeDaoTest {
 
     @AfterClass
     public static void tearDownClass() throws SQLException, DaoSystemException {
+        tableDaoTest.tearDown();
         USER_DAO.getDataSource().getConnection().close();
-        schemaDaoTest.tearDown();
     }
 
     @Before
@@ -84,7 +79,7 @@ public abstract class AbstractGranteeDaoTest {
 
     @After
     public void tearDown() throws DaoSystemException {
-        List<User> users = USER_DAO.readAll(AbstractSchemaDaoTest.schema.getServer().getId());
+        List<User> users = USER_DAO.readAll(server.getId());
         if (users.contains(user1)) USER_DAO.delete(user1);
     }
 

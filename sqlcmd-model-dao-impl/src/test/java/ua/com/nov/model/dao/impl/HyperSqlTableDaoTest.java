@@ -26,7 +26,13 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         numberColumnOptions = new HyperSqlColumnOptions.Builder().autoIncrement();
         charColumnOptions = null;
         generatedColumnOptions = null;
-        createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY");
+        createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY", null);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws SQLException, DaoSystemException {
+        AbstractTableDaoTest.tearDownClass();
+        DATABASE_DAO_TEST.tearDown();
     }
 
     @Override
@@ -38,7 +44,6 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     protected ColumnOptions.Builder<HyperSqlColumnOptions> getUpdateColumnOptions() {
         return null;
     }
-
 
     @Override
     @Test(expected = DaoSystemException.class)
@@ -52,11 +57,5 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     @Test(expected = DaoBusinessLogicException.class)
     public void testRenameUniqueKey() throws DaoSystemException, DaoBusinessLogicException {
         super.testRenameUniqueKey();
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
-        AbstractTableDaoTest.tearDownClass();
-        DATABASE_DAO_TEST.tearDown();
     }
 }

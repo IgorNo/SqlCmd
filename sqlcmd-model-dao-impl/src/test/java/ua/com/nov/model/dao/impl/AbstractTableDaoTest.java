@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractTableDaoTest {
 
+    protected static final SchemaDao SCHEMA_DAO = new SchemaDao();
     protected static final MetaDataDao<Table.Id, Table, Schema.Id> TABLE_DAO = new TableDao();
     protected static final ColumnDao COLUMN_DAO = new ColumnDao();
     protected static final PrimaryKeyDao PRIMARY_KEY_DAO = new PrimaryKeyDao();
@@ -40,7 +41,7 @@ public abstract class AbstractTableDaoTest {
     protected static Database testDb;
     protected static DataSource dataSource;
     protected static Table customers, products, orders, users, temp;
-    protected static Schema.Id schemaId;
+    protected static Schema testSchema;
 
     protected static MetaDataOptions<Table> tableOptions;
     protected static ColumnOptions.Builder numberColumnOptions;
@@ -50,16 +51,20 @@ public abstract class AbstractTableDaoTest {
     protected static DataType integer, character;
 
 
-    protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType)
+    protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType,
+                                         Optional<Schema> options)
             throws DaoSystemException, DaoBusinessLogicException {
         testDb = new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
-        schemaId = new Schema.Id(testDb.getId(), catalog, schema);
+        SCHEMA_DAO.setDataSource(dataSource);
         TABLE_DAO.setDataSource(dataSource);
         COLUMN_DAO.setDataSource(dataSource);
         PRIMARY_KEY_DAO.setDataSource(dataSource);
         FOREIGN_KEY_DAO.setDataSource(dataSource);
         UNIQUE_KEY_DAO.setDataSource(dataSource);
         INDEX_DAO.setDataSource(dataSource);
+
+        Schema.Id schemaId = new Schema.Id(testDb.getId(), catalog, "tmp_schema");
+        testSchema = new Schema(schemaId, options);
 
         DataType serial = testDb.getServer().getDataType(aiTypeName);
         integer = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
@@ -136,6 +141,7 @@ public abstract class AbstractTableDaoTest {
     @Before
     public void setUp() throws DaoSystemException, DaoBusinessLogicException {
         tearDown();
+        SCHEMA_DAO.create(testSchema);
         TABLE_DAO.create(customers);
         TABLE_DAO.create(products);
         TABLE_DAO.create(orders);
@@ -223,6 +229,35 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
+    public void testReadSchema() throws DaoSystemException {
+        Schema result = SCHEMA_DAO.read(testSchema.getId());
+        assertTrue(result.equals(testSchema));
+    }
+
+    @Test
+    public void testReadAllSchemas() throws DaoSystemException {
+        List<Schema> schemas = SCHEMA_DAO.readAll(testDb.getId());
+        assertTrue(schemas.size() > 1);
+        assertTrue(schemas.contains(testSchema));
+    }
+
+    @Test(expected = DaoBusinessLogicException.class)
+    public void testDeleteSchema() throws DaoSystemException {
+        SCHEMA_DAO.delete(testSchema);
+        SCHEMA_DAO.read(testSchema.getId());
+        assertTrue(false);
+    }
+
+    @Test
+    public void testRenameSchema() throws DaoSystemException {
+        Schema.Id updatedId = new Schema.Id(testDb.getId(), testSchema.getId().getCatalog(), "new_name");
+        SCHEMA_DAO.rename(testSchema, updatedId.getName());
+        Schema result = SCHEMA_DAO.read(updatedId);
+        assertTrue(result.getName().equalsIgnoreCase(updatedId.getName()));
+        SCHEMA_DAO.delete(result);
+    }
+
+    @Test
     public void testCreateTemporaryTable() throws DaoSystemException {
         TABLE_DAO.create(temp);
         Table readTable = TABLE_DAO.read(temp.getId());
@@ -231,7 +266,7 @@ public abstract class AbstractTableDaoTest {
 
     @Test
     public void testReadAllTables() throws DaoSystemException {
-        List<Table> tables = TABLE_DAO.readAll(schemaId);
+        List<Table> tables = TABLE_DAO.readAll(customers.getId().getContainerId());
         assertTrue(tables.contains(customers));
         assertTrue(tables.contains(products));
         assertTrue(tables.contains(orders));
@@ -355,7 +390,8 @@ public abstract class AbstractTableDaoTest {
 
     @After
     public void tearDown() throws DaoSystemException, DaoBusinessLogicException {
-        List<Table> tables = TABLE_DAO.readAll(schemaId);
+        SCHEMA_DAO.deleteIfExist(testSchema);
+        List<Table> tables = TABLE_DAO.readAll(customers.getId().getContainerId());
         if (tables.contains(orders)) {
             TABLE_DAO.delete(orders);
             tables.remove(orders);

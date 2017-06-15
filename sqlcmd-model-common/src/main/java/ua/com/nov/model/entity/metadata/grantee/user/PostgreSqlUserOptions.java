@@ -5,32 +5,43 @@ import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PostgreSqlUserOptions extends UserOptions {
-    private final Encryption encryption;
+    private List<String> roles = new ArrayList<>();
+    private List<String> admins = new ArrayList<>();
+
 
     public PostgreSqlUserOptions(Builder builder) {
         super(builder);
-        encryption = builder.encryption;
+        roles = builder.roles;
+        admins = builder.admins;
     }
 
     @Override
     public String getCreateOptionsDefinition() {
-        StringBuilder sb = new StringBuilder();
-        if (getPassword() != null) {
-            if (encryption != null) sb.append(encryption.toString()).append(' ');
-            sb.append("PASSWORD  ").append(getPassword()).append(' ');
-        }
-        sb.append(CollectionUtils.toString(getOptionsMap(), "\n", " "));
+        StringBuilder sb = new StringBuilder(getUpdateOptionsDefinition().get(0));
+        if (roles.size() > 0) sb.append("ROLE ").append(CollectionUtils.toString(roles)).append('\n');
+        if (admins.size() > 0) sb.append("ADMIN ").append(CollectionUtils.toString(admins)).append('\n');
         return sb.toString();
     }
 
-    public enum Encryption {
-        ENCRYPTED, UNENCRYPTED
+    @Override
+    public List<String> getUpdateOptionsDefinition() {
+        StringBuilder sb = new StringBuilder();
+        if (getPassword() != null) {
+            sb.append(" PASSWORD  ").append("'").append(getPassword()).append("'\n");
+        }
+        sb.append(' ').append(CollectionUtils.toString(getOptionsMap(), "\n", " "));
+        List<String> result = new ArrayList<>();
+        result.add(sb.toString());
+        return result;
     }
 
     public static class Builder extends UserOptions.Builder {
-        private Encryption encryption;
+        private List<String> roles = new ArrayList<>();
+        private List<String> admins = new ArrayList<>();
 
         public Builder() {
             super(PostgreSqlServer.class);
@@ -38,7 +49,6 @@ public class PostgreSqlUserOptions extends UserOptions {
 
         public Builder(PostgreSqlUserOptions that) {
             super(that);
-            this.encryption = that.encryption;
         }
 
         @Override
@@ -47,79 +57,59 @@ public class PostgreSqlUserOptions extends UserOptions {
             return this;
         }
 
-        public Builder password(Encryption encryption, String password) {
-            super.password(password);
-            this.encryption = encryption;
+        public Builder superUser(boolean trigger) {
+            if (trigger)
+                addOption("SUPERUSER", "");
+            else
+                addOption("NOSUPERUSER", "");
             return this;
         }
 
-        public Builder superUser() {
-            addOption("SUPERUSER", "");
+        public Builder createDb(boolean trigger) {
+            if (trigger)
+                addOption("CREATEDB", "");
+            else
+                addOption("NOCREATEDB", "");
             return this;
         }
 
-        public Builder noSuperUser() {
-            addOption("NOSUPERUSER", "");
-            return this;
-        }
-
-        public Builder createDb() {
-            addOption("CREATEDB", "");
-            return this;
-        }
-
-        public Builder noCreateDb() {
-            addOption("NOCREATEDB", "");
-            return this;
-        }
-
-        public Builder createRole() {
+        public Builder createRole(boolean trigger) {
+            if (trigger)
             addOption("CREATEROLE", "");
+            else
+                addOption("NOCREATEROLE", "");
             return this;
         }
 
-        public Builder noCreateRole() {
-            addOption("NOCREATEROLE", "");
-            return this;
-        }
-
-        public Builder inherit() {
+        public Builder inherit(boolean trigger) {
+            if (trigger)
             addOption("INHERIT", "");
+            else
+                addOption("NOINHERIT", "");
             return this;
         }
 
-        public Builder noInherit() {
-            addOption("NOINHERIT", "");
-            return this;
-        }
-
-        public Builder login() {
+        public Builder canLogin(boolean trigger) {
+            if (trigger)
             addOption("LOGIN", "");
+            else
+                addOption("NOLOGIN", "");
             return this;
         }
 
-        public Builder noLogin() {
-            addOption("NOLOGIN", "");
-            return this;
-        }
-
-        public Builder replication() {
+        public Builder replication(boolean trigger) {
+            if (trigger)
             addOption("REPLICATION", "");
+            else
+                addOption("NOREPLICATION", "");
             return this;
         }
 
-        public Builder noReplication() {
-            addOption("NOREPLICATION", "");
-            return this;
-        }
-
-        public Builder bypassRLS() {
+        public Builder bypassRLS(boolean trigger) {
+            if (trigger)
             addOption("BYPASSRLS", "");
-            return this;
-        }
-
-        public Builder NoBypassRLS() {
-            addOption("NOBYPASSRLS", "");
+            else
+                addOption("NOBYPASSRLS", "");
             return this;
         }
 
@@ -129,23 +119,18 @@ public class PostgreSqlUserOptions extends UserOptions {
         }
 
         public Builder validUntil(Date date) {
-            addOption("VALID UNTIL", "'" + date.toString() + "'");
+            if (date != null)
+                addOption("VALID UNTIL", "'" + date.toString() + "'");
             return this;
         }
 
         public Builder addRole(Grantee grantee) {
-            if (options.get("ROLE") == null)
-                addOption("ROLE", grantee.getName());
-            else
-                addOption("ROLE", options.get("ROLE") + ", " + grantee.getName());
+            roles.add(grantee.getName());
             return this;
         }
 
         public Builder addAdmin(Grantee grantee) {
-            if (options.get("ADMIN") == null)
-                addOption("ADMIN", grantee.getName());
-            else
-                addOption("ADMIN", options.get("ROLE") + ", " + grantee.getName());
+            admins.add(grantee.getName());
             return this;
         }
 

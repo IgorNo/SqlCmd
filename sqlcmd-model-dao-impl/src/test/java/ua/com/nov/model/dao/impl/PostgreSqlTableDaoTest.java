@@ -34,7 +34,13 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
         numberColumnOptions = new PostgresSqlColumnOptions.Builder().autoIncrement();
         charColumnOptions = null;
         generatedColumnOptions = null;
-        createTestData(null, "public", "serial", null);
+        createTestData(null, "public", "serial", null, null);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws SQLException, DaoSystemException {
+        AbstractTableDaoTest.tearDownClass();
+        DATABASE_DAO_TEST.tearDown();
     }
 
     @Override
@@ -45,11 +51,5 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     @Override
     protected ColumnOptions.Builder<? extends ColumnOptions> getUpdateColumnOptions() {
         return null;
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
-        AbstractTableDaoTest.tearDownClass();
-        DATABASE_DAO_TEST.tearDown();
     }
 }

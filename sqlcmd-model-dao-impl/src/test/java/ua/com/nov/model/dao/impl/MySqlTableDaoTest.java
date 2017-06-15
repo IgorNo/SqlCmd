@@ -7,6 +7,8 @@ import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.metadata.database.Database;
+import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -19,12 +21,12 @@ import java.sql.SQLException;
 import static org.junit.Assert.assertTrue;
 
 public class MySqlTableDaoTest extends AbstractTableDaoTest {
+    public static final ColumnOptions.Builder<MySqlColumnOptions> UPDATE_COLUMN_OPTIONS =
+            new MySqlColumnOptions.Builder().charSet("utf8").collation("utf8_estonian_ci");
     private static final AbstractDatabaseDaoTest DATABASE_DAO_TEST = new MySqlDatabaseDaoTest();
     private static final MySqlTableOptions UPDATE_TABLE_OPTION = new MySqlTableOptions.Builder()
             .checkSum(true).autoIncrement(200).avgRowLength(300).engine("MyISAM")
             .defaultCharset("cp1251").collate("cp1251_ukrainian_ci").rowFormat("FIXED").build();
-    public static final ColumnOptions.Builder<MySqlColumnOptions> UPDATE_COLUMN_OPTIONS =
-            new MySqlColumnOptions.Builder().charSet("utf8").collation("utf8_estonian_ci");
 
     @BeforeClass
     public static void setUpClass() throws SQLException, DaoSystemException, DaoBusinessLogicException {
@@ -40,7 +42,15 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         charColumnOptions = new MySqlColumnOptions.Builder().charSet("ucs2").collation("ucs2_bin").binari();
         generatedColumnOptions = new MySqlColumnOptions.Builder()
                 .generationExpression("concat('login: ',login)", MySqlColumnOptions.GenerationColumnType.VIRTUAL);
-        createTestData(testDb.getName(), null, "INT", "TEMPORARY");
+        createTestData(testDb.getName(), null, "INT", "TEMPORARY", null);
+        Schema.Id schemaId = new Schema.Id(testDb.getId(), null, "tmp_schema");
+        testSchema = new Schema(schemaId, null);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws SQLException, DaoSystemException {
+        AbstractTableDaoTest.tearDownClass();
+        DATABASE_DAO_TEST.tearDown();
     }
 
     @Override
@@ -70,6 +80,25 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         assertTrue(result.equals(md));
     }
 
+    @Test
+    @Override
+    public void testReadSchema() throws DaoSystemException {
+        Database db = new Database(testDb.getServer(), "tmp_schema");
+        Database result = new DatabaseDao().setDataSource(SCHEMA_DAO.getDataSource()).read(db.getId());
+        assertTrue(result.equals(db));
+    }
+
+    @Test
+    @Override
+    public void testReadAllSchemas() throws DaoSystemException {
+    }
+
+    @Test(expected = DaoSystemException.class)
+    @Override
+    public void testRenameSchema() throws DaoSystemException {
+        super.testRenameSchema();
+    }
+
     @Override
     @Test (expected = DaoBusinessLogicException.class)
     public void testCreateTemporaryTable() throws DaoSystemException {
@@ -86,11 +115,5 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testRenameForeignKey() throws DaoSystemException {
         super.testRenameForeignKey();
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
-        AbstractTableDaoTest.tearDownClass();
-        DATABASE_DAO_TEST.tearDown();
     }
 }

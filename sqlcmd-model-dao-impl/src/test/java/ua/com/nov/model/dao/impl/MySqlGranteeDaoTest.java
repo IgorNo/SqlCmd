@@ -10,9 +10,7 @@ public class MySqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException {
-        MySqlSchemaDaoTest.setUpClass();
         MySqlTableDaoTest.setUpClass();
-        schemaDaoTest = new MySqlSchemaDaoTest();
         tableDaoTest = new MySqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();
         createTestData(new MySqlUserOptions.Builder().password("")

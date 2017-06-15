@@ -10,9 +10,7 @@ public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException {
-        HyperSqlSchemaDaoTest.setUpClass();
         HyperSqlTableDaoTest.setUpClass();
-        schemaDaoTest = new HyperSqlSchemaDaoTest();
         tableDaoTest = new HyperSqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();
         createTestData(new HyperSqlUserOptions.Builder().build());

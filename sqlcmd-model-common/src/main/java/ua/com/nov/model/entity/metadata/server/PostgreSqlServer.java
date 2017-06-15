@@ -101,19 +101,38 @@ public class PostgreSqlServer extends Server {
     @Override
     public OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource() {
         return new OptionsSqlStmtSource<Grantee.Id, User>() {
+            String sql = "SELECT * FROM pg_catalog.pg_authid\n";
+
             @Override
             public SqlStatement getReadAllOptionsStmt() {
-                return null;
+                return new SqlStatement.Builder(sql).build();
             }
 
             @Override
             public SqlStatement getReadOptionsStmt(Grantee.Id eId) {
-                return null;
+                return new SqlStatement.Builder(sql + "WHERE rolname = '" + eId.getName() + "'").build();
             }
 
             @Override
             public RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>> getOptionsRowMapper() {
-                return null;
+                return new RowMapper<MetaDataOptions.Builder<? extends MetaDataOptions<User>>>() {
+                    @Override
+                    public PostgreSqlUserOptions.Builder mapRow(ResultSet rs, int i) throws SQLException {
+                        PostgreSqlUserOptions.Builder builder = new PostgreSqlUserOptions.Builder()
+                                .password(rs.getString("rolpassword"))
+                                .connectionLimit(rs.getInt("rolconnlimit"))
+                                .validUntil(rs.getDate("rolvaliduntil"))
+                                .superUser(rs.getBoolean("rolsuper"))
+                                .inherit(rs.getBoolean("rolinherit"))
+                                .createRole(rs.getBoolean("rolcreaterole"))
+                                .createDb(rs.getBoolean("rolcreatedb"))
+                                .canLogin(rs.getBoolean("rolcanlogin"))
+                                .replication(rs.getBoolean("rolreplication"))
+                                .bypassRLS(rs.getBoolean("rolbypassrls"));
+
+                        return builder;
+                    }
+                };
             }
         };
     }
@@ -195,4 +214,6 @@ public class PostgreSqlServer extends Server {
             }
         };
     }
+
+
 }
