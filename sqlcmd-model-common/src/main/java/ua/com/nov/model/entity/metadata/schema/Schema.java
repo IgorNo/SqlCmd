@@ -2,11 +2,10 @@ package ua.com.nov.model.entity.metadata.schema;
 
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Schematic;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.database.Database;
 
-public class Schema extends MetaData<Schema.Id> {
+public class Schema extends AbstractMetaData<Schema.Id> {
 
     public Schema(Id id, Optional<Schema> options) {
         super(id, null, options);
@@ -17,7 +16,7 @@ public class Schema extends MetaData<Schema.Id> {
         return String.format(super.getCreateStmtDefinition(conflictOption), " ");
     }
 
-    public static class Id extends MetaDataId<Database.Id> implements Schematic {
+    public static class Id extends AbstractMetaData.Id<Database.Id> implements Schematic {
         private final String catalog;
 
         public Id(Database.Id dbId, String catalog, String schema) {

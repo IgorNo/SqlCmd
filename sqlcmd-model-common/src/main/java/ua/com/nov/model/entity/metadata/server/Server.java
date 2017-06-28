@@ -1,14 +1,13 @@
 package ua.com.nov.model.entity.metadata.server;
 
 import ua.com.nov.model.dao.statement.*;
-import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.NullMetaData;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
@@ -26,8 +25,8 @@ import java.util.*;
 public abstract class Server  implements Unique<Server.Id> {
     protected List<String> tableTypes;
     private Id id;
-    private Map<String, DataType> dataTypes = new HashMap<>();
-    private Map<JdbcDataTypes, String> typesMap = new HashMap<>();
+    private Map<String, DbDataType> dataTypes = new HashMap<>();
+    private Map<DataTypes, String> typesMap = new HashMap<>();
 
     public Server(String url) {
         this.id = new Id(url);
@@ -38,26 +37,20 @@ public abstract class Server  implements Unique<Server.Id> {
         return id;
     }
 
-    @Override
-    public String getType() {
-        return null;
-    }
-
     public String getName() {
         return id.getName();
     }
-
 
     public void init(Connection conn) throws SQLException{
         addDataTypes(getDataTypes(conn));
         tableTypes = getTableTypes(conn);
     }
 
-    private List<DataType> getDataTypes(Connection conn) throws SQLException {
+    private List<DbDataType> getDataTypes(Connection conn) throws SQLException {
         ResultSet rs = conn.getMetaData().getTypeInfo();
-        List<DataType> dataTypeList = new ArrayList<>();
+        List<DbDataType> dataTypeList = new ArrayList<>();
         while (rs.next()) {
-            DataType dataType = new DataType.Builder(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"))
+            DbDataType dataType = new DbDataType.Builder(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"))
                     .precision(rs.getInt("PRECISION"))
                     .literalPrefix(rs.getString("LITERAL_PREFIX"))
                     .literalSuffix(rs.getString("LITERAL_SUFFIX"))
@@ -125,23 +118,23 @@ public abstract class Server  implements Unique<Server.Id> {
 
     public abstract OptionsSqlStmtSource<Grantee.Id, User> getUserOptionsSqlStmSource();
 
-    public abstract AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id> getDatabaseSqlStmtSource();
+    public abstract AbstractDatabaseMdSqlStatements<Database.Id, Database, Id> getDatabaseSqlStmtSource();
 
-    public AbstractDatabaseMdSqlStatements<Grantee.Id, User, Server.Id> getUserSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<Grantee.Id, User, Server.Id>() {
+    public AbstractDatabaseMdSqlStatements<Grantee.Id, User, Id> getUserSqlStmtSource() {
+        return new AbstractDatabaseMdSqlStatements<Grantee.Id, User, Id>() {
             @Override
             public SqlStatement getReadOneStmt(Grantee.Id eId) {
                 return eId.getServer().getUserOptionsSqlStmSource().getReadOptionsStmt(eId);
             }
 
             @Override
-            public SqlStatement getReadAllStmt(Server.Id cId) {
+            public SqlStatement getReadAllStmt(Id cId) {
                 return cId.getServer().getUserOptionsSqlStmSource().getReadAllOptionsStmt();
             }
         };
     }
 
-    public <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    public <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     AbstractDatabaseMdSqlStatements<I, E, C> getDatabaseMdSqlStmtSource() {
         return new AbstractDatabaseMdSqlStatements() {
         };
@@ -182,15 +175,15 @@ public abstract class Server  implements Unique<Server.Id> {
     // convert 'parameter' to database format (to upper or lower case)
     public abstract String convert(String parameter);
 
-    public void addDataTypes(Collection<DataType> dataTypeList) {
-        for (DataType dataType : dataTypeList) {
+    public void addDataTypes(Collection<DbDataType> dataTypeList) {
+        for (DbDataType dataType : dataTypeList) {
             dataTypes.put(dataType.getTypeName(), dataType);
         }
     }
 
 
-    public DataType getDataType(String typeName) {
-        DataType dataType = dataTypes.get(typeName);
+    public DbDataType getDataType(String typeName) {
+        DbDataType dataType = dataTypes.get(typeName);
         if (dataType == null)
             throw new IllegalArgumentException(String.format("Data type '%s' dosn't exist in this database", typeName));
         return dataType;
@@ -209,11 +202,11 @@ public abstract class Server  implements Unique<Server.Id> {
 
     /**
      * @param jdbcDataType
-     * @return List of DataType elements of that have jdbcDataType
+     * @return List of DbDataType elements of that have jdbcDataType
      */
-    public List<DataType> getDataTypes(int jdbcDataType) {
-        List<DataType> result = new LinkedList<>();
-        for (DataType dataType : dataTypes.values()) {
+    public List<DbDataType> getDataTypes(int jdbcDataType) {
+        List<DbDataType> result = new LinkedList<>();
+        for (DbDataType dataType : dataTypes.values()) {
             if (jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
         }
         return result;
@@ -221,39 +214,44 @@ public abstract class Server  implements Unique<Server.Id> {
 
     /**
      * @param jdbcDataType
-     * @return List of DataType elements of that have jdbcDataType and are autoincremental
+     * @return List of DbDataType elements of that have jdbcDataType and are autoincremental
      */
-    public List<DataType> getAutoincrementalDataTypes(int jdbcDataType) {
-        List<DataType> result = new LinkedList<>();
-        for (DataType dataType : dataTypes.values()) {
+    public List<DbDataType> getAutoincrementalDataTypes(int jdbcDataType) {
+        List<DbDataType> result = new LinkedList<>();
+        for (DbDataType dataType : dataTypes.values()) {
             if (dataType.isAutoIncrement() && jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
         }
         return result;
     }
 
-    public DataType getMostApproximateDataTypes(JdbcDataTypes type) {
+    public DbDataType getMostApproximateDataTypes(DataTypes type) {
         String dataTypeName = getTypesMap().get(type);
         if (dataTypeName != null)
             return getDataType(dataTypeName);
         else {
-            List<DataType> dataTypes = getDataTypes(type.getJdbcDataType());
+            List<DbDataType> dataTypes = getDataTypes(type.getJdbcDataType());
             if (dataTypes.size() == 0) {
                 throw new IllegalArgumentException(String.format("Data type %s does not support this database", type));
             }
-            for (DataType dataType : dataTypes) {
+            for (DbDataType dataType : dataTypes) {
                 if (dataType.getTypeName().equalsIgnoreCase(type.toString())) return dataType;
             }
             return dataTypes.get(0);
         }
     }
 
-    protected Map<JdbcDataTypes, String> getTypesMap() {
+    protected Map<DataTypes, String> getTypesMap() {
         return typesMap;
     }
 
-    public abstract User.Builder getUserBuilder(Server.Id id, String name, UserOptions options);
+    public abstract User.Builder getUserBuilder(Id id, String name, UserOptions options);
 
-    public class Id extends MetaDataId<NullMetaData> {
+    public AbstractDataStmtSource getDataSqlStmtSource() {
+        return new AbstractDataStmtSource() {
+        };
+    }
+
+    public class Id extends AbstractMetaData.Id<NullMetaData> {
 
         public Id(String url) {
             super(new NullMetaData(), url);

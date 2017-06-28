@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Column extends TableMd<Column.Id> {
-    private final DataType dataType;
+    private final DbDataType dataType;
     private final Integer size; // column size
     private final Integer precision;    // the number of fractional digits. Null is returned for data types where
     // precision is not applicable
@@ -82,7 +82,7 @@ public class Column extends TableMd<Column.Id> {
         return options == null ? false : options.isNotNull();
     }
 
-    public DataType getDataType() {
+    public DbDataType getDataType() {
         return dataType;
     }
 
@@ -118,13 +118,13 @@ public class Column extends TableMd<Column.Id> {
     }
 
     public static class Builder extends TableMd.Builder {
-        private final DataType dataType;
+        private final DbDataType dataType;
 
         private int ordinalPosition; // index of column in table (starting at 1)
         private Integer columnSize;
         private Integer precision;  // the number of fractional digits. Null is returned for data types where
         // precision is not applicable
-        private int nullable = DataType.NULL; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
+        private int nullable = DbDataType.NULL; // 0 - columnNoNulls; 1 - columnNullable; 2 - columnNullableUnknown;
         private String defaultValue; //default value for the column, which should be interpreted as a string when
         // the value is enclosed in single quotes
         private String viewName;      // comment describing column
@@ -133,16 +133,16 @@ public class Column extends TableMd<Column.Id> {
         private Map<Class<? extends Constraint.Builder>, Constraint.Builder<? extends Constraint>> constraints = new HashMap<>();
 
 
-        public Builder(Table.Id tableId, String name, DataType dataType) {
+        public Builder(Table.Id tableId, String name, DbDataType dataType) {
             super(name, tableId);
             this.dataType = dataType;
         }
 
-        public Builder(Id id, DataType dataType) {
+        public Builder(Id id, DbDataType dataType) {
             this(id.getTableId(), id.getName(), dataType);
         }
 
-        public Builder(String name, DataType dataType) {
+        public Builder(String name, DbDataType dataType) {
             this(null, name, dataType);
         }
 
@@ -173,7 +173,7 @@ public class Column extends TableMd<Column.Id> {
         }
 
         public Builder nullable(int nullable) {
-            if (dataType.getNullable() == DataType.NOT_NULL && nullable == DataType.NULL) {
+            if (dataType.getNullable() == DbDataType.NOT_NULL && nullable == DbDataType.NULL) {
                 throw new IllegalArgumentException("This column type can not be nullable.");
             }
             this.nullable = nullable;
@@ -181,7 +181,7 @@ public class Column extends TableMd<Column.Id> {
         }
 
         public Builder notNull() {
-            nullable(DataType.NOT_NULL);
+            nullable(DbDataType.NOT_NULL);
             return this;
         }
 

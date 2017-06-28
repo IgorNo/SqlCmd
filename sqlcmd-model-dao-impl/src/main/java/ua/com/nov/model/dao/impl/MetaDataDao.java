@@ -7,9 +7,8 @@ import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
-import ua.com.nov.model.entity.Hierarchical;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.server.Server;
 
 import javax.sql.DataSource;
@@ -18,12 +17,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class MetaDataDao<I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+public abstract class MetaDataDao<I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
         extends AbstractDao<I,E,C> implements DataDefinitionDao<E> {
 
     @Override
-    protected SqlExecutor<E> getExecutor(DataSource dataSource) {
-        return new DDLSqlExecutor<>(dataSource);
+    protected SqlExecutor createExecutor(DataSource dataSource) {
+        return new DDLSqlExecutor(dataSource);
     }
 
     @Override

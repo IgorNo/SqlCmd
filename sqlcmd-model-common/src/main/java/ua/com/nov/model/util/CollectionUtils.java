@@ -1,5 +1,7 @@
 package ua.com.nov.model.util;
 
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +19,22 @@ public class CollectionUtils {
         return sb.append(rightBracket).toString();
     }
 
-    public static String toString(Collection<?> collection) {
+    public static <T> String toString(Collection<T> collection) {
         return toString(collection, "", "");
+    }
+
+    public static String mdToString(Collection<? extends AbstractMetaData> collection, String leftBracket, String rightBracket) {
+        StringBuilder sb = new StringBuilder(leftBracket);
+        String s = "";
+        for (AbstractMetaData o : collection) {
+            sb.append(s).append(o.getName());
+            s = ", ";
+        }
+        return sb.append(rightBracket).toString();
+    }
+
+    public static String mdToString(Collection<? extends AbstractMetaData> collection) {
+        return mdToString(collection, "", "");
     }
 
     public static <T> String toString(T[] array, String leftBracket, String rightBracket) {

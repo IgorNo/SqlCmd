@@ -3,10 +3,9 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Schematic;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 
-public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
+public abstract class TableMd<I extends TableMd.Id> extends AbstractMetaData<I> {
 
     protected TableMd(I id, Builder builder) {
         super(id, builder.type, builder.options);
@@ -20,7 +19,7 @@ public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
         private Table.Id tableId;
         private String name;
         private String type;
-        private MetaDataOptions<? extends MetaData> options;
+        private MetaDataOptions<? extends AbstractMetaData> options;
 
         public Builder(String name, Table.Id tableId) {
             this.tableId = tableId;
@@ -35,12 +34,12 @@ public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
             this.tableId = tableId;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getName() {
             return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public String getType() {
@@ -51,18 +50,18 @@ public abstract class TableMd<I extends TableMd.Id> extends MetaData<I> {
             this.type = type;
         }
 
-        public MetaDataOptions<? extends MetaData> getOptions() {
+        public MetaDataOptions<? extends AbstractMetaData> getOptions() {
             return options;
         }
 
-        protected void setOptions(MetaDataOptions<? extends MetaData> options) {
+        protected void setOptions(MetaDataOptions<? extends AbstractMetaData> options) {
             this.options = options;
         }
 
         public abstract String generateName(String postfix);
     }
 
-    public abstract static class Id extends MetaDataId<Table.Id> implements Schematic {
+    public abstract static class Id extends AbstractMetaData.Id<Table.Id> implements Schematic {
 
         public Id(Table.Id tableId, String name) {
             super(tableId, name);

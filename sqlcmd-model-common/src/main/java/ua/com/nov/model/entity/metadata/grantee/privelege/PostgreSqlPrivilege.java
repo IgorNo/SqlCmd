@@ -31,6 +31,7 @@ public class PostgreSqlPrivilege extends Privilege {
         TEMP("TEMP", DATABASE),
         TRIGGER("TRIGGER", TABLE),
         TRUNCATE("TRUNCATE", TABLE),
+        UPDATE("UPDATE", COLUMN, TABLE, LARGE_OBJECT),
         USAGE("USAGE", SEQUENCE, DOMAIN, FOREIGN_DATA_WRAPPER, FOREIGN_SERVER, LANGUAGE, TYPE);
 
         private String action;
@@ -80,7 +81,7 @@ public class PostgreSqlPrivilege extends Privilege {
 
         public static Builder createTablePrivileges(Schema schema, Action... actions) {
             Builder builder = new Builder(TABLE, actions);
-            builder.onExpression("ALL TABLES IN SCHEMA" + schema.getFullName());
+            builder.onExpression("ALL TABLES IN SCHEMA " + schema.getFullName());
             return builder;
         }
 

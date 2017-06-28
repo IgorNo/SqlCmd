@@ -26,7 +26,7 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
         numberColumnOptions = new HyperSqlColumnOptions.Builder().autoIncrement();
         charColumnOptions = null;
         generatedColumnOptions = null;
-        createTestData("PUBLIC", "PUBLIC", "INTEGER", "TEMPORARY", null);
+        createTestData(null, "PUBLIC", "INTEGER", "TEMPORARY", null);
     }
 
     @AfterClass

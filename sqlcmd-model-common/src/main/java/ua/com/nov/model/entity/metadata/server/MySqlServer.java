@@ -5,13 +5,12 @@ import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
-import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
-import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.privelege.MySqlPrivilege;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
@@ -43,9 +42,9 @@ public final class MySqlServer extends Server {
     }
 
     private void initTypesMap() {
-        getTypesMap().put(JdbcDataTypes.INTEGER, "INT");
-        getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "TEXT");
-        getTypesMap().put(JdbcDataTypes.NUMERIC, "DECIMAL");
+        getTypesMap().put(DataTypes.INTEGER, "INT");
+        getTypesMap().put(DataTypes.LONGVARCHAR, "TEXT");
+        getTypesMap().put(DataTypes.NUMERIC, "DECIMAL");
     }
 
     @Override
@@ -61,9 +60,9 @@ public final class MySqlServer extends Server {
 
     @Override
     public AbstractDatabaseMdSqlStatements getDatabaseSqlStmtSource() {
-        return new AbstractDatabaseMdSqlStatements<Database.Id, Database, Server.Id>() {
+        return new AbstractDatabaseMdSqlStatements<Database.Id, Database, Id>() {
             @Override
-            public SqlStatement getReadAllStmt(Server.Id cId) {
+            public SqlStatement getReadAllStmt(Id cId) {
                 return new SqlStatement.Builder("SHOW DATABASES").build();
             }
 
@@ -106,7 +105,7 @@ public final class MySqlServer extends Server {
     }
 
     @Override
-    public <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    public <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     AbstractDatabaseMdSqlStatements<I, E, C> getDatabaseMdSqlStmtSource() {
         return new AbstractDatabaseMdSqlStatements<I, E, C>() {
             @Override

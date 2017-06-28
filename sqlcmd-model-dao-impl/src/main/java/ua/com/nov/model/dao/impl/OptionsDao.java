@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class OptionsDao<I extends MetaDataId, E> {
+public class OptionsDao<I extends AbstractMetaData.Id, E> {
 
     private DataSource dataSource;
 

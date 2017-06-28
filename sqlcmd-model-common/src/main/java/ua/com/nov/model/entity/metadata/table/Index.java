@@ -13,52 +13,6 @@ import java.util.Map;
 public class Index extends TableMd<Index.Id> {
     private final Map<Integer, KeyCol> columnList;
 
-    public final static class Builder extends Key.Builder<Index> {
-
-        public Builder(String keyName, Table.Id tableId) {
-            super(keyName, tableId);
-        }
-
-        public Builder(String keyName, Table.Id tableId, String... col) {
-            super(keyName, tableId, col);
-        }
-
-        public Builder(String... col) {
-            this(null, null, col);
-        }
-
-        public Builder options(MetaDataOptions<Index> options) {
-            super.setOptions(options);
-            return this;
-        }
-
-        public Index build() {
-            if (getName() == null) setName(generateName("idx"));
-            return new Index(this);
-        }
-
-        @Override
-        protected Map<Integer, KeyCol> getColumnMap() {
-            return super.getColumnMap();
-        }
-    }
-
-    public static class Id extends TableMd.Id {
-        public Id(Table.Id containerId, String name) {
-            super(containerId, name);
-        }
-
-        @Override
-        public String getMdName() {
-            return "INDEX";
-        }
-
-        @Override
-        public String getFullName() {
-            return getName();
-        }
-    }
-
     private Index(Builder builder) {
         super(new Id(builder.getTableId(), builder.getName()), builder);
         this.columnList = builder.getColumnMap();
@@ -78,7 +32,7 @@ public class Index extends TableMd<Index.Id> {
         return result;
     }
 
-    public List<String> getColumnsList() {
+    public List<String> getColumnNamesList() {
         List<String> result = new ArrayList<>();
         for (KeyCol col : columnList.values()) {
             result.add(col.getName());
@@ -133,6 +87,52 @@ public class Index extends TableMd<Index.Id> {
         }
         sb.append(')');
         return sb.toString();
+    }
+
+    public final static class Builder extends Key.Builder<Index> {
+
+        public Builder(String keyName, Table.Id tableId) {
+            super(keyName, tableId);
+        }
+
+        public Builder(String keyName, Table.Id tableId, String... col) {
+            super(keyName, tableId, col);
+        }
+
+        public Builder(String... col) {
+            this(null, null, col);
+        }
+
+        public Builder options(MetaDataOptions<Index> options) {
+            super.setOptions(options);
+            return this;
+        }
+
+        public Index build() {
+            if (getName() == null) setName(generateName("idx"));
+            return new Index(this);
+        }
+
+        @Override
+        protected Map<Integer, KeyCol> getColumnMap() {
+            return super.getColumnMap();
+        }
+    }
+
+    public static class Id extends TableMd.Id {
+        public Id(Table.Id containerId, String name) {
+            super(containerId, name);
+        }
+
+        @Override
+        public String getMdName() {
+            return "INDEX";
+        }
+
+        @Override
+        public String getFullName() {
+            return getName();
+        }
     }
 
 }

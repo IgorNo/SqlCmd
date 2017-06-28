@@ -1,9 +1,10 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
+import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.schema.SchemaMd;
 import ua.com.nov.model.entity.metadata.server.Server;
@@ -12,7 +13,7 @@ import ua.com.nov.model.entity.metadata.table.constraint.*;
 
 import java.util.*;
 
-public class Table extends SchemaMd<Table.Id> {
+public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id> {
     private final Map<String, Column> columns; // all table columns
 
     // all table constraint (primary key, foreign keys, unique keys, checks)
@@ -31,8 +32,14 @@ public class Table extends SchemaMd<Table.Id> {
         }
     }
 
+    @Override
     public Server getServer() {
         return getId().getServer();
+    }
+
+    @Override
+    public Schema.Id getContainerId() {
+        return getId().getContainerId();
     }
 
     public String getFullName() {
@@ -62,15 +69,10 @@ public class Table extends SchemaMd<Table.Id> {
         return getColumn(columnName).getOrdinalPosition();
     }
 
-    public Collection<Column> getColumns() {
-        List<Column> result = new ArrayList<Column>(columns.values());
-        Collections.sort(result, new Comparator<Column>() {
-            @Override
-            public int compare(Column o1, Column o2) {
-                return o1.getOrdinalPosition() - o2.getOrdinalPosition();
-            }
-        });
-        return Collections.unmodifiableCollection(result);
+    public List<Column> getColumns() {
+        List<Column> result = new ArrayList<>(columns.values());
+        Collections.sort(result, (o1, o2) -> o1.getOrdinalPosition() - o2.getOrdinalPosition());
+        return result;
     }
 
     public PrimaryKey getPrimaryKey() {
@@ -105,8 +107,7 @@ public class Table extends SchemaMd<Table.Id> {
         for (UniqueKey key : getUniqueKeyList()) {
             if (key.getName().equalsIgnoreCase(name)) return key;
         }
-        throw new IllegalArgumentException(String.format("Unique key with name '%s' doesn't exist in table '%s'.",
-                name, getFullName()));
+        return null;
     }
 
     public List<ForeignKey> getForeignKeyList() {
@@ -119,8 +120,14 @@ public class Table extends SchemaMd<Table.Id> {
         for (ForeignKey key : getForeignKeyList()) {
             if (key.getName().equalsIgnoreCase(name)) return key;
         }
-        throw new IllegalArgumentException(String.format("Foreign key with name '%s' doesn't exist in table '%s'.",
-                name, getFullName()));
+        return null;
+    }
+
+    public ForeignKey getForeignKey(Table.Id id) {
+        for (ForeignKey key : getForeignKeyList()) {
+            if (key.getPkColumn(1).getTableId().equals(id)) return key;
+        }
+        return null;
     }
 
     public List<Index> getIndexList() {
@@ -133,8 +140,7 @@ public class Table extends SchemaMd<Table.Id> {
         for (Index key : getIndexList()) {
             if (key.getName().equalsIgnoreCase(name)) return key;
         }
-        throw new IllegalArgumentException(String.format("Index with name '%s' doesn't exist in table '%s'.",
-                name, getFullName()));
+        return null;
     }
 
     public Collection<Check> getCheckExpressionCollecttion() {
@@ -214,7 +220,7 @@ public class Table extends SchemaMd<Table.Id> {
 
         public Builder addColumn(Column.Builder columnBuilder) {
             columnBuilder.setTableId(getId());
-            if (columnBuilder.isPrimaryKey() || columnBuilder.isUnique()) columnBuilder.nullable(DataType.NOT_NULL);
+            if (columnBuilder.isPrimaryKey() || columnBuilder.isUnique()) columnBuilder.nullable(DbDataType.NOT_NULL);
             addColumn(columnBuilder.build());
             for (Constraint.Builder<? extends Constraint> constraintBuilder : columnBuilder.getConstraints()) {
                 addConstraint(constraintBuilder);
@@ -249,7 +255,7 @@ public class Table extends SchemaMd<Table.Id> {
         public <V extends Constraint> Builder addConstraint(V constraint) {
             checkTableId(constraint);
             if (constraint instanceof Key) {
-                checkColumnsInKey(((Key) constraint).getColumnsList());
+                checkColumnsInKey(((Key) constraint).getColumnNamesList());
             }
 
             Set<V> constraintSet = (Set<V>) constraints.get(constraint.getClass());

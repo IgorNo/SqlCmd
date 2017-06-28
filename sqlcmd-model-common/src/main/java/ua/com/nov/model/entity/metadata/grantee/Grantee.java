@@ -1,14 +1,13 @@
 package ua.com.nov.model.entity.metadata.grantee;
 
 import ua.com.nov.model.entity.Buildable;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.util.*;
 
-public abstract class Grantee extends MetaData<Grantee.Id> {
+public abstract class Grantee extends AbstractMetaData<Grantee.Id> {
     private final List<Privilege> privileges = new ArrayList<>();
     private Set<Grantee> grantees;
 
@@ -41,7 +40,7 @@ public abstract class Grantee extends MetaData<Grantee.Id> {
         return String.format(super.getCreateStmtDefinition(null), " ");
     }
 
-    public abstract static class Id extends MetaDataId<Server.Id> {
+    public abstract static class Id extends AbstractMetaData.Id<Server.Id> {
 
         public Id(Server.Id containerId, String name) {
             super(containerId, name);
@@ -58,7 +57,7 @@ public abstract class Grantee extends MetaData<Grantee.Id> {
         protected GranteeOptions<? extends Grantee> options;
         protected Set<Grantee> grantees = new HashSet<>();
         protected List<Privilege.Builder> privilegeBuilders = new ArrayList<>();
-        protected Grantee.Id id;
+        protected Id id;
         protected String name;
 
         public Builder(Server.Id id, String name, GranteeOptions<? extends Grantee> options) {

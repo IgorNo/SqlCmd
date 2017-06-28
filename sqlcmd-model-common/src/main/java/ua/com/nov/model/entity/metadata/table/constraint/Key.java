@@ -10,13 +10,61 @@ import java.util.*;
 public abstract class Key extends Constraint {
     private final Index index;
 
+    protected Key(Builder builder) {
+        super(builder);
+        Index.Builder indexBuilder = new Index.Builder(builder.getName(), builder.getTableId());
+        Set<Map.Entry<Integer, KeyCol>> entry = builder.columnList.entrySet();
+        for (Map.Entry<Integer, KeyCol> colEntry : entry) {
+            indexBuilder.addColumn(colEntry.getKey(), colEntry.getValue());
+        }
+        this.index = indexBuilder.build();
+    }
+
+    public KeyCol getColumn(int keySeq) {
+        return index.getColumn(keySeq);
+    }
+
+    public List<String> getColumnNamesList() {
+        return index.getColumnNamesList();
+    }
+
+    public int getNumberOfColumns() {
+        return index.getNumberOfColumns();
+    }
+
+    public Index getIndex() {
+        return index;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Key || o.getClass() == Index.class)) return false;
+
+        Index idx;
+        if (o instanceof Key) idx = ((Key) o).index;
+        else idx = (Index) o;
+
+        return index.equals(idx);
+    }
+
+    @Override
+    public int hashCode() {
+        return index.hashCode();
+    }
+
+    @Override
+    public String getCreateStmtDefinition(String conflictOption) {
+        return String.format(super.getCreateStmtDefinition(conflictOption), index.getColumnNames());
+    }
+
     public abstract static class Builder<V> extends TableMd.Builder<V> {
         private final Map<Integer, KeyCol> columnList = new TreeMap<>();
         private int keySeq = 1;
 
         public Builder(String keyName, Table.Id tableId) {
             super(keyName, tableId);
-       }
+        }
 
         public Builder(String keyName, Table.Id tableId, KeyCol... columns) {
             this(keyName, tableId);
@@ -86,50 +134,6 @@ public abstract class Key extends Constraint {
             return keySeq;
         }
 
-    }
-
-    protected Key(Builder builder) {
-        super(builder);
-        Index.Builder indexBuilder = new Index.Builder(builder.getName(), builder.getTableId());
-        Set<Map.Entry<Integer, KeyCol>> entry = builder.columnList.entrySet();
-        for (Map.Entry<Integer, KeyCol> colEntry : entry) {
-            indexBuilder.addColumn(colEntry.getKey(), colEntry.getValue());
-        }
-        this.index = indexBuilder.build();
-    }
-
-    public KeyCol getColumn(int keySeq) {
-        return index.getColumn(keySeq);
-    }
-
-    public List<String> getColumnsList() {
-        return index.getColumnsList();
-    }
-
-    public Index getIndex() {
-        return index;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Key || o.getClass() == Index.class)) return false;
-
-        Index idx;
-        if (o instanceof Key) idx = ((Key) o).index;
-        else idx = (Index) o;
-
-        return index.equals(idx);
-    }
-
-    @Override
-    public int hashCode() {
-        return index.hashCode();
-    }
-
-    @Override
-    public String getCreateStmtDefinition(String conflictOption) {
-        return String.format(super.getCreateStmtDefinition(conflictOption), index.getColumnNames());
     }
 
 }

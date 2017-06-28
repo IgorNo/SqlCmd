@@ -8,7 +8,7 @@ public interface DataManipulationSqlStmtSource<I,E,C> extends SqlStatementSource
 
     SqlStatement getCountStmt(C cId);
 
-    SqlStatement getReadNStmt(C cId, int nStart, int number);
+    SqlStatement getReadNStmt(C cId, long nStart, int number);
 
     SqlStatement getReadFetchStmt(FetchParametersSource<C> parameters);
 }

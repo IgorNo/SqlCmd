@@ -44,8 +44,8 @@ public final class DatabaseDao
     }
 
     @Override
-    protected SqlExecutor getExecutor(DataSource dataSource) {
-        return new DDLSqlExecutor<>(dataSource);
+    protected SqlExecutor createExecutor(DataSource dataSource) {
+        return new DDLSqlExecutor(dataSource);
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class DatabaseDao
     }
 
     @Override
-    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Server db) {
-        return db.getDatabaseSqlStmtSource();
+    protected AbstractDatabaseMdSqlStatements getSqlStmtSource(Server server) {
+        return server.getDatabaseSqlStmtSource();
     }
 }

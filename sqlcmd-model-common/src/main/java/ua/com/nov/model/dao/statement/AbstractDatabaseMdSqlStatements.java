@@ -1,12 +1,12 @@
 package ua.com.nov.model.dao.statement;
 
-import ua.com.nov.model.entity.Hierarchical;
-import ua.com.nov.model.entity.Persistent;
+import ua.com.nov.model.entity.MetaData;
+import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 
 public abstract class AbstractDatabaseMdSqlStatements
-        <I extends MetaDataId<C>, E extends Unique<I> & Persistent, C extends Hierarchical>
+        <I extends AbstractMetaData.Id<C>, E extends Unique<I> & MetaData, C extends MetaDataId>
         implements DataDefinitionSqlStmtSource<I, E, C> {
 
     @Override

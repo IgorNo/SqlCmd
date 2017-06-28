@@ -28,7 +28,9 @@ public class HyperSqlPrivilege extends Privilege {
         SELECT("SELECT", COLUMN, TABLE, SEQUENCE),
         TRIGGER("TRIGGER", TABLE),
         TRUNCATE("TRUNCATE", TABLE),
+        UPDATE("UPDATE", COLUMN, TABLE),
         USAGE("USAGE", SEQUENCE, DOMAIN, TYPE);
+
 
         private String action;
         private List<Level> levelList = new LinkedList<>();
@@ -69,8 +71,8 @@ public class HyperSqlPrivilege extends Privilege {
             }
         }
 
-        public static Builder creteColumnPrivileges(Table table, Action... actions) {
-            Builder builder = new Builder(COLUMN, actions);
+        public static Builder creteColumnPrivileges(Table table) {
+            Builder builder = new Builder(COLUMN);
             builder.onExpression(table.getFullName());
             return builder;
         }
@@ -106,15 +108,17 @@ public class HyperSqlPrivilege extends Privilege {
             return builder;
         }
 
-        private Builder addAction(Action action) {
+        private Builder addAction(Action... actions) {
             if (level == COLUMN)
                 throw new IllegalArgumentException(
                         "For 'COLUMN' level privileges must be used method 'addAction(action, column)'.\n");
-            if (action.isLevel(level))
-                super.addAction(action.toString());
-            else
-                throw new IllegalArgumentException(String.format("Action '%s' can't be granted for level '%s'.\n",
-                        action, level));
+            for (Action action : actions) {
+                if (action.isLevel(level))
+                    super.addAction(action.toString());
+                else
+                    throw new IllegalArgumentException(String.format("Action '%s' can't be granted for level '%s'.\n",
+                            action, level));
+            }
             return this;
         }
 

@@ -1,9 +1,9 @@
 package ua.com.nov.model.entity.metadata;
 
-import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.metadata.server.Server;
 
-public class NullMetaData implements Hierarchical {
+public class NullMetaData implements MetaDataId {
 
     @Override
     public Server getServer() {

@@ -7,8 +7,8 @@ import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.privelege.HyperSqlPrivilege;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
@@ -30,9 +30,9 @@ public class HyperSqlServer extends Server {
 
     public HyperSqlServer(String dbUrl) {
         super(dbUrl);
-        getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "LONGVARCHAR");
-        List<DataType> dataTypeList = new ArrayList<>();
-        dataTypeList.add(new DataType.Builder("LONGVARCHAR", Types.LONGVARCHAR).build());
+        getTypesMap().put(DataTypes.LONGVARCHAR, "LONGVARCHAR");
+        List<DbDataType> dataTypeList = new ArrayList<>();
+        dataTypeList.add(new DbDataType.Builder("LONGVARCHAR", Types.LONGVARCHAR).build());
         addDataTypes(dataTypeList);
     }
 

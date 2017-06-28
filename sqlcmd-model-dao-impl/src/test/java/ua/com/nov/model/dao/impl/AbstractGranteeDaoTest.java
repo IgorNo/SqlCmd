@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
 import ua.com.nov.model.entity.metadata.server.Server;
@@ -17,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractGranteeDaoTest {
     protected static final UserDao USER_DAO = new UserDao();
+    protected static final PrivilegeDao PRIVILEGE_DAO = new PrivilegeDao();
 
     protected static AbstractTableDaoTest tableDaoTest;
 
@@ -25,10 +27,13 @@ public abstract class AbstractGranteeDaoTest {
     protected static User user1;
     protected static UserOptions updatedUserOptions;
 
+    protected static Privilege columnPrivilege, tablePrivilege1, tablePrivilege2, schemaPrivilege, dbPrivilege;
+
     protected static void setUpClass() throws DaoSystemException, SQLException {
         tableDaoTest.setUp();
-        server = AbstractTableDaoTest.testDb.getServer();
-        USER_DAO.setDataSource(AbstractTableDaoTest.dataSource);
+        server = tableDaoTest.testDb.getServer();
+        USER_DAO.setDataSource(tableDaoTest.dataSource);
+        PRIVILEGE_DAO.setDataSource(tableDaoTest.dataSource);
     }
 
     protected static void createTestData(UserOptions options) {
@@ -45,6 +50,21 @@ public abstract class AbstractGranteeDaoTest {
     public void setUp() throws DaoSystemException {
         tearDown();
         USER_DAO.create(user1);
+    }
+
+    @Test
+    public void grantRevokePrivilege() throws DaoSystemException {
+        PRIVILEGE_DAO.grant(columnPrivilege);
+        PRIVILEGE_DAO.grant(tablePrivilege1);
+        PRIVILEGE_DAO.grant(tablePrivilege2);
+        PRIVILEGE_DAO.grant(schemaPrivilege);
+        PRIVILEGE_DAO.grant(dbPrivilege);
+
+        PRIVILEGE_DAO.revoke(columnPrivilege);
+        PRIVILEGE_DAO.revoke(tablePrivilege1);
+        PRIVILEGE_DAO.revoke(tablePrivilege2);
+        PRIVILEGE_DAO.revoke(schemaPrivilege);
+        PRIVILEGE_DAO.revoke(dbPrivilege);
     }
 
     @Test

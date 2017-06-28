@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class DDLSqlExecutor<E> extends SqlExecutor<E> {
+public class DDLSqlExecutor extends SqlExecutor {
 
     public DDLSqlExecutor(DataSource dataSource) {
         super(dataSource);
@@ -31,14 +31,16 @@ public class DDLSqlExecutor<E> extends SqlExecutor<E> {
     }
 
     @Override
-    public List<E> executeQueryStmt(SqlStatement sqlStmt, RowMapper mapper) throws DaoSystemException {
-        List<E> result;
+    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException {
+        List<T> result;
         try (Statement stmt = getDataSource().getConnection().createStatement()){
             ResultSet rs = stmt.executeQuery(sqlStmt.getSql());
-            result = new RowMapperResultSetExtractor<E>(mapper).extractData(rs);
+            result = new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
         } catch (SQLException e) {
             throw new DaoSystemException("DDL DAO query exception.\n", e);
         }
         return result;
     }
+
+
 }

@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
-import ua.com.nov.model.entity.metadata.MetaData;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PrivilegeDao {
 
-    private SqlExecutor<Privilege> executor;
+    private SqlExecutor executor;
 
     public PrivilegeDao() {
     }
@@ -25,7 +25,7 @@ public class PrivilegeDao {
     }
 
     public PrivilegeDao setDataSource(DataSource dataSource) {
-        this.executor = new DDLSqlExecutor<>(dataSource);
+        this.executor = new DDLSqlExecutor(dataSource);
         return this;
     }
 
@@ -36,10 +36,10 @@ public class PrivilegeDao {
 
     public void revoke(Privilege privilege) throws DaoSystemException {
         executor.executeUpdateStmt(privilege.getGranteeList().get(0).getServer().getPrivelegeStmtSource()
-                .getCreateStmt(privilege));
+                .getDeleteStmt(privilege));
     }
 
-    public Privilege read(MetaData metaData) throws DaoSystemException {
+    public Privilege read(AbstractMetaData metaData) throws DaoSystemException {
         throw new UnsupportedOperationException();
     }
 

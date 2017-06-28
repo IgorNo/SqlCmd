@@ -8,7 +8,7 @@ import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
-import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DataTypes;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.user.PostgreSqlUserOptions;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
@@ -28,7 +28,7 @@ public class PostgreSqlServer extends Server {
 
     public PostgreSqlServer(String dbUrl) {
         super(dbUrl);
-        getTypesMap().put(JdbcDataTypes.LONGVARCHAR, "text");
+        getTypesMap().put(DataTypes.LONGVARCHAR, "text");
     }
 
     @Override

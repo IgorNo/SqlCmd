@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -24,7 +24,7 @@ public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
         return new AbstractDao.AbstractRowMapper<Column, Table.Id>(tableId) {
             @Override
             public Column mapRow(ResultSet rs, int i) throws SQLException {
-                DataType dataType = tableId.getServer().getDataType(rs.getString("TYPE_NAME"));
+                DbDataType dataType = tableId.getServer().getDataType(rs.getString("TYPE_NAME"));
                 Column.Id id = new Column.Id(tableId, rs.getString("COLUMN_NAME"));
 
                 Column.Builder builder = new Column.Builder(id, dataType)

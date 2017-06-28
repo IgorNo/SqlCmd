@@ -1,9 +1,11 @@
 package ua.com.nov.model.entity;
 
-public interface Persistent {
+public interface MetaData {
     String getName();
 
     String getViewName();
+
+    String getType();
 
     Optional<?> getOptions();
 

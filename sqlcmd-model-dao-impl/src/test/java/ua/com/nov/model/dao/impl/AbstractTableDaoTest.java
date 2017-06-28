@@ -5,14 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
-import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.metadata.MetaData;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.database.Database;
-import ua.com.nov.model.entity.metadata.datatype.DataType;
-import ua.com.nov.model.entity.metadata.datatype.JdbcDataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DataTypes;
+import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -48,7 +47,7 @@ public abstract class AbstractTableDaoTest {
     protected static ColumnOptions.Builder charColumnOptions;
     protected static ColumnOptions.Builder generatedColumnOptions;
 
-    protected static DataType integer, character;
+    protected static DbDataType integer, character;
 
 
     protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType,
@@ -66,13 +65,14 @@ public abstract class AbstractTableDaoTest {
         Schema.Id schemaId = new Schema.Id(testDb.getId(), catalog, "tmp_schema");
         testSchema = new Schema(schemaId, options);
 
-        DataType serial = testDb.getServer().getDataType(aiTypeName);
-        integer = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.INTEGER);
-        character = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.CHAR);
-        DataType varchar = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.VARCHAR);
-        DataType text = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.LONGVARCHAR);
-        DataType numeric = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.NUMERIC);
-        DataType date = testDb.getServer().getMostApproximateDataTypes(JdbcDataTypes.DATE);
+        DbDataType serial = testDb.getServer().getDataType(aiTypeName);
+        integer = testDb.getServer().getMostApproximateDataTypes(DataTypes.INTEGER);
+        character = testDb.getServer().getMostApproximateDataTypes(DataTypes.CHAR);
+        DbDataType varchar = testDb.getServer().getMostApproximateDataTypes(DataTypes.VARCHAR);
+        DbDataType text = testDb.getServer().getMostApproximateDataTypes(DataTypes.LONGVARCHAR);
+        DbDataType numeric = testDb.getServer().getMostApproximateDataTypes(DataTypes.DOUBLE);
+        DbDataType date = testDb.getServer().getMostApproximateDataTypes(DataTypes.DATE);
+        DbDataType time = testDb.getServer().getMostApproximateDataTypes(DataTypes.TIME);
 
 
         Table.Id customersId = new Table.Id(testDb.getId(), "Customers", catalog, schema);
@@ -96,7 +96,7 @@ public abstract class AbstractTableDaoTest {
 
         Table.Id ordersId = new Table.Id(testDb.getId(), "Orders", catalog, schema);
         orders = new Table.Builder(ordersId).viewName("Заказы")
-                .addColumn(new Column.Builder("id", serial).autoIncrement().nullable(DataType.NOT_NULL))
+                .addColumn(new Column.Builder("id", serial).autoIncrement().nullable(DbDataType.NOT_NULL))
                 .addColumn(new Column.Builder("date", date))
                 .addColumn(new Column.Builder("product_id", integer).notNull()
                 .references(products.getColumn("id").getId(),
@@ -285,7 +285,7 @@ public abstract class AbstractTableDaoTest {
         renameMetaData(TABLE_DAO, users, new Table.Id(users.getId().getContainerId(), "new_name"));
     }
 
-    private <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    private <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     void renameMetaData(MetaDataDao<I, E, C> dao, E entity, I updatedId)
             throws DaoSystemException {
         dao.rename(entity, updatedId.getName());
@@ -352,7 +352,7 @@ public abstract class AbstractTableDaoTest {
         readDeleteAddMetaData(PRIMARY_KEY_DAO, testTable.getPrimaryKey().getId(), users.getPrimaryKey());
     }
 
-    protected <I extends MetaDataId<C>, E extends MetaData<I>, C extends Hierarchical>
+    protected <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     void readDeleteAddMetaData(MetaDataDao<I, E, C> dao, I mdId, E newMd)
             throws DaoSystemException {
         E md = dao.read(mdId);

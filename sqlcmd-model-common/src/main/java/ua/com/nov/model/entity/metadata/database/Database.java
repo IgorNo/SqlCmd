@@ -1,18 +1,18 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.datasource.BaseDataSource;
+import ua.com.nov.model.entity.MetaData;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.Persistent;
 import ua.com.nov.model.entity.Unique;
-import ua.com.nov.model.entity.metadata.MetaDataId;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.server.Server;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Database extends BaseDataSource implements Unique<Database.Id>, Persistent {
+public class Database extends BaseDataSource implements Unique<Database.Id>, MetaData {
     private final Id id;
     protected MetaDataOptions<Database> options;
 
@@ -91,7 +91,7 @@ public class Database extends BaseDataSource implements Unique<Database.Id>, Per
         return getCreateStmtDefinition(null);
     }
 
-    public static class Id extends MetaDataId<Server.Id> {
+    public static class Id extends AbstractMetaData.Id<Server.Id> {
         private final Server server;
 
         public Id(Server server, String dbName) {

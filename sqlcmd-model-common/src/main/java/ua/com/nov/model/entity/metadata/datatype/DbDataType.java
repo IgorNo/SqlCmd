@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.datatype;
 
 // Builder Pattern
-public class DataType {
+public class DbDataType {
     public static final int NOT_NULL = 0; // does not allow NULL values
     public static final int NULL = 1; // allows NULL values
     public static final int TYPE_NULLABLE_UNKNOWN = 2;  // nullability unknown
@@ -37,6 +37,104 @@ public class DataType {
      * this is the length in bytes. Null is returned for data types where the
      * column size is not applicable.
     */
+
+    private DbDataType(Builder builder) {
+        this.typeName = builder.typeName;
+        this.jdbcDataType = builder.dataType;
+        this.precision = builder.precision;
+        this.literalPrefix = builder.literalPrefix;
+        this.literalSuffix = builder.literalSuffix;
+        this.createParams = builder.createParams;
+        this.nullable = builder.nullable;
+        this.caseSensitive = builder.caseSensitive;
+        this.searchable = builder.searchable;
+        this.unsignedAttribute = builder.unsignedAttribute;
+        this.fixedPrecScale = builder.fixedPrecScale;
+        this.autoIncrement = builder.autoIncrement;
+        this.localTypeName = builder.localTypeName;
+        this.minimumScale = builder.minimumScale;
+        this.maximumScale = builder.maximumScale;
+        this.numPrecRadix = builder.numPrecRadix;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public int getJdbcDataType() {
+        return jdbcDataType;
+    }
+
+    public int getPrecision() {
+        return precision;
+    }
+
+    public String getLiteralPrefix() {
+        return literalPrefix;
+    }
+
+    public String getLiteralSuffix() {
+        return literalSuffix;
+    }
+
+    public String getCreateParams() {
+        return createParams;
+    }
+
+    public int getNullable() {
+        return nullable;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public int getSearchable() {
+        return searchable;
+    }
+
+    public boolean isUnsignedAttribute() {
+        return unsignedAttribute;
+    }
+
+    public boolean isFixedPrecScale() {
+        return fixedPrecScale;
+    }
+
+    public boolean isAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public String getLocalTypeName() {
+        return localTypeName;
+    }
+
+    public int getMinimumScale() {
+        return minimumScale;
+    }
+
+    public int getMaximumScale() {
+        return maximumScale;
+    }
+
+    public int getNumPrecRadix() {
+        return numPrecRadix;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DbDataType dataType = (DbDataType) o;
+
+        return typeName.equals(dataType.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return typeName.hashCode();
+    }
 
     public static class Builder {
         private final String typeName;
@@ -132,106 +230,8 @@ public class DataType {
             return this;
         }
 
-        public DataType build() {
-            return new DataType(this);
+        public DbDataType build() {
+            return new DbDataType(this);
         }
-    }
-
-    private DataType(Builder builder) {
-        this.typeName = builder.typeName;
-        this.jdbcDataType = builder.dataType;
-        this.precision = builder.precision;
-        this.literalPrefix = builder.literalPrefix;
-        this.literalSuffix = builder.literalSuffix;
-        this.createParams = builder.createParams;
-        this.nullable = builder.nullable;
-        this.caseSensitive = builder.caseSensitive;
-        this.searchable = builder.searchable;
-        this.unsignedAttribute = builder.unsignedAttribute;
-        this.fixedPrecScale = builder.fixedPrecScale;
-        this.autoIncrement = builder.autoIncrement;
-        this.localTypeName = builder.localTypeName;
-        this.minimumScale = builder.minimumScale;
-        this.maximumScale = builder.maximumScale;
-        this.numPrecRadix = builder.numPrecRadix;
-    }
-
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public int getJdbcDataType() {
-        return jdbcDataType;
-    }
-
-    public int getPrecision() {
-        return precision;
-    }
-
-    public String getLiteralPrefix() {
-        return literalPrefix;
-    }
-
-    public String getLiteralSuffix() {
-        return literalSuffix;
-    }
-
-    public String getCreateParams() {
-        return createParams;
-    }
-
-    public int getNullable() {
-        return nullable;
-    }
-
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-
-    public int getSearchable() {
-        return searchable;
-    }
-
-    public boolean isUnsignedAttribute() {
-        return unsignedAttribute;
-    }
-
-    public boolean isFixedPrecScale() {
-        return fixedPrecScale;
-    }
-
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public String getLocalTypeName() {
-        return localTypeName;
-    }
-
-    public int getMinimumScale() {
-        return minimumScale;
-    }
-
-    public int getMaximumScale() {
-        return maximumScale;
-    }
-
-    public int getNumPrecRadix() {
-        return numPrecRadix;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DataType dataType = (DataType) o;
-
-        return typeName.equals(dataType.typeName);
-    }
-
-    @Override
-    public int hashCode() {
-        return typeName.hashCode();
     }
 }

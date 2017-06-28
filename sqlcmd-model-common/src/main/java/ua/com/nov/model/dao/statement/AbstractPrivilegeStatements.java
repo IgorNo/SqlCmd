@@ -1,10 +1,10 @@
 package ua.com.nov.model.dao.statement;
 
-import ua.com.nov.model.entity.metadata.MetaData;
+import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 
-public abstract class AbstractPrivilegeStatements implements SqlStatementSource<MetaData<?>, Privilege, Grantee> {
+public abstract class AbstractPrivilegeStatements implements SqlStatementSource<AbstractMetaData<?>, Privilege, Grantee> {
 
     @Override
     public SqlStatement getCreateStmt(Privilege privilege) {
@@ -21,12 +21,12 @@ public abstract class AbstractPrivilegeStatements implements SqlStatementSource<
         StringBuilder sb = new StringBuilder("REVOKE ").append(privilege.getActions());
         sb.append("\n\tON ").append(privilege.getOnExpression());
         sb.append("\n\tFROM ").append(privilege.getGrantees());
-        sb.append(";\n");
+        sb.append(";");
         return new SqlStatement.Builder(sb.toString()).build();
     }
 
     @Override
-    public SqlStatement getReadOneStmt(MetaData<?> eId) {
+    public SqlStatement getReadOneStmt(AbstractMetaData<?> eId) {
         throw new UnsupportedOperationException();
     }
 

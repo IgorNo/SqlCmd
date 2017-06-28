@@ -1,12 +1,14 @@
 package ua.com.nov.model.dao.statement;
 
+import org.springframework.jdbc.core.SqlParameterValue;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class SqlStatement {
     private final String sql;
-    private final List<Object> parameters;
+    private final List<SqlParameterValue> parameters;
 
     private SqlStatement(Builder builder) {
         this.sql = builder.sql;
@@ -17,7 +19,7 @@ public class SqlStatement {
         return sql;
     }
 
-    public List<Object> getParameters() {
+    public List<SqlParameterValue> getParameters() {
         return Collections.unmodifiableList(parameters);
     }
 
@@ -28,20 +30,20 @@ public class SqlStatement {
 
     public static class Builder {
         private final String sql;
-        private final List<Object> parameters = new ArrayList<>();
+        private final List<SqlParameterValue> parameters = new ArrayList<>();
 
         public Builder(String sql) {
             this.sql = sql;
         }
 
-        public Builder(String sql, Object... params) {
+        public Builder(String sql, SqlParameterValue... params) {
             this(sql);
-            for (Object param : params) {
+            for (SqlParameterValue param : params) {
                 addParameter(param);
             }
         }
 
-        public Builder addParameter(Object param) {
+        public Builder addParameter(SqlParameterValue param) {
             parameters.add(param);
             return this;
         }
