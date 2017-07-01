@@ -6,10 +6,18 @@ import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.server.Server;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SchemaDao extends MetaDataDao<Schema.Id, Schema, Database.Id> {
+
+    public SchemaDao() {
+    }
+
+    public SchemaDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected DataDefinitionSqlStmtSource<Schema.Id, Schema, Database.Id> getSqlStmtSource(Server db) {

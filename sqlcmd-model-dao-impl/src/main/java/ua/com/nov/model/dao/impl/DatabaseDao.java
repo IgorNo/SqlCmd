@@ -13,9 +13,17 @@ import ua.com.nov.model.entity.metadata.server.Server;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public final class DatabaseDao
-        extends AbstractDao<Database.Id, Database, Server.Id> implements DataDefinitionDao<Database> {
+        extends AbstractDao<Database.Id, Database, Server.Id> implements DataDefinitionDao<Database, Server.Id> {
+
+    public DatabaseDao() {
+    }
+
+    public DatabaseDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     public void createIfNotExist(Database entity) throws DaoSystemException {
@@ -37,6 +45,10 @@ public final class DatabaseDao
             return new Database(eId.getServer(), dbId.getName());
     }
 
+    @Override
+    public List<Database> readAll(Server.Id cId) throws DaoSystemException {
+        return super.readAll(cId);
+    }
 
     @Override
     public void deleteIfExist(Database entity) throws DaoSystemException {

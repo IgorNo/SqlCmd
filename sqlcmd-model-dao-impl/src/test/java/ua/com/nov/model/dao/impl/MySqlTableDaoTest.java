@@ -84,7 +84,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
     @Override
     public void testReadSchema() throws DaoSystemException {
         Database db = new Database(testDb.getServer(), "tmp_schema");
-        Database result = new DatabaseDao().setDataSource(SCHEMA_DAO.getDataSource()).read(db.getId());
+        Database result = new DatabaseDao(SCHEMA_DAO.getDataSource()).read(db.getId());
         assertTrue(result.equals(db));
     }
 

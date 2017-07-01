@@ -2,7 +2,12 @@ package ua.com.nov.model.dao;
 
 import ua.com.nov.model.dao.exception.DaoSystemException;
 
-public interface DataDefinitionDao<E> {
+import java.util.List;
+
+public interface DataDefinitionDao<E, C> {
+    //Read All from container
+    List<E> readAll(C cId) throws DaoSystemException;
+
     // Create entity if not exist
     void createIfNotExist(E entity) throws DaoSystemException;
 

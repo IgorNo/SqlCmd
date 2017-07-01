@@ -8,10 +8,18 @@ import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.column.ColumnOptions;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
+
+    public ColumnDao() {
+    }
+
+    public ColumnDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String columnName)
@@ -37,7 +45,6 @@ public class ColumnDao extends MetaDataDao<Column.Id, Column, Table.Id> {
                 ColumnOptions.Builder<?> optionsBuilder =
                         (ColumnOptions.Builder<?>) new OptionsDao<Column.Id, Column>(getDataSource()).read(id);
                 builder.options(optionsBuilder);
-//                    rs.getString("IS_GENERATEDCOLUMN").equalsIgnoreCase("YES");
 
                 return builder.build();
             }

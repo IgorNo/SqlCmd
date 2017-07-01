@@ -55,7 +55,11 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
     }
 
     public Column getColumn(int index) {
-        return columns.get(index);
+        for (Column column : columns.values()) {
+            if (column.getOrdinalPosition() == index)
+                return column;
+        }
+        return null;
     }
 
     public Column getColumn(String columnName) {
@@ -112,7 +116,8 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
 
     public List<ForeignKey> getForeignKeyList() {
         List<ForeignKey> result = new LinkedList<>();
-        result.addAll((Set<ForeignKey>) constraints.get(ForeignKey.class));
+        if (constraints.containsKey(ForeignKey.class))
+            result.addAll((Set<ForeignKey>) constraints.get(ForeignKey.class));
         return result;
     }
 
@@ -170,6 +175,7 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
         private String type;
         private Optional<Table> options;
         private Set<Index> indices = new HashSet<>(); // table indices list
+        private int ordinalPosition = 1;
 
         private String viewName;
 
@@ -220,6 +226,7 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
 
         public Builder addColumn(Column.Builder columnBuilder) {
             columnBuilder.setTableId(getId());
+            columnBuilder.ordinalPosition(ordinalPosition++);
             if (columnBuilder.isPrimaryKey() || columnBuilder.isUnique()) columnBuilder.nullable(DbDataType.NOT_NULL);
             addColumn(columnBuilder.build());
             for (Constraint.Builder<? extends Constraint> constraintBuilder : columnBuilder.getConstraints()) {

@@ -23,10 +23,11 @@ public class DMLSqlExecutor extends SqlExecutor {
     private static void setParameters(SqlStatement sqlStmt, PreparedStatement stmt) throws SQLException {
         List<SqlParameterValue> parameters = sqlStmt.getParameters();
         for (int i = 1; i <= parameters.size(); i++) {
-            SqlParameterValue parameter = parameters.get(i);
+            SqlParameterValue parameter = parameters.get(i - 1);
             if (parameter != null) {
                 stmt.setObject(i, parameter.getValue(), parameter.getSqlType());
-            } else stmt.setNull(i, parameter.getSqlType());
+            } else
+                stmt.setNull(i, parameter.getSqlType());
         }
     }
 

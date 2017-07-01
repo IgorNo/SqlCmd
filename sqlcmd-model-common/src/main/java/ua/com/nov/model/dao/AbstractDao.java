@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>, C extends Hierarchical>
-        implements Dao<I, E, C> {
+        implements Dao<I, E> {
 
     private SqlExecutor executor;
 
@@ -29,9 +29,8 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     }
 
     @Override
-    public AbstractDao<I, E, C> setDataSource(DataSource dataSource) {
+    public void setDataSource(DataSource dataSource) {
         this.executor = createExecutor(dataSource);
-        return this;
     }
 
     protected abstract SqlExecutor createExecutor(DataSource dataSource);
@@ -62,11 +61,11 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     @Override
     public E read(I eId) throws DaoSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(eId.getServer()).getReadOneStmt(eId);
-        return executor.executeQueryForObjectStmt(sqlStmt, getRowMapper(eId.getContainerId()));
+        E value = executor.executeQueryForObjectStmt(sqlStmt, getRowMapper(eId.getContainerId()));
+        return value;
     }
 
-    @Override
-    public List<E> readAll(C cId) throws DaoSystemException {
+    protected List<E> readAll(C cId) throws DaoSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(cId.getServer()).getReadAllStmt(cId);
         return executor.executeQueryStmt(sqlStmt, getRowMapper(cId));
     }

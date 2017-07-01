@@ -16,7 +16,7 @@ public class Row implements Unique<Row.Id> {
     private final Object[] values;
     private final Map<Table, Row> foreignKeys;
 
-    public Row(Builder builder) {
+    protected Row(Builder builder) {
         table = builder.table;
         values = builder.values;
         foreignKeys = builder.foreignKeys;
@@ -27,13 +27,12 @@ public class Row implements Unique<Row.Id> {
     }
 
     public Object getValue(String column) {
-        return values[table.getColumn(column).getOrdinalPosition()];
+        return values[table.getColumn(column).getOrdinalPosition() - 1];
     }
 
     public Object getValue(int ordinalPosition) {
-        return values[ordinalPosition];
+        return values[ordinalPosition - 1];
     }
-
 
     public Row getForeignKeyValue(Table fk) {
         return foreignKeys.get(fk);
@@ -50,8 +49,8 @@ public class Row implements Unique<Row.Id> {
         Id id = new Id(table);
         int i = 0;
         for (String s : table.getPrimaryKey().getColumnNamesList()) {
-            int position = table.getColumn(s).getOrdinalPosition();
-            id.values[i++] = values[position];
+            int ordinalPosition = table.getColumn(s).getOrdinalPosition();
+            id.values[i++] = values[ordinalPosition - 1];
         }
         return id;
     }
@@ -64,6 +63,25 @@ public class Row implements Unique<Row.Id> {
         return getValueColumn(ordinalPosition).getDataType().getJdbcDataType();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Row row = (Row) o;
+
+        if (!table.equals(row.table)) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(values, row.values)) return false;
+        return foreignKeys != null ? foreignKeys.equals(row.foreignKeys) : row.foreignKeys == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = table.hashCode();
+        result = 31 * result + Arrays.hashCode(values);
+        return result;
+    }
 
     public static class Id implements Hierarchical<Table> {
         private final Table table;
@@ -115,16 +133,35 @@ public class Row implements Unique<Row.Id> {
         }
 
         public Object getValue(int ordinalPosition) {
-            return values[ordinalPosition];
+            return values[ordinalPosition - 1];
         }
 
         public Column getValueColumn(int ordinalPosition) {
             List<String> idColumns = table.getPrimaryKey().getColumnNamesList();
-            return table.getColumn(idColumns.get(ordinalPosition));
+            return table.getColumn(idColumns.get(ordinalPosition - 1));
         }
 
         public int getValueSqlType(int ordinalPosition) {
             return getValueColumn(ordinalPosition).getDataType().getJdbcDataType();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Id id = (Id) o;
+
+            if (!table.equals(id.table)) return false;
+            // Probably incorrect - comparing Object[] arrays with Arrays.equals
+            return Arrays.equals(values, id.values);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = table.hashCode();
+            result = 31 * result + Arrays.hashCode(values);
+            return result;
         }
     }
 
@@ -138,7 +175,7 @@ public class Row implements Unique<Row.Id> {
             this.values = new Object[table.getNumberOfColumns()];
             List<ForeignKey> foreignKeys = table.getForeignKeyList();
             if (foreignKeys.size() > 0) {
-                this.foreignKeys = new HashMap<>();
+                this.foreignKeys = new LinkedHashMap<>();
             }
         }
 
@@ -147,13 +184,15 @@ public class Row implements Unique<Row.Id> {
             for (int i = 0; i < values.length; i++) {
                 this.values[i] = row.values[i];
             }
-            for (Map.Entry<Table, Row> entry : row.foreignKeys.entrySet()) {
-                this.foreignKeys.put(entry.getKey(), entry.getValue());
+            if (row.foreignKeys != null) {
+                for (Map.Entry<Table, Row> entry : row.foreignKeys.entrySet()) {
+                    this.foreignKeys.put(entry.getKey(), entry.getValue());
+                }
             }
         }
 
         public Builder setValue(String column, Object value) {
-            values[table.getColumn(column).getOrdinalPosition()] = value;
+            values[table.getColumn(column).getOrdinalPosition() - 1] = value;
             return this;
         }
 

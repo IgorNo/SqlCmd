@@ -14,6 +14,7 @@ import ua.com.nov.model.entity.metadata.server.Server;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UserDao extends AbstractDao<Grantee.Id, User, Server.Id> {
 
@@ -25,6 +26,11 @@ public class UserDao extends AbstractDao<Grantee.Id, User, Server.Id> {
     @Override
     protected DataDefinitionSqlStmtSource<Grantee.Id, User, Server.Id> getSqlStmtSource(Server server) {
         return server.getUserSqlStmtSource();
+    }
+
+    @Override
+    public List<User> readAll(Server.Id cId) throws DaoSystemException {
+        return super.readAll(cId);
     }
 
     @Override

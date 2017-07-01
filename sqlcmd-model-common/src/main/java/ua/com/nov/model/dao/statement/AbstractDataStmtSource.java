@@ -9,7 +9,7 @@ import ua.com.nov.model.entity.metadata.table.column.Column;
 import java.sql.Types;
 import java.util.List;
 
-public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtSource<Row.Id, Row, Table> {
+public abstract class AbstractDataStmtSource<E extends Row> implements DataManipulationSqlStmtSource<Row.Id, E, Table> {
 
     private static String whereIdExpression(List<String> idColumns) {
         StringBuilder sb = new StringBuilder();
@@ -22,7 +22,7 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
     }
 
     @Override
-    public SqlStatement getCreateStmt(Row row) {
+    public SqlStatement getCreateStmt(E row) {
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(row.getTable().getFullName());
         List<Column> columns = row.getTable().getColumns();
 
@@ -45,8 +45,8 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
         sql.append(')');
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
-        for (int i = 0; i < columns.size(); i++) {
-            if (!columns.get(i).isAutoIncrement()) {
+        for (int i = 1; i <= columns.size(); i++) {
+            if (!columns.get(i - 1).isAutoIncrement()) {
                 builder.addParameter(new SqlParameterValue(row.getValueSqlType(i), row.getValue(i)));
             }
         }
@@ -54,7 +54,7 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
     }
 
     @Override
-    public SqlStatement getUpdateStmt(Row row) {
+    public SqlStatement getUpdateStmt(E row) {
         StringBuilder sql = new StringBuilder("UPDATE ").append(row.getTable().getFullName());
 
         List<Column> columns = row.getTable().getColumns();
@@ -70,12 +70,12 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
         sql.append(" WHERE ").append(whereIdExpression(idColumns));
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
-        for (int i = 0; i < columns.size(); i++) {
-            if (!idColumns.contains(columns.get(i).getName())) {
+        for (int i = 1; i <= columns.size(); i++) {
+            if (!idColumns.contains(columns.get(i - 1).getName())) {
                 builder.addParameter(new SqlParameterValue(row.getValueSqlType(i), row.getValue(i)));
             }
         }
-        for (int i = 0; i < idColumns.size(); i++) {
+        for (int i = 1; i <= idColumns.size(); i++) {
             Row.Id id = row.getId();
             builder.addParameter(new SqlParameterValue(id.getValueSqlType(i), id.getValue(i)));
         }
@@ -84,14 +84,14 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
     }
 
     @Override
-    public SqlStatement getDeleteStmt(Row row) {
+    public SqlStatement getDeleteStmt(E row) {
         StringBuilder sql = new StringBuilder("DELETE FROM ").append(row.getTable().getFullName());
 
         List<String> idColumns = row.getTable().getPrimaryKey().getColumnNamesList();
         sql.append(" WHERE ").append(whereIdExpression(idColumns));
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
-        for (int i = 0; i < idColumns.size(); i++) {
+        for (int i = 1; i <= idColumns.size(); i++) {
             Row.Id id = row.getId();
             builder.addParameter(new SqlParameterValue(id.getValueSqlType(i), id.getValue(i)));
         }
@@ -101,7 +101,7 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
 
     @Override
     public SqlStatement getDeleteAllStmt(Table table) {
-        StringBuilder sql = new StringBuilder("TRUNCATE ").append(table.getFullName());
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(table.getFullName());
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
         return builder.build();
     }
@@ -114,7 +114,7 @@ public abstract class AbstractDataStmtSource implements DataManipulationSqlStmtS
         sql.append(" WHERE ").append(whereIdExpression(idColumns));
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
-        for (int i = 0; i < idColumns.size(); i++) {
+        for (int i = 1; i <= idColumns.size(); i++) {
             builder.addParameter(new SqlParameterValue(eId.getValueSqlType(i), eId.getValue(i)));
         }
 

@@ -7,10 +7,18 @@ import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.constraint.UniqueKey;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UniqueKeyDao extends MetaDataDao<TableMd.Id, UniqueKey, Table.Id> {
+
+    public UniqueKeyDao() {
+    }
+
+    public UniqueKeyDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {

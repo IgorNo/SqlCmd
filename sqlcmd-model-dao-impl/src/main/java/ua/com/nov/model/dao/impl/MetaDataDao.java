@@ -18,7 +18,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 public abstract class MetaDataDao<I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
-        extends AbstractDao<I,E,C> implements DataDefinitionDao<E> {
+        extends AbstractDao<I, E, C> implements DataDefinitionDao<E, C> {
+
+    public MetaDataDao() {
+    }
+
+    public MetaDataDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected SqlExecutor createExecutor(DataSource dataSource) {

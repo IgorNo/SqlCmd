@@ -7,10 +7,18 @@ import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class IndexDao extends MetaDataDao<Index.Id, Index, Table.Id> {
+
+    public IndexDao() {
+    }
+
+    public IndexDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {

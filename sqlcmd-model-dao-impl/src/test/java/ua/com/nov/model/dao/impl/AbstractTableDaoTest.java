@@ -53,7 +53,7 @@ public abstract class AbstractTableDaoTest {
     protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType,
                                          Optional<Schema> options)
             throws DaoSystemException, DaoBusinessLogicException {
-        testDb = new DatabaseDao().setDataSource(dataSource).read(testDb.getId());
+        testDb = new DatabaseDao(dataSource).read(testDb.getId());
         SCHEMA_DAO.setDataSource(dataSource);
         TABLE_DAO.setDataSource(dataSource);
         COLUMN_DAO.setDataSource(dataSource);
@@ -70,7 +70,7 @@ public abstract class AbstractTableDaoTest {
         character = testDb.getServer().getMostApproximateDataTypes(DataTypes.CHAR);
         DbDataType varchar = testDb.getServer().getMostApproximateDataTypes(DataTypes.VARCHAR);
         DbDataType text = testDb.getServer().getMostApproximateDataTypes(DataTypes.LONGVARCHAR);
-        DbDataType numeric = testDb.getServer().getMostApproximateDataTypes(DataTypes.DOUBLE);
+        DbDataType numeric = testDb.getServer().getMostApproximateDataTypes(DataTypes.NUMERIC);
         DbDataType date = testDb.getServer().getMostApproximateDataTypes(DataTypes.DATE);
         DbDataType time = testDb.getServer().getMostApproximateDataTypes(DataTypes.TIME);
 

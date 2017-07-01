@@ -8,10 +8,18 @@ import ua.com.nov.model.entity.metadata.table.TableMd;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ForeignKeyDao extends MetaDataDao<TableMd.Id, ForeignKey, Table.Id> {
+
+    public ForeignKeyDao() {
+    }
+
+    public ForeignKeyDao(DataSource dataSource) {
+        super(dataSource);
+    }
 
     @Override
     protected ResultSet getResultSet(Table.Id id, String ignore) throws SQLException {

@@ -3,13 +3,12 @@ package ua.com.nov.model.dao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 
 import javax.sql.DataSource;
-import java.util.List;
 
-public interface Dao<I, E, C> {
+public interface Dao<I, E> {
 
     DataSource getDataSource();
 
-    Dao<I, E, C> setDataSource(DataSource dataSource);
+    void setDataSource(DataSource dataSource);
 
     // Create entity
     void create(E entity) throws DaoSystemException;
@@ -23,6 +22,4 @@ public interface Dao<I, E, C> {
     // Read one entity with identifier = 'eId'
     E read(I eId) throws DaoSystemException;
 
-    //Read All from container with identifier = 'cId'
-    List<E> readAll(C cId) throws DaoSystemException;
 }
