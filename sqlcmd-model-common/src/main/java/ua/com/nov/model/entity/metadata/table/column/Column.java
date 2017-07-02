@@ -117,6 +117,11 @@ public class Column extends TableMd<Column.Id> {
         return sb.toString();
     }
 
+    public boolean isGenerated() {
+        if (options == null || !options.isGeneratedColumn()) return false;
+        return true;
+    }
+
     public static class Builder extends TableMd.Builder {
         private final DbDataType dataType;
 

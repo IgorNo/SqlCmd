@@ -2,14 +2,14 @@ package ua.com.nov.model.dao.statement;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 import ua.com.nov.model.dao.fetch.FetchParametersSource;
-import ua.com.nov.model.entity.data.Row;
+import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 
 import java.sql.Types;
 import java.util.List;
 
-public abstract class AbstractDataStmtSource<E extends Row> implements DataManipulationSqlStmtSource<Row.Id, E, Table> {
+public abstract class AbstractDataStmtSource<E extends AbstractRow> implements DataManipulationSqlStmtSource<AbstractRow.Id, E, Table> {
 
     private static String whereIdExpression(List<String> idColumns) {
         StringBuilder sb = new StringBuilder();
@@ -23,21 +23,22 @@ public abstract class AbstractDataStmtSource<E extends Row> implements DataManip
 
     @Override
     public SqlStatement getCreateStmt(E row) {
-        StringBuilder sql = new StringBuilder("INSERT INTO ").append(row.getTable().getFullName());
-        List<Column> columns = row.getTable().getColumns();
+        StringBuilder sql = new StringBuilder("INSERT INTO ").append(row.getTable().getFullName()).append(" (");
 
-        String s = " (";
+        List<Column> columns = row.getTable().getColumns();
+        String s = "";
         for (Column column : columns) {
-            if (!column.isAutoIncrement()) {
+            if (!(column.isAutoIncrement() || column.isGenerated())) {
                 sql.append(s).append(column.getName());
                 s = ", ";
             }
         }
         sql.append(") VALUES ");
+        if (s.isEmpty()) return null;
 
         s = "(";
         for (Column column : columns) {
-            if (!column.isAutoIncrement()) {
+            if (!(column.isAutoIncrement() || column.isGenerated())) {
                 sql.append(s).append('?');
                 s = ", ";
             }
@@ -46,7 +47,7 @@ public abstract class AbstractDataStmtSource<E extends Row> implements DataManip
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
         for (int i = 1; i <= columns.size(); i++) {
-            if (!columns.get(i - 1).isAutoIncrement()) {
+            if (!(columns.get(i - 1).isAutoIncrement() || columns.get(i - 1).isGenerated())) {
                 builder.addParameter(new SqlParameterValue(row.getValueSqlType(i), row.getValue(i)));
             }
         }
@@ -55,28 +56,30 @@ public abstract class AbstractDataStmtSource<E extends Row> implements DataManip
 
     @Override
     public SqlStatement getUpdateStmt(E row) {
-        StringBuilder sql = new StringBuilder("UPDATE ").append(row.getTable().getFullName());
+        StringBuilder sql = new StringBuilder("UPDATE ").append(row.getTable().getFullName()).append(" SET ");
 
         List<Column> columns = row.getTable().getColumns();
         List<String> idColumns = row.getTable().getPrimaryKey().getColumnNamesList();
-        String s = " SET ";
+        String s = "";
         for (Column column : columns) {
-            if (!idColumns.contains(column.getName())) {
+            if (!(idColumns.contains(column.getName()) || column.isGenerated() || column.isAutoIncrement())) {
                 sql.append(s).append(column.getName()).append(" = ?");
                 s = ", ";
             }
         }
+        if (s.isEmpty()) return null;
 
         sql.append(" WHERE ").append(whereIdExpression(idColumns));
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
         for (int i = 1; i <= columns.size(); i++) {
-            if (!idColumns.contains(columns.get(i - 1).getName())) {
+            if (!(idColumns.contains(columns.get(i - 1).getName()) || columns.get(i - 1).isGenerated()
+                    || columns.get(i - 1).isAutoIncrement())) {
                 builder.addParameter(new SqlParameterValue(row.getValueSqlType(i), row.getValue(i)));
             }
         }
         for (int i = 1; i <= idColumns.size(); i++) {
-            Row.Id id = row.getId();
+            AbstractRow.Id id = row.getId();
             builder.addParameter(new SqlParameterValue(id.getValueSqlType(i), id.getValue(i)));
         }
 
@@ -92,7 +95,7 @@ public abstract class AbstractDataStmtSource<E extends Row> implements DataManip
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
         for (int i = 1; i <= idColumns.size(); i++) {
-            Row.Id id = row.getId();
+            AbstractRow.Id id = row.getId();
             builder.addParameter(new SqlParameterValue(id.getValueSqlType(i), id.getValue(i)));
         }
 
@@ -107,7 +110,7 @@ public abstract class AbstractDataStmtSource<E extends Row> implements DataManip
     }
 
     @Override
-    public SqlStatement getReadOneStmt(Row.Id eId) {
+    public SqlStatement getReadOneStmt(AbstractRow.Id eId) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ").append(eId.getContainerId().getFullName());
 
         List<String> idColumns = eId.getTable().getPrimaryKey().getColumnNamesList();

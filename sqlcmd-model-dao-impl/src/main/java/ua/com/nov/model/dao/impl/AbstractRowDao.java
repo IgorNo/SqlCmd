@@ -5,7 +5,7 @@ import ua.com.nov.model.dao.DataManipulationDao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.AbstractDataStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
-import ua.com.nov.model.entity.data.Row;
+import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -15,8 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class AbstractRowDao<R extends Row>
-        extends AbstractDao<Row.Id, R, Table> implements DataManipulationDao<R> {
+public abstract class AbstractRowDao<R extends AbstractRow>
+        extends AbstractDao<AbstractRow.Id, R, Table> implements DataManipulationDao<R> {
 
     private Table table;
 
@@ -27,7 +27,7 @@ public abstract class AbstractRowDao<R extends Row>
         setTable(table);
     }
 
-    protected static void setRowValues(ResultSet rs, Row.Builder row, Table table) throws SQLException {
+    protected static void setRowValues(ResultSet rs, AbstractRow.Builder row, Table table) throws SQLException {
         for (Column column : table.getColumns()) {
             row.setValue(column.getName(), rs.getObject(column.getName()));
         }
@@ -50,6 +50,7 @@ public abstract class AbstractRowDao<R extends Row>
         return -1;
     }
 
+    @Override
     public List<R> readAll() throws DaoSystemException {
         return super.readAll(table);
     }

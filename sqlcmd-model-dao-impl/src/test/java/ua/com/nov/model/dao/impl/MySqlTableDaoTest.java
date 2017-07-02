@@ -38,7 +38,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
                 .checkSum(false).engine("InnoDB").avgRowLength(200).autoIncrement(100)
                 .defaultCharset("utf8").collate("utf8_slovenian_ci").rowFormat("DYNAMIC")
                 .minRows(2).maxRows(100).build();
-        numberColumnOptions = new MySqlColumnOptions.Builder().autoIncrement().zeroFill().unsigned();
+        numberColumnOptions = new MySqlColumnOptions.Builder().autoIncrement();
         charColumnOptions = new MySqlColumnOptions.Builder().charSet("ucs2").collation("ucs2_bin").binari();
         generatedColumnOptions = new MySqlColumnOptions.Builder()
                 .generationExpression("concat('login: ',login)", MySqlColumnOptions.GenerationColumnType.VIRTUAL);

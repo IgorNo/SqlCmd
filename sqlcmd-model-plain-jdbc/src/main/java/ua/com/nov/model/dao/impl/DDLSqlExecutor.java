@@ -33,8 +33,9 @@ public class DDLSqlExecutor extends SqlExecutor {
     @Override
     public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException {
         List<T> result;
-        try (Statement stmt = getDataSource().getConnection().createStatement()){
-            ResultSet rs = stmt.executeQuery(sqlStmt.getSql());
+        try (Statement stmt = getDataSource().getConnection().createStatement();
+             ResultSet rs = stmt.executeQuery(sqlStmt.getSql())) {
+
             result = new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
         } catch (SQLException e) {
             throw new DaoSystemException("DDL DAO query exception.\n", e);

@@ -33,11 +33,13 @@ public class DMLSqlExecutor extends SqlExecutor {
 
     @Override
     public void executeUpdateStmt(SqlStatement sqlStmt) throws DaoSystemException {
-        try (PreparedStatement stmt = getDataSource().getConnection().prepareStatement(sqlStmt.getSql())) {
-            setParameters(sqlStmt, stmt);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new DaoSystemException("DML DAO update exception.\n", e);
+        if (sqlStmt != null) {
+            try (PreparedStatement stmt = getDataSource().getConnection().prepareStatement(sqlStmt.getSql())) {
+                setParameters(sqlStmt, stmt);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new DaoSystemException("DML DAO update exception.\n", e);
+            }
         }
     }
 

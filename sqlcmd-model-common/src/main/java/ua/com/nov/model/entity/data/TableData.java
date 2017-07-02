@@ -5,7 +5,7 @@ import ua.com.nov.model.entity.metadata.table.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TableData<E extends Row> {
+public class TableData<E extends AbstractRow> {
     private final Table table;
     private List<E> rows = new ArrayList<>();   // table data
 

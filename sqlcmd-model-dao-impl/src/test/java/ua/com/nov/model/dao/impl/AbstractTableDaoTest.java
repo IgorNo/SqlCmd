@@ -115,7 +115,7 @@ public abstract class AbstractTableDaoTest {
                 .addColumn(new Column.Builder("login", varchar).size(25).notNull().viewName("Логин"))
                 .addColumn(new Column.Builder("password", varchar).size(25).options(charColumnOptions).viewName("Пароль"))
                 .addColumn(new Column.Builder("login_", varchar).size(50).options(generatedColumnOptions))
-                .addConstraint(new PrimaryKey.Builder("login"))
+                .addConstraint(new PrimaryKey.Builder("login", "password"))
                 .options(tableOptions)
                 .build();
 

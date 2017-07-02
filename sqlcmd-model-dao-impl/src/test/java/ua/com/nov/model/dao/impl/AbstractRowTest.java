@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -21,6 +22,8 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRowTest {
+    protected static final RowDao ROW_DAO = new RowDao();
+
     protected static final AbstractRowDao<Customer> CUSTOMER_DAO = new AbstractRowDao<Customer>() {
         @Override
         protected AbstractRowMapper<Customer, Table> getRowMapper(Table table) {
@@ -68,6 +71,7 @@ public abstract class AbstractRowTest {
 
     protected static Server server;
 
+    protected static List<Row> userList;
     protected static List<Customer> customerList;
     protected static List<Product> productList;
     protected static List<Order> orderList;
@@ -75,6 +79,7 @@ public abstract class AbstractRowTest {
     protected static void setUpClass() throws DaoSystemException, SQLException {
         tableDaoTest.setUp();
         server = tableDaoTest.testDb.getServer();
+        ROW_DAO.setTable(AbstractTableDaoTest.users).setDataSource(tableDaoTest.dataSource);
         CUSTOMER_DAO.setTable(AbstractTableDaoTest.customers).setDataSource(tableDaoTest.dataSource);
         PRODUCT_DAO.setTable(AbstractTableDaoTest.products).setDataSource(tableDaoTest.dataSource);
         ORDER_DAO.setTable(AbstractTableDaoTest.orders).setDataSource(tableDaoTest.dataSource);
@@ -88,6 +93,11 @@ public abstract class AbstractRowTest {
 
     @Before
     public void setUp() throws DaoSystemException {
+
+        userList = new ArrayList<>();
+        Row.Builder user = new Row.Builder(AbstractTableDaoTest.users).setValue("login", "User1")
+                .setValue("password", "1111");
+        userList.add(user.setValue("id", (int) ROW_DAO.insert(user.build())).build());
 
         customerList = new ArrayList<>();
         Customer.Builder customer = new Customer.Builder()
@@ -141,6 +151,12 @@ public abstract class AbstractRowTest {
 
     @Test
     public void readRow() throws DaoSystemException {
+        for (Row row : userList) {
+            Row result = ROW_DAO.read(row.getId());
+            assertTrue(row.getValue("id").equals((int) result.getValue("id")));
+            assertTrue(row.getValue("login").equals(result.getValue("login")));
+            assertTrue(row.getValue("password").equals(result.getValue("password")));
+        }
         for (Customer customer : customerList) {
             Customer result = CUSTOMER_DAO.read(customer.getId());
             assertTrue(customer.equals(result));
@@ -158,6 +174,10 @@ public abstract class AbstractRowTest {
 
     @Test
     public void readAllRow() throws DaoSystemException {
+        List<Row> users = ROW_DAO.readAll();
+        for (Row row : users) {
+            assertTrue(users.contains(row));
+        }
         List<Customer> customers = CUSTOMER_DAO.readAll();
         for (Customer row : customers) {
             assertTrue(customers.contains(row));
@@ -172,6 +192,14 @@ public abstract class AbstractRowTest {
         }
     }
 
+    @Test
+    public void readNRow() throws DaoSystemException {
+        List<Product> products = PRODUCT_DAO.readN(1, 2);
+        assertTrue(products.size() == 2);
+        assertTrue(products.contains(productList.get(1)));
+        assertTrue(products.contains(productList.get(2)));
+    }
+
     @Test(expected = EmptyResultDataAccessException.class)
     public void deleteRow() throws DaoSystemException {
         ORDER_DAO.delete(orderList.get(0));
@@ -183,19 +211,25 @@ public abstract class AbstractRowTest {
     public void updateRow() throws DaoSystemException {
         Customer customer = new Customer.Builder(customerList.get(0)).rating(2000).phone("888-48-48").build();
         CUSTOMER_DAO.update(customer);
-        Row result = CUSTOMER_DAO.read(customer.getId());
+        Customer result = CUSTOMER_DAO.read(customer.getId());
         assertTrue(customer.equals(result));
+    }
+
+    @Test
+    public void countRow() throws DaoSystemException {
+        assertTrue(PRODUCT_DAO.count() == 5);
     }
 
     @After
     public void tearDown() throws DaoSystemException {
+        ROW_DAO.deleteAll();
         ORDER_DAO.deleteAll();
         CUSTOMER_DAO.deleteAll();
         PRODUCT_DAO.deleteAll();
     }
 }
 
-class Customer extends Row {
+class Customer extends AbstractRow {
     private Customer(Builder builder) {
         super(builder);
     }
@@ -220,7 +254,7 @@ class Customer extends Row {
         return (String) getValue("address");
     }
 
-    public static class Builder extends Row.Builder {
+    public static class Builder extends AbstractRow.Builder<Customer> {
 
         public Builder() {
             super(AbstractTableDaoTest.customers);
@@ -262,7 +296,7 @@ class Customer extends Row {
     }
 }
 
-class Product extends Row {
+class Product extends AbstractRow {
     public Product(Builder builder) {
         super(builder);
     }
@@ -283,7 +317,7 @@ class Product extends Row {
         return (BigDecimal) getValue("price");
     }
 
-    public static class Builder extends Row.Builder {
+    public static class Builder extends AbstractRow.Builder<Product> {
         public Builder() {
             super(AbstractTableDaoTest.products);
         }
@@ -319,7 +353,7 @@ class Product extends Row {
     }
 }
 
-class Order extends Row {
+class Order extends AbstractRow {
     public Order(Builder builder) {
         super(builder);
     }
@@ -348,7 +382,7 @@ class Order extends Row {
         return (Customer) getForeignKeyValue(AbstractTableDaoTest.customers);
     }
 
-    public static class Builder extends Row.Builder {
+    public static class Builder extends AbstractRow.Builder<Order> {
         public Builder() {
             super(AbstractTableDaoTest.orders);
         }
@@ -393,3 +427,5 @@ class Order extends Row {
         }
     }
 }
+
+
