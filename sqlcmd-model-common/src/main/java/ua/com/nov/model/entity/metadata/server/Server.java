@@ -27,9 +27,18 @@ public abstract class Server  implements Unique<Server.Id> {
     private Id id;
     private Map<String, DbDataType> dataTypes = new HashMap<>();
     private Map<DataTypes, String> typesMap = new HashMap<>();
+    private Map<String, Grantee> granteeMap = new HashMap<>();
 
     public Server(String url) {
         this.id = new Id(url);
+    }
+
+    public Grantee getUser(String roleName) {
+        return granteeMap.get(roleName);
+    }
+
+    public Grantee addUser(Grantee role) {
+        return granteeMap.put(role.getName(), role);
     }
 
     @Override

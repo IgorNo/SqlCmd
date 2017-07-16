@@ -29,6 +29,10 @@ public abstract class SqlExecutor {
 
     public abstract <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException;
 
+    public long executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
+        return -1;
+    }
+
     public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, RowMapper<T> rowMapper) throws DaoSystemException {
         return DataAccessUtils.requiredSingleResult(executeQueryStmt(sqlStmt, rowMapper));
     }

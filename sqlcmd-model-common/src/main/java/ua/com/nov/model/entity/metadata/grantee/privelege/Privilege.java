@@ -12,14 +12,14 @@ import java.util.List;
 
 public abstract class Privilege {
     private final List<String> actions;
-    private final List<Grantee> grantees;
     private final String onExpression;
+    private final List<Grantee> grantees;
     private final boolean withGrantOptions;
 
     public Privilege(Builder builder) {
         this.actions = builder.actions;
-        this.grantees = builder.grantees;
         this.onExpression = builder.onExpression;
+        this.grantees = builder.grantees;
         this.withGrantOptions = builder.withGrantOptions;
     }
 

@@ -21,7 +21,7 @@ public abstract class AbstractPrivilegeStatements implements SqlStatementSource<
         StringBuilder sb = new StringBuilder("REVOKE ").append(privilege.getActions());
         sb.append("\n\tON ").append(privilege.getOnExpression());
         sb.append("\n\tFROM ").append(privilege.getGrantees());
-        sb.append(";");
+        //       sb.append(";");
         return new SqlStatement.Builder(sb.toString()).build();
     }
 

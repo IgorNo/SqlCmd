@@ -21,7 +21,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class AbstractRowTest {
+public abstract class AbstractRowDaoTest {
     protected static final RowDao ROW_DAO = new RowDao();
 
     protected static final AbstractRowDao<Customer> CUSTOMER_DAO = new AbstractRowDao<Customer>() {
@@ -76,7 +76,7 @@ public abstract class AbstractRowTest {
     protected static List<Product> productList;
     protected static List<Order> orderList;
 
-    protected static void setUpClass() throws DaoSystemException, SQLException {
+    public static void setUpClass() throws DaoSystemException, SQLException {
         tableDaoTest.setUp();
         server = tableDaoTest.testDb.getServer();
         ROW_DAO.setTable(AbstractTableDaoTest.users).setDataSource(tableDaoTest.dataSource);
@@ -229,76 +229,11 @@ public abstract class AbstractRowTest {
     }
 }
 
-class Customer extends AbstractRow {
-    private Customer(Builder builder) {
-        super(builder);
-    }
-
-    public int getCustomerId() {
-        return (int) getValue("id");
-    }
-
-    public int getRating() {
-        return (int) getValue("rating");
-    }
-
-    public String getName() {
-        return (String) getValue("name");
-    }
-
-    public String getPhone() {
-        return (String) getValue("phone");
-    }
-
-    public String getAddress() {
-        return (String) getValue("address");
-    }
-
-    public static class Builder extends AbstractRow.Builder<Customer> {
-
-        public Builder() {
-            super(AbstractTableDaoTest.customers);
-        }
-
-        public Builder(Customer customer) {
-            super(customer);
-        }
-
-        public Builder id(int id) {
-            setValue("id", id);
-            return this;
-        }
-
-        public Builder rating(int rating) {
-            setValue("rating", rating);
-            return this;
-        }
-
-        public Builder name(String name) {
-            setValue("name", name);
-            return this;
-        }
-
-        public Builder phone(String phone) {
-            setValue("phone", phone);
-            return this;
-        }
-
-        public Builder address(String address) {
-            setValue("address", address);
-            return this;
-        }
-
-        @Override
-        public Customer build() {
-            return new Customer(this);
-        }
-    }
-}
 
 class Product extends AbstractRow {
     public Product(Builder builder) {
         super(builder);
+        initId(new Id());
     }
 
     public int getProductId() {
@@ -351,11 +286,23 @@ class Product extends AbstractRow {
             return new Product(this);
         }
     }
+
+    public static class Id extends AbstractRow.Id {
+
+        public Id(int value) {
+            super(AbstractTableDaoTest.products, value);
+        }
+
+        public Id() {
+            super(AbstractTableDaoTest.products);
+        }
+    }
 }
 
 class Order extends AbstractRow {
     public Order(Builder builder) {
         super(builder);
+        initId(new Id());
     }
 
     public int getOrderId() {
@@ -424,6 +371,17 @@ class Order extends AbstractRow {
         @Override
         public Order build() {
             return new Order(this);
+        }
+    }
+
+    public static class Id extends AbstractRow.Id {
+
+        public Id(int value) {
+            super(AbstractTableDaoTest.orders, value);
+        }
+
+        public Id() {
+            super(AbstractTableDaoTest.orders);
         }
     }
 }

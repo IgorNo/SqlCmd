@@ -1,8 +1,6 @@
 package ua.com.nov.model.entity.metadata.grantee.privelege;
 
-import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
-import ua.com.nov.model.entity.metadata.schema.Schema;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 import ua.com.nov.model.util.CollectionUtils;
@@ -19,7 +17,7 @@ public class HyperSqlPrivilege extends Privilege {
     }
 
     public enum Action {
-        ALL("ALL PRIVILEGES", COLUMN, TABLE, SCHEMA, DATABASE, FUNCTION, PROCEDURE, SEQUENCE, DOMAIN, COLLATION,
+        ALL("ALL PRIVILEGES", COLUMN, TABLE, FUNCTION, PROCEDURE, SEQUENCE, DOMAIN, COLLATION,
                 CHARACTER_SET, ROUTINE, TYPE),
         DELETE("DELETE", TABLE),
         EXECUTE("EXECUTE", FUNCTION),
@@ -46,6 +44,7 @@ public class HyperSqlPrivilege extends Privilege {
             return levelList.contains(level);
         }
 
+
         @Override
         public String toString() {
             return action;
@@ -53,8 +52,7 @@ public class HyperSqlPrivilege extends Privilege {
     }
 
     public enum Level {
-        COLUMN, TABLE, SCHEMA, DATABASE, FUNCTION, PROCEDURE, SEQUENCE, DOMAIN, COLLATION, CHARACTER_SET,
-        ROUTINE, TYPE
+        COLUMN, TABLE, FUNCTION, PROCEDURE, SEQUENCE, DOMAIN, COLLATION, CHARACTER_SET, ROUTINE, TYPE
     }
 
     public static class Builder extends Privilege.Builder {
@@ -77,12 +75,6 @@ public class HyperSqlPrivilege extends Privilege {
             return builder;
         }
 
-        public static Builder createTablePrivileges(Schema schema, Action... actions) {
-            Builder builder = new Builder(TABLE, actions);
-            builder.onExpression("ALL TABLES IN SCHEMA" + schema.getFullName());
-            return builder;
-        }
-
         public static Builder createTablePrivileges(Table table, Action... actions) {
             Builder builder = new Builder(TABLE, actions);
             builder.onExpression(table.getFullName());
@@ -93,18 +85,6 @@ public class HyperSqlPrivilege extends Privilege {
             Builder builder = new Builder(TABLE, actions);
             StringBuilder sb = new StringBuilder();
             builder.onExpression(CollectionUtils.toString(tables));
-            return builder;
-        }
-
-        public static Builder creteSchemaPrivileges(Schema schema, Action... actions) {
-            Builder builder = new Builder(SCHEMA, actions);
-            builder.onExpression("SCHEMA " + schema.getFullName());
-            return builder;
-        }
-
-        public static Builder creteDatabasePrivileges(Database database, Action... actions) {
-            Builder builder = new Builder(DATABASE, actions);
-            builder.onExpression("DATABASE " + database.getName());
             return builder;
         }
 

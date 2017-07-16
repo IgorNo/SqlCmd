@@ -2,8 +2,10 @@ package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
+import ua.com.nov.model.entity.metadata.grantee.privelege.OnDeleteOptions;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 
 import javax.sql.DataSource;
@@ -34,9 +36,12 @@ public class PrivilegeDao {
                 .getCreateStmt(privilege));
     }
 
-    public void revoke(Privilege privilege) throws DaoSystemException {
-        executor.executeUpdateStmt(privilege.getGranteeList().get(0).getServer().getPrivelegeStmtSource()
-                .getDeleteStmt(privilege));
+    public void revoke(Privilege privilege, OnDeleteOptions option) throws DaoSystemException {
+        SqlStatement sqlStatement = privilege.getGranteeList().get(0).getServer().getPrivelegeStmtSource()
+                .getDeleteStmt(privilege);
+        if (option != null)
+            sqlStatement = new SqlStatement.Builder(sqlStatement.getSql() + " " + option).build();
+        executor.executeUpdateStmt(sqlStatement);
     }
 
     public Privilege read(AbstractMetaData metaData) throws DaoSystemException {

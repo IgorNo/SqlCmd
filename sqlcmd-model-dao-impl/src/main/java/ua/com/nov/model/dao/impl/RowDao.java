@@ -7,6 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class RowDao extends AbstractRowDao<Row> {
+
+    public RowDao() {
+    }
+
+    public RowDao(Table table) {
+        super(table);
+    }
+
     @Override
     protected AbstractRowMapper<Row, Table> getRowMapper(Table table) {
         return new AbstractRowMapper<Row, Table>(table) {

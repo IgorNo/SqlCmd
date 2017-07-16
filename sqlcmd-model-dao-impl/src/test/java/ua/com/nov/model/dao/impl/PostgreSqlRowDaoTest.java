@@ -5,13 +5,12 @@ import ua.com.nov.model.dao.exception.DaoSystemException;
 
 import java.sql.SQLException;
 
-public class HyperSqlRowTest extends AbstractRowTest {
+public class PostgreSqlRowDaoTest extends AbstractRowDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException {
-        HyperSqlTableDaoTest.setUpClass();
-        tableDaoTest = new HyperSqlTableDaoTest();
-        AbstractRowTest.setUpClass();
+        PostgreSqlTableDaoTest.setUpClass();
+        tableDaoTest = new PostgreSqlTableDaoTest();
+        AbstractRowDaoTest.setUpClass();
     }
-
 }

@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <artifactId>sqlcmd-model-plain-jdbc</artifactId>
     <packaging>jar</packaging>
-    <version>${version}</version>
+    <groupId>${myapp.groupid}</groupId>
+    <version>${myapp.version}</version>
 
     <parent>
         <artifactId>SqlCmd-parent</artifactId>
-        <groupId>ua.com.nov</groupId>
-        <version>0.1</version>
+        <groupId>${myapp.groupid}</groupId>
+        <version>${myapp.version}</version>
     </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>${myapp.groupid}</groupId>
+            <artifactId>sqlcmd-model-common</artifactId>
+            <version>${myapp.version}</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -27,11 +38,4 @@
         </plugins>
     </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>ua.com.nov</groupId>
-            <artifactId>sqlcmd-model-common</artifactId>
-            <version>${version}</version>
-        </dependency>
-    </dependencies>
 </project>

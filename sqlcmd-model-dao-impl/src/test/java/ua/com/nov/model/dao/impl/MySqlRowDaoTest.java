@@ -10,13 +10,13 @@ import java.sql.SQLException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class MySqlRowTest extends AbstractRowTest {
+public class MySqlRowDaoTest extends AbstractRowDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException {
         MySqlTableDaoTest.setUpClass();
         tableDaoTest = new MySqlTableDaoTest();
-        AbstractRowTest.setUpClass();
+        AbstractRowDaoTest.setUpClass();
     }
 
     @Override

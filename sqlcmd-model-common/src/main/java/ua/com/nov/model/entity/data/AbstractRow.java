@@ -12,9 +12,10 @@ import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 import java.util.*;
 
 public abstract class AbstractRow implements Unique<AbstractRow.Id> {
+    protected final Object[] values;
     private final Table table;
-    private final Object[] values;
     private final Map<Table, AbstractRow> foreignKeys;
+    private AbstractRow.Id id;
 
     protected AbstractRow(Builder builder) {
         table = builder.table;
@@ -46,13 +47,16 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
     }
 
     public Id getId() {
-        Id id = new Id(table);
+        return id;
+    }
+
+    protected void initId(Id id) {
         int i = 0;
         for (String s : table.getPrimaryKey().getColumnNamesList()) {
             int ordinalPosition = table.getColumn(s).getOrdinalPosition();
             id.values[i++] = values[ordinalPosition - 1];
         }
-        return id;
+        this.id = id;
     }
 
     public Column getValueColumn(int ordinalPosition) {
@@ -83,22 +87,17 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
         return result;
     }
 
-    public static class Id implements Hierarchical<Table> {
+    public abstract static class Id implements Hierarchical<Table> {
         private final Table table;
-        private Object[] values;
-
-        private Id(Table table) {
-            this.table = table;
-            this.values = new Object[table.getPrimaryKey().getNumberOfColumns()];
-        }
+        protected Object[] values;
 
         public Id(Table table, Object... values) {
             int length = table.getPrimaryKey().getNumberOfColumns();
-            if (length == values.length) {
+            if (values.length == 0 || length == values.length) {
                 this.table = table;
                 this.values = new Object[length];
-                for (int i = 0; i < length; i++) {
-                    String columnName = table.getPrimaryKey().getColumn(i).getName();
+                for (int i = 0; i < values.length; i++) {
+                    String columnName = table.getPrimaryKey().getColumn(i + 1).getName();
                     Column column = table.getColumn(columnName);
                     Class<?> columnClass = DataTypes.getClazz(column.getDataType().getJdbcDataType());
                     if (values[i].getClass() == columnClass)

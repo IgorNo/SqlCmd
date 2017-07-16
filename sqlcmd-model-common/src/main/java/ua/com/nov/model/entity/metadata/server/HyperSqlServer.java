@@ -1,10 +1,7 @@
 package ua.com.nov.model.entity.metadata.server;
 
 import org.springframework.jdbc.core.RowMapper;
-import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
-import ua.com.nov.model.dao.statement.AbstractTableMdSqlStatements;
-import ua.com.nov.model.dao.statement.OptionsSqlStmtSource;
-import ua.com.nov.model.dao.statement.SqlStatement;
+import ua.com.nov.model.dao.statement.*;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DataTypes;
@@ -138,6 +135,16 @@ public class HyperSqlServer extends Server {
                         return builder;
                     }
                 };
+            }
+        };
+    }
+
+    @Override
+    public AbstractPrivilegeStatements getPrivelegeStmtSource() {
+        return new AbstractPrivilegeStatements() {
+            @Override
+            public SqlStatement getCreateStmt(Privilege privilege) {
+                return new SqlStatement.Builder(super.getCreateStmt(privilege).getSql()).build();
             }
         };
     }

@@ -36,7 +36,7 @@ public class Schema extends AbstractMetaData<Schema.Id> {
         @Override
         public String getFullName() {
             StringBuilder sb = new StringBuilder();
-            if (catalog != null) sb.append(catalog);
+            if (catalog != null) sb.append(getCatalog());
             if (getSchema() != null) {
                 if (catalog != null) sb.append('.');
                 sb.append(getSchema());

@@ -54,17 +54,17 @@ public abstract class AbstractGranteeDaoTest {
 
     @Test
     public void grantRevokePrivilege() throws DaoSystemException {
-        PRIVILEGE_DAO.grant(columnPrivilege);
         PRIVILEGE_DAO.grant(tablePrivilege1);
+        PRIVILEGE_DAO.grant(columnPrivilege);
         PRIVILEGE_DAO.grant(tablePrivilege2);
         PRIVILEGE_DAO.grant(schemaPrivilege);
         PRIVILEGE_DAO.grant(dbPrivilege);
 
-        PRIVILEGE_DAO.revoke(columnPrivilege);
-        PRIVILEGE_DAO.revoke(tablePrivilege1);
-        PRIVILEGE_DAO.revoke(tablePrivilege2);
-        PRIVILEGE_DAO.revoke(schemaPrivilege);
-        PRIVILEGE_DAO.revoke(dbPrivilege);
+        PRIVILEGE_DAO.revoke(tablePrivilege1, null);
+        PRIVILEGE_DAO.revoke(columnPrivilege, null);
+        PRIVILEGE_DAO.revoke(tablePrivilege2, null);
+        PRIVILEGE_DAO.revoke(schemaPrivilege, null);
+        PRIVILEGE_DAO.revoke(dbPrivilege, null);
     }
 
     @Test

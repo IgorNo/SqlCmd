@@ -3,8 +3,10 @@ package ua.com.nov.model.entity.data;
 import ua.com.nov.model.entity.metadata.table.Table;
 
 public class Row extends AbstractRow {
-    private Row(Builder builder) {
+
+    public Row(Builder builder) {
         super(builder);
+        initId(new Id(getTable()));
     }
 
     public static class Builder extends AbstractRow.Builder<Row> {
@@ -31,6 +33,12 @@ public class Row extends AbstractRow {
         @Override
         public Row build() {
             return new Row(this);
+        }
+    }
+
+    public static class Id extends AbstractRow.Id {
+        public Id(Table table, Object... values) {
+            super(table, values);
         }
     }
 }
