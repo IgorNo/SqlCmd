@@ -159,5 +159,10 @@ public abstract class AbstractMetaData<I extends AbstractMetaData.Id> implements
             result = 31 * result + getFullName().hashCode();
             return result;
         }
+
+        @Override
+        public String toString() {
+            return getFullName();
+        }
     }
 }

@@ -15,7 +15,7 @@ public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E exten
 
     public String getCommentStmt(E entity) {
         if (entity.getViewName() == null) return "";
-        return String.format("\nCOMMENT ON %s %s IS '%s'",
+        return String.format("\nCOMMENT ON %s %s IS '%s';",
                 entity.getId().getMdName(), entity.getFullName(), entity.getViewName());
     }
 

@@ -1,9 +1,10 @@
 package ua.com.nov.model.dao.statement;
 
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SqlStatement {
@@ -19,8 +20,32 @@ public class SqlStatement {
         return sql;
     }
 
-    public List<SqlParameterValue> getParameters() {
+    public List<SqlParameterValue> getSqlParameterValues() {
         return Collections.unmodifiableList(parameters);
+    }
+
+    public List<SqlParameter> getSqlParameters() {
+        List<SqlParameter> result = new LinkedList<>();
+        for (SqlParameterValue parameterValue : parameters) {
+            result.add(new SqlParameter(parameterValue));
+        }
+        return Collections.unmodifiableList(parameters);
+    }
+
+    public Object[] getValues() {
+        Object[] result = new Object[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++) {
+            result[i] = parameters.get(i).getValue();
+        }
+        return result;
+    }
+
+    public int[] getValueTypes() {
+        int[] result = new int[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++) {
+            result[i] = parameters.get(i).getSqlType();
+        }
+        return result;
     }
 
     @Override
@@ -30,7 +55,7 @@ public class SqlStatement {
 
     public static class Builder {
         private final String sql;
-        private final List<SqlParameterValue> parameters = new ArrayList<>();
+        private final List<SqlParameterValue> parameters = new LinkedList<>();
 
         public Builder(String sql) {
             this.sql = sql;

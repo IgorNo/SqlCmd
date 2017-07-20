@@ -157,8 +157,10 @@ public abstract class Server  implements Unique<Server.Id> {
                 StringBuilder sb = new StringBuilder(super.getCommentStmt(table));
                 String s = "";
                 for (Column column : table.getColumns()) {
-                    sb.append(s).append(sqlStmtSource.getCommentStmt(column));
-                    s = ";";
+                    if (column.getViewName() != null) {
+                        sb.append(s).append(sqlStmtSource.getCommentStmt(column));
+                        //                      s = ";";
+                    }
                 }
                 return sb.toString();
             }

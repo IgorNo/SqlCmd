@@ -26,7 +26,7 @@ public class MySqlRowDaoTest extends AbstractRowDaoTest {
         Row user = new Row.Builder(userList.get(0)).setValue("id", 1).setValue("login_", "update").build();
         ROW_DAO.update(user);
         Row result = ROW_DAO.read(user.getId());
-        assertFalse(user.getValue("id").equals((int) result.getValue("id")));
+        assertFalse(user.getValue("id").equals(result.getValue("id")));
         assertTrue(user.getValue("login").equals(result.getValue("login")));
         assertTrue(user.getValue("password").equals(result.getValue("password")));
         assertFalse(user.getValue("login_").equals(result.getValue("login_")));

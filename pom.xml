@@ -22,6 +22,7 @@
         <module>sqlcmd-model-plain-jdbc</module>
         <module>sqlcmd-model-common</module>
         <module>sqlcmd-model-dao-impl</module>
+        <module>sqlcmd-model-spring-jdbc</module>
     </modules>
 
     <dependencyManagement>

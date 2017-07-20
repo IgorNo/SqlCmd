@@ -42,7 +42,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         charColumnOptions = new MySqlColumnOptions.Builder().charSet("ucs2").collation("ucs2_bin").binari();
         generatedColumnOptions = new MySqlColumnOptions.Builder()
                 .generationExpression("concat('login: ',login)", MySqlColumnOptions.GenerationColumnType.VIRTUAL);
-        createTestData(testDb.getName(), null, "INT", "TEMPORARY", null);
+        createTestData(testDb.getName(), null, "BIGINT", "TEMPORARY", null);
         Schema.Id schemaId = new Schema.Id(testDb.getId(), null, "tmp_schema");
         testSchema = new Schema(schemaId, null);
     }

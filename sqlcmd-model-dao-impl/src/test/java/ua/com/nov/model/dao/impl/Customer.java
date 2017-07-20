@@ -1,5 +1,6 @@
 package ua.com.nov.model.dao.impl;
 
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.entity.data.AbstractRow;
 
 public class Customer extends AbstractRow {
@@ -39,12 +40,17 @@ public class Customer extends AbstractRow {
             super(customer);
         }
 
-        public Builder id(int id) {
+        public Builder id(long id) {
             setValue("id", id);
             return this;
         }
 
-        public Builder rating(int rating) {
+        public Builder id(KeyHolder id) {
+            setId(id);
+            return this;
+        }
+
+        public Builder rating(long rating) {
             setValue("rating", rating);
             return this;
         }

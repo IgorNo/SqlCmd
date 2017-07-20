@@ -9,8 +9,8 @@ public class HyperSqlRowDaoTest extends AbstractRowDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws DaoSystemException, SQLException {
-        HyperSqlTableDaoTest.setUpClass();
         tableDaoTest = new HyperSqlTableDaoTest();
+        HyperSqlTableDaoTest.setUpClass();
         AbstractRowDaoTest.setUpClass();
     }
 

@@ -19,7 +19,7 @@ public abstract class AbstractDatabaseMdSqlStatements
 
     protected String getCommentStmt(E entity) {
         if (entity.getViewName() == null) return "";
-        return String.format("\nCOMMENT ON %s %s IS '%s'",
+        return String.format("\nCOMMENT ON %s %s IS '%s';",
                 entity.getId().getMdName(), entity.getId().getFullName(), entity.getViewName());
     }
 

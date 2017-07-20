@@ -1,48 +1,51 @@
 package ua.com.nov.model.dao.impl;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 public class DDLSqlExecutor extends SqlExecutor {
+    private JdbcTemplate jdbcTemplate;
+
+    public DDLSqlExecutor() {
+    }
 
     public DDLSqlExecutor(DataSource dataSource) {
         super(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public void setDataSource(DataSource dataSource) {
+        super.setDataSource(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
     public void executeUpdateStmt(SqlStatement sqlStmt) throws DaoSystemException {
         String[] sqlArray = sqlStmt.getSql().split(";");
-        try (Statement stmt = getDataSource().getConnection().createStatement()) {
+        try {
             for (String sql : sqlArray) {
                 if (!sql.isEmpty())
-                    stmt.executeUpdate(sql);
+                    jdbcTemplate.update(sql);
             }
-        } catch (SQLException e) {
-           throw new DaoSystemException("DDL DAO update exception.\n", e);
+        } catch (DataAccessException e) {
+            throw new DaoSystemException("DDL DAO update exception.\n", e);
         }
     }
 
     @Override
     public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException {
-        List<T> result;
-        try (Statement stmt = getDataSource().getConnection().createStatement();
-             ResultSet rs = stmt.executeQuery(sqlStmt.getSql())) {
-
-            result = new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
-        } catch (SQLException e) {
+        try {
+            return jdbcTemplate.query(sqlStmt.getSql(), mapper);
+        } catch (DataAccessException e) {
             throw new DaoSystemException("DDL DAO query exception.\n", e);
         }
-        return result;
     }
-
-
 }

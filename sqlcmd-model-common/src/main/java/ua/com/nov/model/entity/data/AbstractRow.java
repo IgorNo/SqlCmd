@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.data;
 
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Unique;
@@ -162,6 +163,11 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
             result = 31 * result + Arrays.hashCode(values);
             return result;
         }
+
+        @Override
+        public String toString() {
+            return Arrays.toString(values);
+        }
     }
 
     public abstract static class Builder<T extends AbstractRow> implements Buildable<T> {
@@ -188,6 +194,22 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
                     this.foreignKeys.put(entry.getKey(), entry.getValue());
                 }
             }
+        }
+
+        public Builder setId(KeyHolder id) {
+            if (id.getKeys().size() == 1) {
+                for (Column column : table.getColumns()) {
+                    if (column.isAutoIncrement()) {
+                        setValue(column.getName().toLowerCase(), id.getKey());
+                        break;
+                    }
+                }
+            } else {
+                for (Map.Entry<String, Object> entry : id.getKeys().entrySet()) {
+                    setValue(entry.getKey(), entry.getValue());
+                }
+            }
+            return this;
         }
 
         public Builder setValue(String column, Object value) {

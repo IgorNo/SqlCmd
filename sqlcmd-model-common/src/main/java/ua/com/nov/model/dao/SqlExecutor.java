@@ -3,6 +3,7 @@ package ua.com.nov.model.dao;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 
@@ -12,6 +13,9 @@ import java.util.List;
 public abstract class SqlExecutor {
     private DataSource dataSource;
 
+    public SqlExecutor() {
+    }
+
     public SqlExecutor(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -20,17 +24,16 @@ public abstract class SqlExecutor {
         return dataSource;
     }
 
-    public SqlExecutor setDataSource(DataSource dataSource) {
+    public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-        return this;
     }
 
     public abstract void executeUpdateStmt(SqlStatement sqlStmt) throws DaoSystemException;
 
     public abstract <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException;
 
-    public long executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
-        return -1;
+    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
+        return null;
     }
 
     public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, RowMapper<T> rowMapper) throws DaoSystemException {

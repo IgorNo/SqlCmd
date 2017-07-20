@@ -4,11 +4,12 @@ import java.sql.Connection;
 
 public class JdbcUtils {
 
-    public static void closeQuietly(Connection conn) {
-        if (conn != null) {
+    public static void closeQuietly(AutoCloseable resource) {
+        if (resource != null) {
             try {
-                conn.close();
+                resource.close();
             } catch (Exception e) {/*NOP*/}
+
         }
     }
 

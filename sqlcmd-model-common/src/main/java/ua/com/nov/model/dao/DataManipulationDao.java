@@ -1,5 +1,6 @@
 package ua.com.nov.model.dao;
 
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 public interface DataManipulationDao<E> {
 
     // Insert value into table
-    long insert(E entity) throws DaoSystemException;
+    KeyHolder insert(E entity) throws DaoSystemException;
 
     //Read N values from container starting with nStart position
     List<E> readN(long nStart, int number) throws DaoSystemException;

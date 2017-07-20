@@ -1,11 +1,15 @@
 package ua.com.nov.model.dao.impl;
 
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.SqlExecutor;
 import ua.com.nov.model.dao.exception.DaoSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
+import ua.com.nov.model.util.JdbcUtils;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -13,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 
 public class DMLSqlExecutor extends SqlExecutor {
 
@@ -21,7 +26,7 @@ public class DMLSqlExecutor extends SqlExecutor {
     }
 
     private static void setParameters(SqlStatement sqlStmt, PreparedStatement stmt) throws SQLException {
-        List<SqlParameterValue> parameters = sqlStmt.getParameters();
+        List<SqlParameterValue> parameters = sqlStmt.getSqlParameterValues();
         for (int i = 1; i <= parameters.size(); i++) {
             SqlParameterValue parameter = parameters.get(i - 1);
             if (parameter != null) {
@@ -43,32 +48,44 @@ public class DMLSqlExecutor extends SqlExecutor {
         }
     }
 
-    public long executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
+    @Override
+    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
+        ResultSet keys = null;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         try (PreparedStatement stmt = getDataSource().getConnection()
                 .prepareStatement(sqlStmt.getSql(), Statement.RETURN_GENERATED_KEYS)) {
 
             setParameters(sqlStmt, stmt);
             stmt.executeUpdate();
 
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) return rs.getLong(1);
-            return -1;
+            keys = stmt.getGeneratedKeys();
+            if (keys != null) {
+                RowMapper<Map<String, Object>> columnMapper = new ColumnMapRowMapper();
+                RowMapperResultSetExtractor<Map<String, Object>> rse =
+                        new RowMapperResultSetExtractor<Map<String, Object>>(columnMapper, 1);
+                List<Map<String, Object>> generatedKeys = keyHolder.getKeyList();
+                generatedKeys.addAll(rse.extractData(keys));
+            }
         } catch (SQLException e) {
             throw new DaoSystemException("DML DAO insert exception.\n", e);
+        } finally {
+            JdbcUtils.closeQuietly(keys);
         }
+        return keyHolder;
     }
 
     @Override
     public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException {
-        List<T> result;
+        ResultSet rs = null;
         try (PreparedStatement stmt = getDataSource().getConnection().prepareStatement(sqlStmt.getSql())) {
             setParameters(sqlStmt, stmt);
-            ResultSet rs = stmt.executeQuery();
-            result = new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
+            rs = stmt.executeQuery();
+            return new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
         } catch (SQLException e) {
             throw new DaoSystemException("DDL DAO query exception.\n", e);
+        } finally {
+            JdbcUtils.closeQuietly(rs);
         }
-        return result;
     }
 
 }

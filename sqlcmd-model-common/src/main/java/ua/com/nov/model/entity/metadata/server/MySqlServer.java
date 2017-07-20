@@ -169,7 +169,7 @@ public final class MySqlServer extends Server {
             @Override
             protected String getCommentStmt(Table table) {
                 if (table.getViewName() == null) return "";
-                return String.format("\nALTER TABLE %s COMMENT '%s'", table.getId().getFullName(), table.getViewName());
+                return String.format("\nALTER TABLE %s COMMENT '%s';", table.getId().getFullName(), table.getViewName());
             }
         };
     }
@@ -252,14 +252,14 @@ public final class MySqlServer extends Server {
             public SqlStatement getRenameStmt(Column col, String newName) {
                 Column.Builder builder = new Column.Builder(col);
                 builder.setName(newName);
-                return new SqlStatement.Builder(String.format("ALTER TABLE %s CHANGE COLUMN %s %s",
+                return new SqlStatement.Builder(String.format("ALTER TABLE %s CHANGE COLUMN %s %s;",
                         col.getTableId().getFullName(), col.getName(), builder.build().getCreateStmtDefinition(null)))
                         .build();
             }
 
             @Override
             public SqlStatement getUpdateStmt(Column col) {
-                return new SqlStatement.Builder(String.format("ALTER TABLE %s MODIFY COLUMN %s",
+                return new SqlStatement.Builder(String.format("ALTER TABLE %s MODIFY COLUMN %s;",
                         col.getTableId().getFullName(), col.getCreateStmtDefinition(null)))
                         .build();
             }

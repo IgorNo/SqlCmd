@@ -4,8 +4,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.server.Server;
@@ -37,7 +38,6 @@ public abstract class AbstractRowDaoTest {
             };
         }
     };
-
 
     protected static final AbstractRowDao<Product> PRODUCT_DAO = new AbstractRowDao<Product>() {
         @Override
@@ -97,55 +97,56 @@ public abstract class AbstractRowDaoTest {
         userList = new ArrayList<>();
         Row.Builder user = new Row.Builder(AbstractTableDaoTest.users).setValue("login", "User1")
                 .setValue("password", "1111");
-        userList.add(user.setValue("id", (int) ROW_DAO.insert(user.build())).build());
+        userList.add(user.id(ROW_DAO.insert(user.build())).build());
 
         customerList = new ArrayList<>();
         Customer.Builder customer = new Customer.Builder()
                 .name("ООО 'Явир'").phone("313-48-48").address("ул.Покровская, д.7").rating(1000);
-        customerList.add(customer.id((int) CUSTOMER_DAO.insert(customer.build())).build());
+        customerList.add(customer.id(CUSTOMER_DAO.insert(customer.build())).build());
         customer = new Customer.Builder()
                 .name("ООО 'Кускус'").phone("112-14-15").address("ул.Соборная, д.8").rating(1500);
-        customerList.add(customer.id((int) CUSTOMER_DAO.insert(customer.build())).build());
+        customerList.add(customer.id(CUSTOMER_DAO.insert(customer.build())).build());
         customer = new Customer.Builder()
                 .name("Крылов C.C.").phone("444-78-90").address("Зелёный пр-т, д.22").rating(1200);
-        customerList.add(customer.id((int) CUSTOMER_DAO.insert(customer.build())).build());
+        customerList.add(customer.id(CUSTOMER_DAO.insert(customer.build())).build());
 
         productList = new ArrayList<>();
         Product.Builder product = new Product.Builder().description("Обогреватель ВГД 121R")
                 .details("Инфракрасный обогреватель. 3 режима нагрева:\n" +
                         "400 Вт, 800 Вт, 1200 Вт").price(BigDecimal.valueOf(1145));
-        productList.add(product.id((int) PRODUCT_DAO.insert(product.build())).build());
+        productList.add(product.id(PRODUCT_DAO.insert(product.build())).build());
         product = new Product.Builder().description("Гриль СТ-14")
                 .details("Мощность 1440 Вт. Быстрый нагрев. Термостат.\n" +
                         "Цветовой индикатор работы").price(BigDecimal.valueOf(2115));
-        productList.add(product.id((int) PRODUCT_DAO.insert(product.build())).build());
+        productList.add(product.id(PRODUCT_DAO.insert(product.build())).build());
         product = new Product.Builder().description("Кофеварка ЕКЛ-1032")
                 .details("Цвет: черный. Мощность: 450 Вт.\n" +
                         "Вместительность: 2 чашки").price(BigDecimal.valueOf(710));
-        productList.add(product.id((int) PRODUCT_DAO.insert(product.build())).build());
+        productList.add(product.id(PRODUCT_DAO.insert(product.build())).build());
         product = new Product.Builder().description("Чайник МН")
                 .details("Цвет: белый. Мощность: 2200 Вт. Объем: 2 л").price(BigDecimal.valueOf(925));
-        productList.add(product.id((int) PRODUCT_DAO.insert(product.build())).build());
+        productList.add(product.id(PRODUCT_DAO.insert(product.build())).build());
         product = new Product.Builder().description("Утюг c паром АБ 200")
                 .details("Цвет: фиолетовый. Мощность: 1400 вт").price(BigDecimal.valueOf(518));
-        productList.add(product.id((int) PRODUCT_DAO.insert(product.build())).build());
+        productList.add(product.id(PRODUCT_DAO.insert(product.build())).build());
 
         orderList = new ArrayList<>();
         Order.Builder order = new Order.Builder().date(LocalDate.of(2017, 05, 10))
-                .qty(8).product(productList.get(0)).amount(BigDecimal.valueOf(450000, 2)).customer(customerList.get(0));
-        orderList.add(order.id((int) ORDER_DAO.insert(order.build())).build());
+                .qty(8).product(productList.get(0)).amount(BigDecimal.valueOf(450000, 2))
+                .customer(customerList.get(0));
+        orderList.add(order.id(ORDER_DAO.insert(order.build())).build());
         order = new Order.Builder().date(LocalDate.of(2017, 05, 10))
                 .qty(4).product(productList.get(1)).amount(BigDecimal.valueOf(750000, 2)).customer(customerList.get(0));
-        orderList.add(order.id((int) ORDER_DAO.insert(order.build())).build());
+        orderList.add(order.id(ORDER_DAO.insert(order.build())).build());
         order = new Order.Builder().date(LocalDate.now())
                 .qty(14).product(productList.get(2)).amount(BigDecimal.valueOf(22000, 2)).customer(customerList.get(1));
-        orderList.add(order.id((int) ORDER_DAO.insert(order.build())).build());
+        orderList.add(order.id(ORDER_DAO.insert(order.build())).build());
         order = new Order.Builder().date(LocalDate.now())
                 .qty(1).product(productList.get(3)).amount(BigDecimal.valueOf(925, 2)).customer(customerList.get(1));
-        orderList.add(order.id((int) ORDER_DAO.insert(order.build())).build());
+        orderList.add(order.id(ORDER_DAO.insert(order.build())).build());
         order = new Order.Builder().date(LocalDate.now())
                 .qty(12).product(productList.get(4)).amount(BigDecimal.valueOf(5750, 2)).customer(customerList.get(2));
-        orderList.add(order.id((int) ORDER_DAO.insert(order.build())).build());
+        orderList.add(order.id(ORDER_DAO.insert(order.build())).build());
 
     }
 
@@ -153,7 +154,7 @@ public abstract class AbstractRowDaoTest {
     public void readRow() throws DaoSystemException {
         for (Row row : userList) {
             Row result = ROW_DAO.read(row.getId());
-            assertTrue(row.getValue("id").equals((int) result.getValue("id")));
+            assertTrue(row.getValue("id").equals(result.getValue("id")));
             assertTrue(row.getValue("login").equals(result.getValue("login")));
             assertTrue(row.getValue("password").equals(result.getValue("password")));
         }
@@ -200,7 +201,7 @@ public abstract class AbstractRowDaoTest {
         assertTrue(products.contains(productList.get(2)));
     }
 
-    @Test(expected = EmptyResultDataAccessException.class)
+    @Test(expected = NoSuchEntityException.class)
     public void deleteRow() throws DaoSystemException {
         ORDER_DAO.delete(orderList.get(0));
         ORDER_DAO.read(orderList.get(0).getId());
@@ -261,8 +262,13 @@ class Product extends AbstractRow {
             super(product);
         }
 
-        public Builder id(int id) {
+        public Builder id(long id) {
             setValue("id", id);
+            return this;
+        }
+
+        public Builder id(KeyHolder id) {
+            setId(id);
             return this;
         }
 
@@ -338,8 +344,13 @@ class Order extends AbstractRow {
             super(order);
         }
 
-        public Builder id(int id) {
+        public Builder id(long id) {
             setValue("id", id);
+            return this;
+        }
+
+        public Builder id(KeyHolder id) {
+            setId(id);
             return this;
         }
 
@@ -348,7 +359,7 @@ class Order extends AbstractRow {
             return this;
         }
 
-        public Builder qty(int qty) {
+        public Builder qty(long qty) {
             setValue("qty", qty);
             return this;
         }

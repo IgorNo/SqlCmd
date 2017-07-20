@@ -1,5 +1,6 @@
 package ua.com.nov.model.dao.impl;
 
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.DataManipulationDao;
 import ua.com.nov.model.dao.exception.DaoSystemException;
@@ -39,15 +40,15 @@ public abstract class AbstractRowDao<R extends AbstractRow>
     }
 
     @Override
-    public long insert(R value) throws DaoSystemException {
+    public KeyHolder insert(R value) throws DaoSystemException {
         for (Column column : value.getTable().getColumns()) {
             if (column.isAutoIncrement()) {
                 SqlStatement createStmt = getSqlStmtSource(value.getTable().getServer()).getCreateStmt(value);
-                return ((DMLSqlExecutor) getExecutor()).executeInsertStmt(createStmt);
+                return getExecutor().executeInsertStmt(createStmt);
             }
         }
         super.create(value);
-        return -1;
+        return null;
     }
 
     @Override

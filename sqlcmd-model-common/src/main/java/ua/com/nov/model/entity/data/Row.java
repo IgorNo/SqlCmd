@@ -1,5 +1,6 @@
 package ua.com.nov.model.entity.data;
 
+import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.entity.metadata.table.Table;
 
 public class Row extends AbstractRow {
@@ -16,6 +17,11 @@ public class Row extends AbstractRow {
 
         public Builder(Row row) {
             super(row);
+        }
+
+        public Builder id(KeyHolder id) {
+            super.setId(id);
+            return this;
         }
 
         @Override

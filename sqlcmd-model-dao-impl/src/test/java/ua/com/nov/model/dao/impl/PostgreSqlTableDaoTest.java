@@ -34,7 +34,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
         numberColumnOptions = new PostgresSqlColumnOptions.Builder().autoIncrement();
         charColumnOptions = null;
         generatedColumnOptions = null;
-        createTestData(null, "public", "serial", null, null);
+        createTestData(null, "public", "bigserial", null, null);
     }
 
     @AfterClass

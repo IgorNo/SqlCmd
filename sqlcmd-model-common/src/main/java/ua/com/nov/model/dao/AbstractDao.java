@@ -1,7 +1,9 @@
 package ua.com.nov.model.dao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.dao.statement.SqlStatementSource;
 import ua.com.nov.model.entity.Hierarchical;
@@ -61,8 +63,13 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     @Override
     public E read(I eId) throws DaoSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(eId.getServer()).getReadOneStmt(eId);
-        E value = executor.executeQueryForObjectStmt(sqlStmt, getRowMapper(eId.getContainerId()));
-        return value;
+        try {
+            E value = executor.executeQueryForObjectStmt(sqlStmt, getRowMapper(eId.getContainerId()));
+            return value;
+        } catch (EmptyResultDataAccessException e) {
+            throw new NoSuchEntityException(String.format("Row with id '%s' doesn't exist in '%s'.",
+                    eId, eId.getContainerId()), e);
+        }
     }
 
     protected List<E> readAll(C cId) throws DaoSystemException {

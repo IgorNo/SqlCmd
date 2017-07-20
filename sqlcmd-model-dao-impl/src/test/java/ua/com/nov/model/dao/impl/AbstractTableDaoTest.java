@@ -66,7 +66,7 @@ public abstract class AbstractTableDaoTest {
         testSchema = new Schema(schemaId, options);
 
         DbDataType serial = testDb.getServer().getDataType(aiTypeName);
-        integer = testDb.getServer().getMostApproximateDataTypes(DataTypes.INTEGER);
+        integer = testDb.getServer().getMostApproximateDataTypes(DataTypes.BIGINT);
         character = testDb.getServer().getMostApproximateDataTypes(DataTypes.CHAR);
         DbDataType varchar = testDb.getServer().getMostApproximateDataTypes(DataTypes.VARCHAR);
         DbDataType text = testDb.getServer().getMostApproximateDataTypes(DataTypes.LONGVARCHAR);
