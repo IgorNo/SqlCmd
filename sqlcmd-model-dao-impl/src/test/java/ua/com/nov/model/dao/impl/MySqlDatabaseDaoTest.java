@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.MySqlDbOptions;
@@ -45,21 +45,21 @@ public class MySqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Test
-    public void testRead() throws DaoSystemException {
+    public void testRead() throws MappingSystemException {
         MySqlDbOptions options = (MySqlDbOptions) readDatabase().getOptions();
         assertTrue(OPTIONS.getCollate().equalsIgnoreCase(options.getCollate()));
         assertTrue(OPTIONS.getCharacterSet().equalsIgnoreCase(options.getCharacterSet()));
     }
 
     @Test
-    public void testReadAll() throws DaoSystemException {
+    public void testReadAll() throws MappingSystemException {
         List<Database> databases = DAO.readAll(server.getId());
         assertTrue(databases.size() > 1);
         assertTrue(databases.contains(TEST_DATABASE));
     }
 
     @Test
-    public void testUpdateDatabase() throws DaoSystemException {
+    public void testUpdateDatabase() throws MappingSystemException {
         Database updateDb = new Database(server, TEST_DATABASE.getName(),
                 new MySqlDbOptions.Builder().characterSet("cp1251").collate("cp1251_general_ci").build());
         DAO.update(updateDb);

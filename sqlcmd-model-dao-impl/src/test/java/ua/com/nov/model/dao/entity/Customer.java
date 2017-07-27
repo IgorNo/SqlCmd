@@ -1,6 +1,7 @@
-package ua.com.nov.model.dao.impl;
+package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
+import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
 
 public class Customer extends AbstractRow {
@@ -33,7 +34,7 @@ public class Customer extends AbstractRow {
     public static class Builder extends AbstractRow.Builder<Customer> {
 
         public Builder() {
-            super(AbstractTableDaoTest.customers);
+            super(AbstractRowDaoTest.customers);
         }
 
         public Builder(Customer customer) {
@@ -79,11 +80,12 @@ public class Customer extends AbstractRow {
     public static class Id extends AbstractRow.Id {
 
         public Id(int value) {
-            super(AbstractTableDaoTest.customers, value);
+            super(AbstractRowDaoTest.customers, value);
         }
 
         public Id() {
-            super(AbstractTableDaoTest.customers);
+            super(AbstractRowDaoTest.customers);
         }
+
     }
 }

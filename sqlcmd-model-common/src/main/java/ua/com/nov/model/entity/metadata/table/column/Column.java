@@ -86,6 +86,10 @@ public class Column extends TableMd<Column.Id> {
         return dataType;
     }
 
+    public int getSqlTye() {
+        return dataType.getSqlType();
+    }
+
     public String getDefaultValue() {
         return options == null ? null : options.getDefaultValue();
     }

@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao.statement;
 
-import ua.com.nov.model.dao.fetch.FetchParametersSource;
+import ua.com.nov.model.dao.fetch.FetchParameter;
 
 public interface DataManipulationSqlStmtSource<I,E,C> extends SqlStatementSource<I,E,C> {
 
@@ -10,5 +10,5 @@ public interface DataManipulationSqlStmtSource<I,E,C> extends SqlStatementSource
 
     SqlStatement getReadNStmt(C cId, long nStart, int number);
 
-    SqlStatement getReadFetchStmt(FetchParametersSource<C> parameters);
+    SqlStatement getReadFetchStmt(C cId, FetchParameter... parameters);
 }

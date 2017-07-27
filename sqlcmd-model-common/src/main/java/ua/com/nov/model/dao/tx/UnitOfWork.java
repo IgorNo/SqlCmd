@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.tx;
 
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 
 public interface UnitOfWork<T> {
-    T doInTx() throws DaoSystemException;
+    T doInTx() throws MappingSystemException;
 }

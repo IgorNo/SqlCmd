@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.entity.metadata.grantee.privelege.HyperSqlPrivilege;
 import ua.com.nov.model.entity.metadata.grantee.privelege.OnDeleteOptions;
 import ua.com.nov.model.entity.metadata.grantee.user.HyperSqlUserOptions;
@@ -15,7 +15,7 @@ import static ua.com.nov.model.entity.metadata.grantee.privelege.HyperSqlPrivile
 public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @BeforeClass
-    public static void setUpClass() throws DaoSystemException, SQLException {
+    public static void setUpClass() throws MappingSystemException, SQLException {
         HyperSqlTableDaoTest.setUpClass();
         tableDaoTest = new HyperSqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();
@@ -28,7 +28,7 @@ public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @Override
     @Test
-    public void grantRevokePrivilege() throws DaoSystemException {
+    public void grantRevokePrivilege() throws MappingSystemException {
         PRIVILEGE_DAO.grant(tablePrivilege1);
         PRIVILEGE_DAO.revoke(tablePrivilege1, OnDeleteOptions.RESTRICT);
     }

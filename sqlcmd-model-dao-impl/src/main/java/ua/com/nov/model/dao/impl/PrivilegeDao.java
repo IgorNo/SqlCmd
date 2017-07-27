@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
@@ -31,12 +31,12 @@ public class PrivilegeDao {
         return this;
     }
 
-    public void grant(Privilege privilege) throws DaoSystemException {
+    public void grant(Privilege privilege) throws MappingSystemException {
         executor.executeUpdateStmt(privilege.getGranteeList().get(0).getServer().getPrivelegeStmtSource()
                 .getCreateStmt(privilege));
     }
 
-    public void revoke(Privilege privilege, OnDeleteOptions option) throws DaoSystemException {
+    public void revoke(Privilege privilege, OnDeleteOptions option) throws MappingSystemException {
         SqlStatement sqlStatement = privilege.getGranteeList().get(0).getServer().getPrivelegeStmtSource()
                 .getDeleteStmt(privilege);
         if (option != null)
@@ -44,11 +44,11 @@ public class PrivilegeDao {
         executor.executeUpdateStmt(sqlStatement);
     }
 
-    public Privilege read(AbstractMetaData metaData) throws DaoSystemException {
+    public Privilege read(AbstractMetaData metaData) throws MappingSystemException {
         throw new UnsupportedOperationException();
     }
 
-    public List<Privilege> readAll(Grantee grantee) throws DaoSystemException {
+    public List<Privilege> readAll(Grantee grantee) throws MappingSystemException {
         throw new UnsupportedOperationException();
     }
 }

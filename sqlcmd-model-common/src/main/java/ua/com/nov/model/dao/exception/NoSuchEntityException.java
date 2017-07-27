@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao.exception;
 
-public class NoSuchEntityException extends DaoBusinessLogicException {
+public class NoSuchEntityException extends MappingBusinessLogicException {
     public NoSuchEntityException(String message) {
         super(message);
     }

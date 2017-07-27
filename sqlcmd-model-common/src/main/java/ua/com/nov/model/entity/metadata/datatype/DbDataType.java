@@ -12,7 +12,7 @@ public class DbDataType {
     public static final int TYPE_SEARCHABLE = 3;     // Supported for all WHERE ..
 
     private final String typeName;
-    private final int jdbcDataType; // SQL data type from java.sql.Types
+    private final int sqlType; // SQL data type from java.sql.Types
     private final int precision;    // maximum precision
     private final String literalPrefix;   // prefix used to quote a literal (may be 'null')
     private final String literalSuffix;   // suffix used to quote a literal (may be 'null')
@@ -40,7 +40,7 @@ public class DbDataType {
 
     private DbDataType(Builder builder) {
         this.typeName = builder.typeName;
-        this.jdbcDataType = builder.dataType;
+        this.sqlType = builder.sqlType;
         this.precision = builder.precision;
         this.literalPrefix = builder.literalPrefix;
         this.literalSuffix = builder.literalSuffix;
@@ -61,8 +61,8 @@ public class DbDataType {
         return typeName;
     }
 
-    public int getJdbcDataType() {
-        return jdbcDataType;
+    public int getSqlType() {
+        return sqlType;
     }
 
     public int getPrecision() {
@@ -138,7 +138,7 @@ public class DbDataType {
 
     public static class Builder {
         private final String typeName;
-        private final int dataType;
+        private final int sqlType;
 
         private int precision = 0;
         private String literalPrefix = null;
@@ -155,9 +155,9 @@ public class DbDataType {
         private int maximumScale = 0;
         private int numPrecRadix = 0;
 
-        public Builder(String typeName, int dataType) {
+        public Builder(String typeName, int sqlType) {
             this.typeName = typeName;
-            this.dataType = dataType;
+            this.sqlType = sqlType;
         }
 
         public Builder precision(int precision) {

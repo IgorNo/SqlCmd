@@ -1,14 +1,14 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 
 import java.sql.SQLException;
 
 public class HyperSqlRowDaoTest extends AbstractRowDaoTest {
 
     @BeforeClass
-    public static void setUpClass() throws DaoSystemException, SQLException {
+    public static void setUpClass() throws MappingSystemException, SQLException {
         tableDaoTest = new HyperSqlTableDaoTest();
         HyperSqlTableDaoTest.setUpClass();
         AbstractRowDaoTest.setUpClass();

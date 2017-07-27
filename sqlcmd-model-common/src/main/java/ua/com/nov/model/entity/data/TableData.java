@@ -2,14 +2,19 @@ package ua.com.nov.model.entity.data;
 
 import ua.com.nov.model.entity.metadata.table.Table;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class TableData<E extends AbstractRow> {
-    private final Table table;
-    private List<E> rows = new ArrayList<>();   // table data
+public abstract class TableData<R extends AbstractRow> {
 
-    public TableData(Table table) {
+    private Table table;
+    private Map<AbstractRow.Id, R> rows = new ConcurrentHashMap<>();   // table data
+
+    public TableData() {
+    }
+
+    protected TableData table(Table table) {
         this.table = table;
+        return this;
     }
 }

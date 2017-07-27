@@ -4,7 +4,7 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 
 import javax.sql.DataSource;
@@ -28,19 +28,19 @@ public abstract class SqlExecutor {
         this.dataSource = dataSource;
     }
 
-    public abstract void executeUpdateStmt(SqlStatement sqlStmt) throws DaoSystemException;
+    public abstract void executeUpdateStmt(SqlStatement sqlStmt) throws MappingSystemException;
 
-    public abstract <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DaoSystemException;
+    public abstract <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws MappingSystemException;
 
-    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws DaoSystemException {
+    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws MappingSystemException {
         return null;
     }
 
-    public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, RowMapper<T> rowMapper) throws DaoSystemException {
+    public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, RowMapper<T> rowMapper) throws MappingSystemException {
         return DataAccessUtils.requiredSingleResult(executeQueryStmt(sqlStmt, rowMapper));
     }
 
-    public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, Class<T> requiredType) throws DaoSystemException {
+    public <T> T executeQueryForObjectStmt(SqlStatement sqlStmt, Class<T> requiredType) throws MappingSystemException {
         return executeQueryForObjectStmt(sqlStmt, new SingleColumnRowMapper<T>(requiredType));
     }
 

@@ -2,7 +2,7 @@ package ua.com.nov.model.dao;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.dao.statement.SqlStatementSource;
@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>, C extends Hierarchical>
-        implements Dao<I, E> {
+        implements Dao<I, E, C> {
 
     private SqlExecutor executor;
 
@@ -42,26 +42,26 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     }
 
     @Override
-    public void create(E value) throws DaoSystemException {
+    public void create(E value) throws MappingSystemException {
         executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getCreateStmt(value));
     }
 
     protected abstract SqlStatementSource<I, E, C> getSqlStmtSource(Server db);
 
     @Override
-    public void update(E value) throws DaoSystemException {
+    public void update(E value) throws MappingSystemException {
         executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getUpdateStmt(value));
     }
 
     @Override
-    public void delete(E entity) throws DaoSystemException {
+    public void delete(E entity) throws MappingSystemException {
         executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getDeleteStmt(entity));
     }
 
     protected abstract AbstractRowMapper<E, C> getRowMapper(C id);
 
     @Override
-    public E read(I eId) throws DaoSystemException {
+    public E read(I eId) throws MappingSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(eId.getServer()).getReadOneStmt(eId);
         try {
             E value = executor.executeQueryForObjectStmt(sqlStmt, getRowMapper(eId.getContainerId()));
@@ -72,7 +72,8 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
         }
     }
 
-    protected List<E> readAll(C cId) throws DaoSystemException {
+    @Override
+    public List<E> readAll(C cId) throws MappingSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(cId.getServer()).getReadAllStmt(cId);
         return executor.executeQueryStmt(sqlStmt, getRowMapper(cId));
     }

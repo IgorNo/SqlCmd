@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.entity.metadata.database.Database;
 
 import java.sql.Connection;
@@ -18,7 +18,7 @@ public abstract class AbstractDatabaseDaoTest {
     public abstract Database getTestDatabase();
 
     @Before
-    public void setUp() throws SQLException, DaoSystemException {
+    public void setUp() throws SQLException, MappingSystemException {
         tearDown();
         DAO.create(getTestDatabase());
     }
@@ -34,14 +34,14 @@ public abstract class AbstractDatabaseDaoTest {
 
     protected abstract String getUserName();
 
-    public Database readDatabase() throws DaoSystemException {
+    public Database readDatabase() throws MappingSystemException {
         Database db = DAO.read(getTestDatabase().getId());
         assertTrue(getTestDatabase().equals(db));
         return db;
     }
 
     @Test(expected = SQLException.class)
-    public void testDeleteDataBase() throws SQLException, DaoSystemException {
+    public void testDeleteDataBase() throws SQLException, MappingSystemException {
         DAO.delete(getTestDatabase());
         Connection conn = getTestDatabase().getConnection(getUserName(), getPassword());
         assertTrue(false);
@@ -49,7 +49,7 @@ public abstract class AbstractDatabaseDaoTest {
     }
 
     @After
-    public void tearDown() throws DaoSystemException {
+    public void tearDown() throws MappingSystemException {
         DAO.deleteIfExist(getTestDatabase());
     }
 

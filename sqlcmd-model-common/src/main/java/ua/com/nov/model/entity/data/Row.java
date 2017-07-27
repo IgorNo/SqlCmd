@@ -15,7 +15,7 @@ public class Row extends AbstractRow {
             super(table);
         }
 
-        public Builder(Row row) {
+        public Builder(AbstractRow row) {
             super(row);
         }
 
@@ -43,8 +43,10 @@ public class Row extends AbstractRow {
     }
 
     public static class Id extends AbstractRow.Id {
+
         public Id(Table table, Object... values) {
             super(table, values);
         }
+
     }
 }

@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.statement;
 
 import org.springframework.jdbc.core.SqlParameterValue;
-import ua.com.nov.model.dao.fetch.FetchParametersSource;
+import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
@@ -142,7 +142,7 @@ public abstract class AbstractDataStmtSource<E extends AbstractRow> implements D
     }
 
     @Override
-    public SqlStatement getReadFetchStmt(FetchParametersSource<Table> parameters) {
+    public SqlStatement getReadFetchStmt(Table cId, FetchParameter[] parameters) {
         return null;
     }
 

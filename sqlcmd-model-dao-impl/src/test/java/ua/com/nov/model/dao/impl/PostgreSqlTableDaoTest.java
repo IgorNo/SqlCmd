@@ -2,8 +2,8 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.table.PostgreSqlTableOptions;
@@ -22,7 +22,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
 
 
     @BeforeClass
-    public static void setUpClass() throws SQLException, DaoSystemException, DaoBusinessLogicException {
+    public static void setUpClass() throws SQLException, MappingSystemException, MappingBusinessLogicException {
         PostgreSqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
@@ -38,7 +38,7 @@ public class PostgreSqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
+    public static void tearDownClass() throws SQLException, MappingSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }

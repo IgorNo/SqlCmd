@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.database.Database;
@@ -29,7 +29,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
             .defaultCharset("cp1251").collate("cp1251_ukrainian_ci").rowFormat("FIXED").build();
 
     @BeforeClass
-    public static void setUpClass() throws SQLException, DaoSystemException, DaoBusinessLogicException {
+    public static void setUpClass() throws SQLException, MappingSystemException, MappingBusinessLogicException {
         MySqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
@@ -48,7 +48,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
+    public static void tearDownClass() throws SQLException, MappingSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }
@@ -65,7 +65,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
 
     @Test
     @Override
-    public void testReadDeleteAddPrimaryKey() throws DaoSystemException {
+    public void testReadDeleteAddPrimaryKey() throws MappingSystemException {
         Table testTable = TABLE_DAO.read(users.getId());
         TableMd.Id mdId = testTable.getPrimaryKey().getId();
         PrimaryKey md = PRIMARY_KEY_DAO.read(mdId);
@@ -74,7 +74,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
         try {
             PRIMARY_KEY_DAO.read(mdId);
             assertTrue(false);
-        } catch (DaoBusinessLogicException e) {/*NOP*/}
+        } catch (MappingBusinessLogicException e) {/*NOP*/}
         PRIMARY_KEY_DAO.create(users.getPrimaryKey());
         PrimaryKey result = PRIMARY_KEY_DAO.read(testTable.getPrimaryKey().getId());
         assertTrue(result.equals(md));
@@ -82,7 +82,7 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
 
     @Test
     @Override
-    public void testReadSchema() throws DaoSystemException {
+    public void testReadSchema() throws MappingSystemException {
         Database db = new Database(testDb.getServer(), "tmp_schema");
         Database result = new DatabaseDao(SCHEMA_DAO.getDataSource()).read(db.getId());
         assertTrue(result.equals(db));
@@ -90,30 +90,30 @@ public class MySqlTableDaoTest extends AbstractTableDaoTest {
 
     @Test
     @Override
-    public void testReadAllSchemas() throws DaoSystemException {
+    public void testReadAllSchemas() throws MappingSystemException {
     }
 
-    @Test(expected = DaoSystemException.class)
+    @Test(expected = MappingSystemException.class)
     @Override
-    public void testRenameSchema() throws DaoSystemException {
+    public void testRenameSchema() throws MappingSystemException {
         super.testRenameSchema();
     }
 
     @Override
-    @Test (expected = DaoBusinessLogicException.class)
-    public void testCreateTemporaryTable() throws DaoSystemException {
+    @Test(expected = MappingBusinessLogicException.class)
+    public void testCreateTemporaryTable() throws MappingSystemException {
         super.testCreateTemporaryTable();
     }
 
     @Override
     @Test (expected = UnsupportedOperationException.class)
-    public void testRenamePrimaryKey() throws DaoSystemException {
+    public void testRenamePrimaryKey() throws MappingSystemException {
         super.testRenamePrimaryKey();
     }
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testRenameForeignKey() throws DaoSystemException {
+    public void testRenameForeignKey() throws MappingSystemException {
         super.testRenameForeignKey();
     }
 }

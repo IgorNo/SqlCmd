@@ -1,8 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.dao.Dao;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
@@ -33,9 +32,9 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
     }
 
     @Override
-    public void create(Table entity) throws DaoSystemException {
+    public void create(Table entity) throws MappingSystemException {
         super.create(entity);
-        Dao<Index.Id, Index> dao = new IndexDao(getDataSource());
+        IndexDao dao = new IndexDao(getDataSource());
         for (Index index : entity.getIndexList()) {
             dao.create(index);
         }
@@ -66,7 +65,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                         }
                     }
                     Collection<Column> columns = new ColumnDao(getDataSource()).readAll(tableId);
-                    builder.columns(columns);
+                    builder.addColumnList(columns);
                     List<ForeignKey> foreignKeys = new ForeignKeyDao(getDataSource()).readAll(tableId);
                     builder.addConstraintList(foreignKeys);
                     List<UniqueKey> uniqueKeys = new UniqueKeyDao(getDataSource()).readAll(tableId);
@@ -78,8 +77,8 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                         builder.addConstraint(pk);
                     }
                     List<Index> indices = new IndexDao(getDataSource()).readAll(tableId);
-                    builder.indexList(indices);
-                } catch (DaoSystemException e) {
+                    builder.addIndexList(indices);
+                } catch (MappingSystemException e) {
                     throw new SQLException("", e);
                 }
                 return builder.build();

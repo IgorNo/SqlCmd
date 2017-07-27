@@ -4,8 +4,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.entity.Customer;
+import ua.com.nov.model.dao.entity.Order;
+import ua.com.nov.model.dao.entity.Product;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
@@ -13,8 +15,6 @@ import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Table;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,76 +23,45 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRowDaoTest {
-    protected static final RowDao ROW_DAO = new RowDao();
+    protected static final RowDao<Row> ROW_DAO = new RowDao();
 
-    protected static final AbstractRowDao<Customer> CUSTOMER_DAO = new AbstractRowDao<Customer>() {
-        @Override
-        protected AbstractRowMapper<Customer, Table> getRowMapper(Table table) {
-            return new AbstractRowMapper<Customer, Table>(table) {
-                @Override
-                public Customer mapRow(ResultSet rs, int i) throws SQLException {
-                    Customer.Builder row = new Customer.Builder();
-                    setRowValues(rs, row, table);
-                    return row.build();
-                }
-            };
-        }
-    };
+    protected static final RowDao<Customer> CUSTOMER_DAO = new RowDao<>();
 
-    protected static final AbstractRowDao<Product> PRODUCT_DAO = new AbstractRowDao<Product>() {
-        @Override
-        protected AbstractRowMapper<Product, Table> getRowMapper(Table table) {
-            return new AbstractRowMapper<Product, Table>(table) {
-                @Override
-                public Product mapRow(ResultSet rs, int i) throws SQLException {
-                    Product.Builder row = new Product.Builder();
-                    setRowValues(rs, row, table);
-                    return row.build();
-                }
-            };
-        }
-    };
+    protected static final RowDao<Product> PRODUCT_DAO = new RowDao<>();
 
-    protected static final AbstractRowDao<Order> ORDER_DAO = new AbstractRowDao<Order>() {
-        @Override
-        protected AbstractRowMapper<Order, Table> getRowMapper(Table table) {
-            return new AbstractRowMapper<Order, Table>(table) {
-                @Override
-                public Order mapRow(ResultSet rs, int i) throws SQLException {
-                    Order.Builder row = new Order.Builder();
-                    setRowValues(rs, row, table);
-                    return row.build();
-                }
-            };
-        }
-    };
+    protected static final RowDao<Order> ORDER_DAO = new RowDao<>();
 
     protected static AbstractTableDaoTest tableDaoTest;
 
     protected static Server server;
+
+    public static Table customers, products, orders;
 
     protected static List<Row> userList;
     protected static List<Customer> customerList;
     protected static List<Product> productList;
     protected static List<Order> orderList;
 
-    public static void setUpClass() throws DaoSystemException, SQLException {
+    public static void setUpClass() throws MappingSystemException, SQLException {
         tableDaoTest.setUp();
         server = tableDaoTest.testDb.getServer();
-        ROW_DAO.setTable(AbstractTableDaoTest.users).setDataSource(tableDaoTest.dataSource);
-        CUSTOMER_DAO.setTable(AbstractTableDaoTest.customers).setDataSource(tableDaoTest.dataSource);
-        PRODUCT_DAO.setTable(AbstractTableDaoTest.products).setDataSource(tableDaoTest.dataSource);
-        ORDER_DAO.setTable(AbstractTableDaoTest.orders).setDataSource(tableDaoTest.dataSource);
+        ROW_DAO.setDataSource(tableDaoTest.dataSource);
+        CUSTOMER_DAO.setDataSource(tableDaoTest.dataSource);
+        PRODUCT_DAO.setDataSource(tableDaoTest.dataSource);
+        ORDER_DAO.setDataSource(tableDaoTest.dataSource);
+        customers = new Table.Builder(AbstractTableDaoTest.customers).rowClass(Customer.class).build();
+        products = new Table.Builder(AbstractTableDaoTest.products).rowClass(Product.class).build();
+        orders = new Table.Builder(AbstractTableDaoTest.orders).rowClass(Order.class).build();
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
+    public static void tearDownClass() throws SQLException, MappingSystemException {
         tableDaoTest.tearDown();
         ORDER_DAO.getDataSource().getConnection().close();
     }
 
     @Before
-    public void setUp() throws DaoSystemException {
+    public void setUp() throws MappingSystemException {
 
         userList = new ArrayList<>();
         Row.Builder user = new Row.Builder(AbstractTableDaoTest.users).setValue("login", "User1")
@@ -151,9 +120,9 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void readRow() throws DaoSystemException {
+    public void readRow() throws MappingSystemException {
         for (Row row : userList) {
-            Row result = ROW_DAO.read(row.getId());
+            AbstractRow result = ROW_DAO.read(row.getId());
             assertTrue(row.getValue("id").equals(result.getValue("id")));
             assertTrue(row.getValue("login").equals(result.getValue("login")));
             assertTrue(row.getValue("password").equals(result.getValue("password")));
@@ -174,42 +143,42 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void readAllRow() throws DaoSystemException {
-        List<Row> users = ROW_DAO.readAll();
-        for (Row row : users) {
-            assertTrue(users.contains(row));
+    public void readAllRow() throws MappingSystemException {
+        List<Row> allUsers = ROW_DAO.readAll(AbstractTableDaoTest.users);
+        for (AbstractRow row : allUsers) {
+            assertTrue(allUsers.contains(row));
         }
-        List<Customer> customers = CUSTOMER_DAO.readAll();
-        for (Customer row : customers) {
-            assertTrue(customers.contains(row));
+        List<Customer> allCustomers = CUSTOMER_DAO.readAll(customers);
+        for (Customer row : allCustomers) {
+            assertTrue(allCustomers.contains(row));
         }
-        List<Product> products = PRODUCT_DAO.readAll();
-        for (Product row : products) {
-            assertTrue(products.contains(row));
+        List<Product> allProducts = PRODUCT_DAO.readAll(products);
+        for (Product row : allProducts) {
+            assertTrue(allProducts.contains(row));
         }
-        List<Order> orders = ORDER_DAO.readAll();
-        for (Order row : orders) {
-            assertTrue(orders.contains(row));
+        List<Order> allOrders = ORDER_DAO.readAll(orders);
+        for (Order row : allOrders) {
+            assertTrue(allOrders.contains(row));
         }
     }
 
     @Test
-    public void readNRow() throws DaoSystemException {
-        List<Product> products = PRODUCT_DAO.readN(1, 2);
-        assertTrue(products.size() == 2);
-        assertTrue(products.contains(productList.get(1)));
-        assertTrue(products.contains(productList.get(2)));
+    public void readNRow() throws MappingSystemException {
+        List<Product> productList = PRODUCT_DAO.readN(products, 1, 2);
+        assertTrue(productList.size() == 2);
+        assertTrue(productList.contains(AbstractRowDaoTest.productList.get(1)));
+        assertTrue(productList.contains(AbstractRowDaoTest.productList.get(2)));
     }
 
     @Test(expected = NoSuchEntityException.class)
-    public void deleteRow() throws DaoSystemException {
+    public void deleteRow() throws MappingSystemException {
         ORDER_DAO.delete(orderList.get(0));
         ORDER_DAO.read(orderList.get(0).getId());
         assertTrue(false);
     }
 
     @Test
-    public void updateRow() throws DaoSystemException {
+    public void updateRow() throws MappingSystemException {
         Customer customer = new Customer.Builder(customerList.get(0)).rating(2000).phone("888-48-48").build();
         CUSTOMER_DAO.update(customer);
         Customer result = CUSTOMER_DAO.read(customer.getId());
@@ -217,184 +186,18 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void countRow() throws DaoSystemException {
-        assertTrue(PRODUCT_DAO.count() == 5);
+    public void countRow() throws MappingSystemException {
+        assertTrue(PRODUCT_DAO.count(products) == 5);
     }
 
     @After
-    public void tearDown() throws DaoSystemException {
-        ROW_DAO.deleteAll();
-        ORDER_DAO.deleteAll();
-        CUSTOMER_DAO.deleteAll();
-        PRODUCT_DAO.deleteAll();
+    public void tearDown() throws MappingSystemException {
+        ROW_DAO.deleteAll(AbstractTableDaoTest.users);
+        ROW_DAO.deleteAll(orders);
+        ROW_DAO.deleteAll(products);
+        ROW_DAO.deleteAll(customers);
     }
 }
 
-
-class Product extends AbstractRow {
-    public Product(Builder builder) {
-        super(builder);
-        initId(new Id());
-    }
-
-    public int getProductId() {
-        return (int) getValue("id");
-    }
-
-    public String getDescription() {
-        return (String) getValue("description");
-    }
-
-    public String getDetails() {
-        return (String) getValue("details");
-    }
-
-    public BigDecimal getPrice() {
-        return (BigDecimal) getValue("price");
-    }
-
-    public static class Builder extends AbstractRow.Builder<Product> {
-        public Builder() {
-            super(AbstractTableDaoTest.products);
-        }
-
-        public Builder(Product product) {
-            super(product);
-        }
-
-        public Builder id(long id) {
-            setValue("id", id);
-            return this;
-        }
-
-        public Builder id(KeyHolder id) {
-            setId(id);
-            return this;
-        }
-
-        public Builder description(String description) {
-            setValue("description", description);
-            return this;
-        }
-
-        public Builder details(String details) {
-            setValue("details", details);
-            return this;
-        }
-
-        public Builder price(BigDecimal price) {
-            setValue("price", price);
-            return this;
-        }
-
-        @Override
-        public Product build() {
-            return new Product(this);
-        }
-    }
-
-    public static class Id extends AbstractRow.Id {
-
-        public Id(int value) {
-            super(AbstractTableDaoTest.products, value);
-        }
-
-        public Id() {
-            super(AbstractTableDaoTest.products);
-        }
-    }
-}
-
-class Order extends AbstractRow {
-    public Order(Builder builder) {
-        super(builder);
-        initId(new Id());
-    }
-
-    public int getOrderId() {
-        return (int) getValue("id");
-    }
-
-    public LocalDate getDate() {
-        return ((Date) getValue("date")).toLocalDate();
-    }
-
-    public int qty() {
-        return (int) getValue("qty");
-    }
-
-    public BigDecimal amount() {
-        return (BigDecimal) getValue("amount");
-    }
-
-    public Product getProduct() {
-        return (Product) getForeignKeyValue(AbstractTableDaoTest.products);
-    }
-
-    public Customer getCustomer() {
-        return (Customer) getForeignKeyValue(AbstractTableDaoTest.customers);
-    }
-
-    public static class Builder extends AbstractRow.Builder<Order> {
-        public Builder() {
-            super(AbstractTableDaoTest.orders);
-        }
-
-        public Builder(Order order) {
-            super(order);
-        }
-
-        public Builder id(long id) {
-            setValue("id", id);
-            return this;
-        }
-
-        public Builder id(KeyHolder id) {
-            setId(id);
-            return this;
-        }
-
-        public Builder date(LocalDate date) {
-            setValue("date", Date.valueOf(date));
-            return this;
-        }
-
-        public Builder qty(long qty) {
-            setValue("qty", qty);
-            return this;
-        }
-
-        public Builder amount(BigDecimal amount) {
-            setValue("amount", amount);
-            return this;
-        }
-
-        public Builder product(Product product) {
-            setForeignKey(product);
-            return this;
-        }
-
-        public Builder customer(Customer customer) {
-            setForeignKey(customer);
-            return this;
-        }
-
-        @Override
-        public Order build() {
-            return new Order(this);
-        }
-    }
-
-    public static class Id extends AbstractRow.Id {
-
-        public Id(int value) {
-            super(AbstractTableDaoTest.orders, value);
-        }
-
-        public Id() {
-            super(AbstractTableDaoTest.orders);
-        }
-    }
-}
 
 

@@ -3,6 +3,8 @@ package ua.com.nov.model.entity.metadata.table;
 import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Optional;
+import ua.com.nov.model.entity.data.AbstractRow;
+import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
@@ -14,22 +16,26 @@ import ua.com.nov.model.entity.metadata.table.constraint.*;
 import java.util.*;
 
 public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id> {
-    private final Map<String, Column> columns; // all table columns
+    private final Map<String, Column> columns; // all table addColumnList
 
     // all table constraint (primary key, foreign keys, unique keys, checks)
     private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints;
 
     private final Set<Index> indices; // table indices list
 
-    public Table(Builder builder) {
+    private final Class<? extends AbstractRow> rowClass;
+
+    private Table(Builder builder) {
         super(builder.id, builder.type, builder.options);
         setViewName(builder.viewName);
+        this.rowClass = builder.rowClass;
         this.constraints = builder.constraints;
         this.columns = builder.columns;
         this.indices = builder.indices;
         for (Index index : new ArrayList<>(indices)) {
             if (builder.isContainsIndex(index)) indices.remove(index);
         }
+
     }
 
     @Override
@@ -40,6 +46,10 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
     @Override
     public Schema.Id getContainerId() {
         return getId().getContainerId();
+    }
+
+    public Class<? extends AbstractRow> getRowClass() {
+        return rowClass;
     }
 
     public String getFullName() {
@@ -169,7 +179,7 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
 
     public static class Builder implements Buildable<Table> {
         private final Id id;     // table object identifier
-        private final Map<String, Column> columns = new LinkedHashMap<>(); // all table columns
+        private final Map<String, Column> columns = new LinkedHashMap<>(); // all table addColumnList
         private final Map<Class<? extends Constraint>, Set<? extends Constraint>> constraints =
                 new LinkedHashMap<>(); // all table constraint (primary key, foreign keys, unique keys, checks, etc)
         private String type;
@@ -178,6 +188,8 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
         private int ordinalPosition = 1;
 
         private String viewName;
+
+        private Class<? extends AbstractRow> rowClass = Row.class;
 
         public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new Id(db, name, catalog, schema));
@@ -188,8 +200,24 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
             constraints.put(PrimaryKey.class, new LinkedHashSet<PrimaryKey>(1));
         }
 
+        public Builder(Table table) {
+            this(table.getId());
+            this.addColumnList(table.getColumns());
+            this.addConstraintList(table.getAllConstrains());
+            this.addIndexList(table.getIndexList());
+            this.options((Optional<Table>) table.getOptions());
+            this.type(table.getType());
+            this.viewName(table.getViewName());
+            this.rowClass(table.getRowClass());
+        }
+
         public Id getId() {
             return id;
+        }
+
+        public Builder rowClass(Class<? extends AbstractRow> rowClass) {
+            this.rowClass = rowClass;
+            return this;
         }
 
         public Builder type(String type) {
@@ -202,7 +230,7 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
             return this;
         }
 
-        public Builder columns(Collection<Column> columns) {
+        public Builder addColumnList(Collection<Column> columns) {
             for (Column col : columns) {
                 addColumn(col);
             }
@@ -311,7 +339,7 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
             return this;
         }
 
-        public Builder indexList(List<Index> indexList) {
+        public Builder addIndexList(List<Index> indexList) {
             for (Index index : indexList) {
                 addIndex(index);
             }

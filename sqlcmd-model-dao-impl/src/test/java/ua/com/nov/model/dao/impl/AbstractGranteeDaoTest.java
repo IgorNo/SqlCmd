@@ -4,8 +4,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.entity.metadata.grantee.privelege.Privilege;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
 import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
@@ -29,7 +29,7 @@ public abstract class AbstractGranteeDaoTest {
 
     protected static Privilege columnPrivilege, tablePrivilege1, tablePrivilege2, schemaPrivilege, dbPrivilege;
 
-    protected static void setUpClass() throws DaoSystemException, SQLException {
+    protected static void setUpClass() throws MappingSystemException, SQLException {
         tableDaoTest.setUp();
         server = tableDaoTest.testDb.getServer();
         USER_DAO.setDataSource(tableDaoTest.dataSource);
@@ -41,19 +41,19 @@ public abstract class AbstractGranteeDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, DaoSystemException {
+    public static void tearDownClass() throws SQLException, MappingSystemException {
         tableDaoTest.tearDown();
         USER_DAO.getDataSource().getConnection().close();
     }
 
     @Before
-    public void setUp() throws DaoSystemException {
+    public void setUp() throws MappingSystemException {
         tearDown();
         USER_DAO.create(user1);
     }
 
     @Test
-    public void grantRevokePrivilege() throws DaoSystemException {
+    public void grantRevokePrivilege() throws MappingSystemException {
         PRIVILEGE_DAO.grant(tablePrivilege1);
         PRIVILEGE_DAO.grant(columnPrivilege);
         PRIVILEGE_DAO.grant(tablePrivilege2);
@@ -68,27 +68,27 @@ public abstract class AbstractGranteeDaoTest {
     }
 
     @Test
-    public void readUser() throws DaoSystemException {
+    public void readUser() throws MappingSystemException {
         User result = USER_DAO.read(user1.getId());
         assertTrue(user1.equals(result));
         AbstractTableDaoTest.compareOptions(user1.getOptions(), result.getOptions());
     }
 
     @Test
-    public void readAllUsers() throws DaoSystemException {
+    public void readAllUsers() throws MappingSystemException {
         List<User> users = USER_DAO.readAll(user1.getId().getServer().getId());
         assertTrue(users.contains(user1));
     }
 
-    @Test(expected = DaoBusinessLogicException.class)
-    public void deleteUser() throws DaoSystemException {
+    @Test(expected = MappingBusinessLogicException.class)
+    public void deleteUser() throws MappingSystemException {
         USER_DAO.delete(user1);
         USER_DAO.read(user1.getId());
         assertTrue(false);
     }
 
     @Test
-    public void updateUser() throws DaoSystemException {
+    public void updateUser() throws MappingSystemException {
         User updatedUser = server.getUserBuilder(user1.getServer().getId(), user1.getName(), updatedUserOptions).build();
         USER_DAO.update(updatedUser);
         User result = USER_DAO.read(updatedUser.getId());
@@ -98,7 +98,7 @@ public abstract class AbstractGranteeDaoTest {
     }
 
     @After
-    public void tearDown() throws DaoSystemException {
+    public void tearDown() throws MappingSystemException {
         List<User> users = USER_DAO.readAll(server.getId());
         if (users.contains(user1)) USER_DAO.delete(user1);
     }

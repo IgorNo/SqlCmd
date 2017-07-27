@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao.impl;
 
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.schema.Schema;
@@ -42,7 +42,7 @@ public class SchemaDao extends MetaDataDao<Schema.Id, Schema, Database.Id> {
     }
 
     @Override
-    public void update(Schema value) throws DaoSystemException {
+    public void update(Schema value) throws MappingSystemException {
         throw new UnsupportedOperationException();
     }
 }

@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
@@ -41,21 +41,21 @@ public class HyperSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Before
-    public void setUp() throws SQLException, DaoSystemException {
+    public void setUp() throws SQLException, MappingSystemException {
         tearDown();
     }
 
     @Test
-    public void testRead() throws DaoSystemException {
+    public void testRead() throws MappingSystemException {
         readDatabase();
     }
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testDeleteDataBase() throws SQLException, DaoSystemException {
+    public void testDeleteDataBase() throws SQLException, MappingSystemException {
         super.testDeleteDataBase();
     }
 
     @After
-    public void tearDown() throws DaoSystemException { /*NOP*/ }
+    public void tearDown() throws MappingSystemException { /*NOP*/ }
 }

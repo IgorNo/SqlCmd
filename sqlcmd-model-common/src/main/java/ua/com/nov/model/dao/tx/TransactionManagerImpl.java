@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao.tx;
 
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.util.JdbcUtils;
 
@@ -22,7 +22,7 @@ public class TransactionManagerImpl extends BaseDataSource implements Transactio
     }
 
     @Override
-    public <T> T doInTransaction(UnitOfWork<T> unitOfWork) throws DaoSystemException {
+    public <T> T doInTransaction(UnitOfWork<T> unitOfWork) throws MappingSystemException {
         Connection conn = null;
         try {
             dataSource.getConnection();
@@ -31,9 +31,9 @@ public class TransactionManagerImpl extends BaseDataSource implements Transactio
             T result = unitOfWork.doInTx();
             conn.commit();
             return result;
-        } catch (SQLException | DaoSystemException e) {
+        } catch (SQLException | MappingSystemException e) {
             JdbcUtils.rollbackQuietly(conn);
-            throw new DaoSystemException("Transaction Manager exception\n", e);
+            throw new MappingSystemException("Transaction Manager exception\n", e);
         } finally {
             JdbcUtils.closeQuietly(conn);
             connectionHolder.remove();

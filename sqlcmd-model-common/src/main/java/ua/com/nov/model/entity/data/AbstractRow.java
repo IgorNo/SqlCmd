@@ -65,7 +65,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
     }
 
     public int getValueSqlType(int ordinalPosition) {
-        return getValueColumn(ordinalPosition).getDataType().getJdbcDataType();
+        return getValueColumn(ordinalPosition).getDataType().getSqlType();
     }
 
     @Override
@@ -77,8 +77,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
 
         if (!table.equals(row.table)) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(values, row.values)) return false;
-        return foreignKeys != null ? foreignKeys.equals(row.foreignKeys) : row.foreignKeys == null;
+        return Arrays.equals(values, row.values);
     }
 
     @Override
@@ -86,6 +85,19 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
         int result = table.hashCode();
         result = 31 * result + Arrays.hashCode(values);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Table '").append(table.getFullName()).append("'");
+        String s = " {";
+        for (Column column : table.getColumns()) {
+            sb.append(s).append("'").append(column.getName()).append("' = ")
+                    .append(values[table.getColumnIndex(column.getName())]);
+            s = ", ";
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     public abstract static class Id implements Hierarchical<Table> {
@@ -100,7 +112,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
                 for (int i = 0; i < values.length; i++) {
                     String columnName = table.getPrimaryKey().getColumn(i + 1).getName();
                     Column column = table.getColumn(columnName);
-                    Class<?> columnClass = DataTypes.getClazz(column.getDataType().getJdbcDataType());
+                    Class<?> columnClass = DataTypes.getClazz(column.getDataType().getSqlType()).get(0);
                     if (values[i].getClass() == columnClass)
                         this.values[i] = values[i];
                     else
@@ -109,7 +121,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
                                 columnClass, values[i].getClass(), i));
                 }
             } else {
-                throw new IllegalArgumentException(String.format("Mismatch between number of columns in PrimaryKey = '%d' " +
+                throw new IllegalArgumentException(String.format("Mismatch between number of addColumnList in PrimaryKey = '%d' " +
                         "and number of values in parametes = '%d'", length, values.length));
             }
         }
@@ -142,7 +154,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
         }
 
         public int getValueSqlType(int ordinalPosition) {
-            return getValueColumn(ordinalPosition).getDataType().getJdbcDataType();
+            return getValueColumn(ordinalPosition).getDataType().getSqlType();
         }
 
         @Override
@@ -186,6 +198,10 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
 
         public Builder(AbstractRow row) {
             this(row.getTable());
+            assign(row);
+        }
+
+        public void assign(AbstractRow row) {
             for (int i = 0; i < values.length; i++) {
                 this.values[i] = row.values[i];
             }
@@ -230,6 +246,7 @@ public abstract class AbstractRow implements Unique<AbstractRow.Id> {
                         table.getFullName(), value.table.getFullName()));
             return this;
         }
-
     }
+
+
 }

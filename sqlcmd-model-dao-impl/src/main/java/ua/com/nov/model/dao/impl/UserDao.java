@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.springframework.dao.EmptyResultDataAccessException;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.DaoBusinessLogicException;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.statement.DataDefinitionSqlStmtSource;
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
 import ua.com.nov.model.entity.metadata.grantee.user.User;
@@ -29,16 +29,16 @@ public class UserDao extends AbstractDao<Grantee.Id, User, Server.Id> {
     }
 
     @Override
-    public List<User> readAll(Server.Id cId) throws DaoSystemException {
+    public List<User> readAll(Server.Id cId) throws MappingSystemException {
         return super.readAll(cId);
     }
 
     @Override
-    public User read(Grantee.Id eId) throws DaoSystemException {
+    public User read(Grantee.Id eId) throws MappingSystemException {
         try {
             return super.read(eId);
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoBusinessLogicException(String.format("%s '%s' doesn't exist in %s '%s'.\n",
+            throw new MappingBusinessLogicException(String.format("%s '%s' doesn't exist in %s '%s'.\n",
                     eId.getMdName(), eId.getFullName(),
                     eId.getContainerId().getMdName(), eId.getContainerId().getFullName()));
         }

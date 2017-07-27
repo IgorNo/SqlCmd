@@ -218,7 +218,7 @@ public abstract class Server  implements Unique<Server.Id> {
     public List<DbDataType> getDataTypes(int jdbcDataType) {
         List<DbDataType> result = new LinkedList<>();
         for (DbDataType dataType : dataTypes.values()) {
-            if (jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
+            if (jdbcDataType == dataType.getSqlType()) result.add(dataType);
         }
         return result;
     }
@@ -230,7 +230,7 @@ public abstract class Server  implements Unique<Server.Id> {
     public List<DbDataType> getAutoincrementalDataTypes(int jdbcDataType) {
         List<DbDataType> result = new LinkedList<>();
         for (DbDataType dataType : dataTypes.values()) {
-            if (dataType.isAutoIncrement() && jdbcDataType == dataType.getJdbcDataType()) result.add(dataType);
+            if (dataType.isAutoIncrement() && jdbcDataType == dataType.getSqlType()) result.add(dataType);
         }
         return result;
     }

@@ -2,6 +2,8 @@ package ua.com.nov.model.entity.metadata.datatype;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public enum DataTypes {
 
@@ -42,17 +44,23 @@ public enum DataTypes {
         this.clazz = clazz;
     }
 
-    public static Class<?> getClazz(int jdbcDataType) {
-        for (DataTypes dataType : values()) {
-            if (dataType.jdbcDataType == jdbcDataType) return dataType.clazz;
+    public static List<Class<?>> getClazz(int jdbcDataType) {
+        List<Class<?>> result = new ArrayList<>();
+        for (DataTypes type : values()) {
+            if (type.jdbcDataType == jdbcDataType) result.add(type.clazz);
         }
+        if (result.size() > 0)
+            return result;
         throw new IllegalArgumentException(String.format("Types %s dosn't exist.", jdbcDataType));
     }
 
-    public static String getTypeName(int jdbcDataType) {
+    public static List<String> getTypeName(int jdbcDataType) {
+        List<String> result = new ArrayList<>();
         for (DataTypes type : values()) {
-            if (type.jdbcDataType == jdbcDataType) return type.toString();
+            if (type.jdbcDataType == jdbcDataType) result.add(type.toString());
         }
+        if (result.size() > 0)
+            return result;
         throw new IllegalArgumentException(String.format("Types %s dosn't exist.", jdbcDataType));
     }
 

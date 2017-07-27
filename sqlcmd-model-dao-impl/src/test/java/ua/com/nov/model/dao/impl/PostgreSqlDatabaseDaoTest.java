@@ -2,7 +2,7 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.DaoSystemException;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
@@ -48,7 +48,7 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
     }
 
     @Test
-    public void testRead() throws DaoSystemException {
+    public void testRead() throws MappingSystemException {
         Database db = DAO.read(TEST_DATABASE.getId());
         assertTrue(TEST_DATABASE.equals(db));
         PostgreSqlDbOptions options = (PostgreSqlDbOptions) db.getOptions();
@@ -68,13 +68,13 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
 
     @Test
-    public void testReadAll() throws DaoSystemException {
+    public void testReadAll() throws MappingSystemException {
         List<Database> databases = DAO.readAll(server.getId());
         assertTrue(databases.contains(TEST_DATABASE));
     }
 
     @Test
-    public void testUpdateDatabase() throws DaoSystemException {
+    public void testUpdateDatabase() throws MappingSystemException {
         PostgreSqlDbOptions uOptions = new PostgreSqlDbOptions.Builder()
                 .owner("postgres").connLimit(100).allowConn(true)
                 .tableSpace("pg_default").isTemplate(false)
