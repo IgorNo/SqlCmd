@@ -240,7 +240,7 @@ public abstract class Server  implements Unique<Server.Id> {
         if (dataTypeName != null)
             return getDataType(dataTypeName);
         else {
-            List<DbDataType> dataTypes = getDataTypes(type.getJdbcDataType());
+            List<DbDataType> dataTypes = getDataTypes(type.getSqlType());
             if (dataTypes.size() == 0) {
                 throw new IllegalArgumentException(String.format("Data type %s does not support this database", type));
             }

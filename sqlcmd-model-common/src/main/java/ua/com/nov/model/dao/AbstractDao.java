@@ -6,14 +6,14 @@ import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.dao.statement.SqlStatementSource;
-import ua.com.nov.model.entity.Hierarchical;
+import ua.com.nov.model.entity.Persistance;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.server.Server;
 
 import javax.sql.DataSource;
 import java.util.List;
 
-public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>, C extends Hierarchical>
+public abstract class AbstractDao<I extends Persistance<C>, E extends Unique<I>, C extends Persistance>
         implements Dao<I, E, C> {
 
     private SqlExecutor executor;
@@ -42,15 +42,15 @@ public abstract class AbstractDao<I extends Hierarchical<C>, E extends Unique<I>
     }
 
     @Override
-    public void create(E value) throws MappingSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getCreateStmt(value));
+    public void create(E entity) throws MappingSystemException {
+        executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getCreateStmt(entity));
     }
 
     protected abstract SqlStatementSource<I, E, C> getSqlStmtSource(Server db);
 
     @Override
-    public void update(E value) throws MappingSystemException {
-        executor.executeUpdateStmt(getSqlStmtSource(value.getId().getServer()).getUpdateStmt(value));
+    public void update(E entity) throws MappingSystemException {
+        executor.executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getUpdateStmt(entity));
     }
 
     @Override

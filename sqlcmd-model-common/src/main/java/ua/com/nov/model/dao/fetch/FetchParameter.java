@@ -11,8 +11,8 @@ public abstract class FetchParameter {
     public FetchParameter(Column column, Object value) {
         this.column = column;
         this.value = value;
-        if (!DataTypes.getClazz(column.getSqlTye()).contains(value.getClass()))
-            throw new IllegalArgumentException("Mismatch between column and value types.");
+        if (!DataTypes.getClazz(column.getSqlType()).contains(value.getClass()))
+            throw new IllegalArgumentException("Mismatch between column and value");
     }
 
     public Column getColumn() {

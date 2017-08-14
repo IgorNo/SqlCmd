@@ -86,8 +86,12 @@ public class Column extends TableMd<Column.Id> {
         return dataType;
     }
 
-    public int getSqlTye() {
+    public int getSqlType() {
         return dataType.getSqlType();
+    }
+
+    public String getTypeName() {
+        return dataType.getTypeName();
     }
 
     public String getDefaultValue() {

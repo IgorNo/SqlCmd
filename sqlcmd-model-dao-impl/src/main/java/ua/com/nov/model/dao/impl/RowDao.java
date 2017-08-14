@@ -11,6 +11,7 @@ import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.server.Server;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 import ua.com.nov.model.entity.metadata.table.Table;
 import ua.com.nov.model.entity.metadata.table.column.Column;
 
@@ -19,20 +20,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class RowDao<R extends AbstractRow>
-        extends AbstractDao<AbstractRow.Id, R, Table> implements DataManipulationDao<R> {
+public class RowDao<R extends AbstractRow<R>>
+        extends AbstractDao<AbstractRow.Id<R>, R, GenericTable<R>> implements DataManipulationDao<R> {
 
     public RowDao() {
     }
 
     public RowDao(DataSource dataSource) {
         setDataSource(dataSource);
-    }
-
-    protected static void setRowValues(ResultSet rs, AbstractRow.Builder row, Table table) throws SQLException {
-        for (Column column : table.getColumns()) {
-            row.setValue(column.getName(), rs.getObject(column.getName()));
-        }
     }
 
     @Override
@@ -47,15 +42,15 @@ public class RowDao<R extends AbstractRow>
         return null;
     }
 
-    @Override
-    public List<R> readFetch(Table table, FetchParameter... parameters) throws MappingSystemException {
-        SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadFetchStmt(parameters);
-        return getExecutor().executeQueryStmt(sqlStmt, getRowMapper(table));
+    private static void setRowValues(ResultSet rs, AbstractRow.Builder row, Table table) throws SQLException {
+        for (Column column : table.getColumns()) {
+            row.setValue(column.getName(), rs.getObject(column.getName()));
+        }
     }
 
     @Override
-    public List<R> readN(Table table, long nStart, int number) throws MappingSystemException {
-        SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadNStmt(table, nStart, number);
+    public List<R> readFetch(GenericTable<R> table, FetchParameter... parameters) throws MappingSystemException {
+        SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadFetchStmt(parameters);
         return getExecutor().executeQueryStmt(sqlStmt, getRowMapper(table));
     }
 
@@ -81,13 +76,19 @@ public class RowDao<R extends AbstractRow>
     }
 
     @Override
-    protected AbstractRowMapper<R, Table> getRowMapper(Table table) {
-        return new AbstractRowMapper<R, Table>(table) {
+    public List<R> readN(GenericTable<R> table, long nStart, int number) throws MappingSystemException {
+        SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadNStmt(table, nStart, number);
+        return getExecutor().executeQueryStmt(sqlStmt, getRowMapper(table));
+    }
+
+    @Override
+    protected AbstractRowMapper<R, GenericTable<R>> getRowMapper(GenericTable<R> table) {
+        return new AbstractRowMapper<R, GenericTable<R>>(table) {
             @Override
             public R mapRow(ResultSet rs, int rowNum) throws SQLException {
                 AbstractRow.Builder<R> row = null;
                 if (table.getRowClass() == Row.class) {
-                    row = (AbstractRow.Builder<R>) new Row.Builder(table);
+                    row = (AbstractRow.Builder<R>) new Row.Builder((GenericTable<Row>) table);
                 } else {
                     try {
                         row = (AbstractRow.Builder<R>) Class.forName(table.getRowClass().getName() + "$Builder").newInstance();

@@ -4,7 +4,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
 
-public class Customer extends AbstractRow {
+public class Customer extends AbstractRow<Customer> {
 
     private Customer(Builder builder) {
         super(builder);
@@ -12,23 +12,23 @@ public class Customer extends AbstractRow {
     }
 
     public int getCustomerId() {
-        return (int) getValue("id");
+        return getValue("id");
     }
 
     public int getRating() {
-        return (int) getValue("rating");
+        return getValue("rating");
     }
 
     public String getName() {
-        return (String) getValue("name");
+        return getValue("name");
     }
 
     public String getPhone() {
-        return (String) getValue("phone");
+        return getValue("phone");
     }
 
     public String getAddress() {
-        return (String) getValue("address");
+        return getValue("address");
     }
 
     public static class Builder extends AbstractRow.Builder<Customer> {

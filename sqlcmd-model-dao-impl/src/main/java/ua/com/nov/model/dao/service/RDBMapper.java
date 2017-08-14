@@ -1,20 +1,32 @@
 package ua.com.nov.model.dao.service;
 
 import org.springframework.jdbc.support.KeyHolder;
+import ua.com.nov.model.dao.TableRowMapper;
 import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
 import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.dao.impl.RowDao;
 import ua.com.nov.model.entity.data.AbstractRow;
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
+import ua.com.nov.model.entity.metadata.table.TableMapper;
+import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
 
 import javax.sql.DataSource;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
-public class RDBMapper implements Mapper {
+public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     private DataSource dataSource;
     private boolean checkConcurrentModification;
+    private GenericTable<R> table;
+    private boolean immediateInitialization;
+
+    public RDBMapper() {
+    }
+
+    public RDBMapper(GenericTable<R> table) {
+        this.table = table;
+    }
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -28,28 +40,70 @@ public class RDBMapper implements Mapper {
         this.checkConcurrentModification = checkConcurrentModification;
     }
 
-    @Override
-    public <R extends AbstractRow> R get(AbstractRow.Id id) throws MappingSystemException {
-        return new RowDao<R>(dataSource).read(id);
+    public boolean isImmediateInitialization() {
+        return immediateInitialization;
+    }
+
+    public void setImmediateInitialization(boolean immediateInitialization) {
+        this.immediateInitialization = immediateInitialization;
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getAll(Table table) throws MappingSystemException {
-        return new RowDao<R>(dataSource).readAll(table);
+    public GenericTable<R> getTable() {
+        return table;
+    }
+
+    public void setTable(GenericTable<R> table) {
+        this.table = table;
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getN(Table table, int nStart, int number) throws MappingSystemException {
-        return new RowDao<R>(dataSource).readN(table, nStart, number);
+    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+        R row = new RowDao<R>(dataSource).read(id);
+        initForeignKey(row);
+        return row;
+    }
+
+    private void initForeignKey(R row) throws MappingSystemException {
+        List<ForeignKey> foreignKeys = row.getTable().getForeignKeyList();
+        if (foreignKeys != null) {
+            for (ForeignKey foreignKey : foreignKeys) {
+                GenericTable<?> table = TableMapper.getGenericTable(foreignKey.getTableId());
+                row.setForeignKey(new RDBMapper<>(TableMapper.getGenericTable(table.getId(), table.getRowClass())));
+                if (isImmediateInitialization()) row.getForeignKeyValue(table);
+            }
+        }
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getFetch(Table table, FetchParameter... parameters) throws MappingSystemException {
-        return new RowDao<R>(dataSource).readFetch(table, parameters);
+    public List<R> getAll() throws MappingSystemException {
+        List<R> result = new RowDao<R>(dataSource).readAll(table);
+        for (R row : result) {
+            initForeignKey(row);
+        }
+        return result;
     }
 
     @Override
-    public <R extends AbstractRow> R add(R row) throws MappingSystemException {
+    public List<R> getN(int nStart, int number) throws MappingSystemException {
+        List<R> result = new RowDao<R>(dataSource).readN(table, nStart, number);
+        for (R row : result) {
+            initForeignKey(row);
+        }
+        return result;
+    }
+
+    @Override
+    public List<R> getFetch(FetchParameter... parameters) throws MappingSystemException {
+        List<R> result = new RowDao<R>(dataSource).readFetch(table, parameters);
+        for (R row : result) {
+            initForeignKey(row);
+        }
+        return result;
+    }
+
+    @Override
+    public R add(R row) throws MappingSystemException {
         RowDao<R> dao = new RowDao<>(dataSource);
         KeyHolder keyHolder = dao.insert(row);
         AbstractRow.Builder<R> rowWithId = null;
@@ -67,12 +121,12 @@ public class RDBMapper implements Mapper {
     }
 
     @Override
-    public <R extends AbstractRow> void change(R oldValue, R newValue) throws MappingSystemException {
+    public void change(R oldValue, R newValue) throws MappingSystemException {
         if (isCheckConcurrentModification()) checkChanges(oldValue);
         new RowDao<R>(dataSource).update(newValue);
     }
 
-    protected <R extends AbstractRow> void checkChanges(R oldValue) throws MappingSystemException {
+    protected void checkChanges(R oldValue) throws MappingSystemException {
         R value = get(oldValue.getId());
         if (!oldValue.equals(value)) {
             throw new ConcurrentModificationException(String.format("Row '%s' has been already changed to '%s'.",
@@ -81,13 +135,13 @@ public class RDBMapper implements Mapper {
     }
 
     @Override
-    public void delete(AbstractRow row) throws MappingSystemException {
+    public void delete(R row) throws MappingSystemException {
         if (isCheckConcurrentModification()) checkChanges(row);
-        new RowDao<>(dataSource).delete(row);
+        new RowDao<R>(dataSource).delete(row);
     }
 
     @Override
-    public int size(Table table) throws MappingSystemException {
+    public int size() throws MappingSystemException {
         return new RowDao<>(dataSource).count(table);
     }
 }

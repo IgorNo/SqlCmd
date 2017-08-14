@@ -2,9 +2,7 @@ package ua.com.nov.model.entity;
 
 import ua.com.nov.model.entity.metadata.server.Server;
 
-public interface Hierarchical<C> {
+public interface Persistance<C> extends Id<C> {
 
     Server getServer();
-
-    C getContainerId();
 }

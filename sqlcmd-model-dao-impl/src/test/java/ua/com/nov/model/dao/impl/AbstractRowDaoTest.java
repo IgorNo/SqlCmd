@@ -12,7 +12,8 @@ import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.server.Server;
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
+import ua.com.nov.model.entity.metadata.table.RowTable;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -24,18 +25,18 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRowDaoTest {
     protected static final RowDao<Row> ROW_DAO = new RowDao();
-
     protected static final RowDao<Customer> CUSTOMER_DAO = new RowDao<>();
-
     protected static final RowDao<Product> PRODUCT_DAO = new RowDao<>();
-
     protected static final RowDao<Order> ORDER_DAO = new RowDao<>();
 
     protected static AbstractTableDaoTest tableDaoTest;
 
     protected static Server server;
 
-    public static Table customers, products, orders;
+    public static GenericTable<Row> users;
+    public static GenericTable<Customer> customers;
+    public static GenericTable<Product> products;
+    public static GenericTable<Order> orders;
 
     protected static List<Row> userList;
     protected static List<Customer> customerList;
@@ -45,13 +46,16 @@ public abstract class AbstractRowDaoTest {
     public static void setUpClass() throws MappingSystemException, SQLException {
         tableDaoTest.setUp();
         server = tableDaoTest.testDb.getServer();
+
         ROW_DAO.setDataSource(tableDaoTest.dataSource);
         CUSTOMER_DAO.setDataSource(tableDaoTest.dataSource);
         PRODUCT_DAO.setDataSource(tableDaoTest.dataSource);
         ORDER_DAO.setDataSource(tableDaoTest.dataSource);
-        customers = new Table.Builder(AbstractTableDaoTest.customers).rowClass(Customer.class).build();
-        products = new Table.Builder(AbstractTableDaoTest.products).rowClass(Product.class).build();
-        orders = new Table.Builder(AbstractTableDaoTest.orders).rowClass(Order.class).build();
+
+        users = new RowTable(AbstractTableDaoTest.users);
+        customers = new GenericTable<>(AbstractTableDaoTest.customers, Customer.class);
+        products = new GenericTable<>(AbstractTableDaoTest.products, Product.class);
+        orders = new GenericTable<>(AbstractTableDaoTest.orders, Order.class);
     }
 
     @AfterClass
@@ -64,7 +68,7 @@ public abstract class AbstractRowDaoTest {
     public void setUp() throws MappingSystemException {
 
         userList = new ArrayList<>();
-        Row.Builder user = new Row.Builder(AbstractTableDaoTest.users).setValue("login", "User1")
+        Row.Builder user = new Row.Builder(users).setValue("login", "User1")
                 .setValue("password", "1111");
         userList.add(user.id(ROW_DAO.insert(user.build())).build());
 
@@ -144,7 +148,7 @@ public abstract class AbstractRowDaoTest {
 
     @Test
     public void readAllRow() throws MappingSystemException {
-        List<Row> allUsers = ROW_DAO.readAll(AbstractTableDaoTest.users);
+        List<Row> allUsers = ROW_DAO.readAll(users);
         for (AbstractRow row : allUsers) {
             assertTrue(allUsers.contains(row));
         }

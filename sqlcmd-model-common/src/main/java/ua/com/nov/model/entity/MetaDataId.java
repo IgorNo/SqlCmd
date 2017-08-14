@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity;
 
-public interface MetaDataId<C> extends Hierarchical<C> {
+public interface MetaDataId<C> extends Persistance<C> {
 
     String getMdName();
 

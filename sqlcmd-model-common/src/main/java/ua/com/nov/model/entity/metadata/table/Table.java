@@ -1,10 +1,8 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.Buildable;
-import ua.com.nov.model.entity.Hierarchical;
 import ua.com.nov.model.entity.Optional;
-import ua.com.nov.model.entity.data.AbstractRow;
-import ua.com.nov.model.entity.data.Row;
+import ua.com.nov.model.entity.Persistance;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.datatype.DbDataType;
 import ua.com.nov.model.entity.metadata.schema.Schema;
@@ -15,7 +13,8 @@ import ua.com.nov.model.entity.metadata.table.constraint.*;
 
 import java.util.*;
 
-public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id> {
+public class Table extends SchemaMd<Table.Id> implements Persistance<Schema.Id> {
+
     private final Map<String, Column> columns; // all table addColumnList
 
     // all table constraint (primary key, foreign keys, unique keys, checks)
@@ -23,19 +22,15 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
 
     private final Set<Index> indices; // table indices list
 
-    private final Class<? extends AbstractRow> rowClass;
-
-    private Table(Builder builder) {
+    protected Table(Builder builder) {
         super(builder.id, builder.type, builder.options);
         setViewName(builder.viewName);
-        this.rowClass = builder.rowClass;
         this.constraints = builder.constraints;
         this.columns = builder.columns;
         this.indices = builder.indices;
         for (Index index : new ArrayList<>(indices)) {
             if (builder.isContainsIndex(index)) indices.remove(index);
         }
-
     }
 
     @Override
@@ -46,10 +41,6 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
     @Override
     public Schema.Id getContainerId() {
         return getId().getContainerId();
-    }
-
-    public Class<? extends AbstractRow> getRowClass() {
-        return rowClass;
     }
 
     public String getFullName() {
@@ -189,8 +180,6 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
 
         private String viewName;
 
-        private Class<? extends AbstractRow> rowClass = Row.class;
-
         public Builder(Database.Id db, String name, String catalog, String schema) {
             this(new Id(db, name, catalog, schema));
         }
@@ -208,16 +197,10 @@ public class Table extends SchemaMd<Table.Id> implements Hierarchical<Schema.Id>
             this.options((Optional<Table>) table.getOptions());
             this.type(table.getType());
             this.viewName(table.getViewName());
-            this.rowClass(table.getRowClass());
         }
 
         public Id getId() {
             return id;
-        }
-
-        public Builder rowClass(Class<? extends AbstractRow> rowClass) {
-            this.rowClass = rowClass;
-            return this;
         }
 
         public Builder type(String type) {

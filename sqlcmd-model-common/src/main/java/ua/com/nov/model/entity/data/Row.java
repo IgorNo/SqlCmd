@@ -1,9 +1,9 @@
 package ua.com.nov.model.entity.data;
 
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 
-public class Row extends AbstractRow {
+public class Row extends AbstractRow<Row> {
 
     public Row(Builder builder) {
         super(builder);
@@ -11,7 +11,7 @@ public class Row extends AbstractRow {
     }
 
     public static class Builder extends AbstractRow.Builder<Row> {
-        public Builder(Table table) {
+        public Builder(GenericTable<Row> table) {
             super(table);
         }
 
@@ -31,8 +31,8 @@ public class Row extends AbstractRow {
         }
 
         @Override
-        public Builder setForeignKey(AbstractRow value) {
-            super.setForeignKey(value);
+        public Builder setForeignKey(AbstractRow row) {
+            super.setForeignKey(row);
             return this;
         }
 
@@ -42,9 +42,9 @@ public class Row extends AbstractRow {
         }
     }
 
-    public static class Id extends AbstractRow.Id {
+    public static class Id extends AbstractRow.Id<Row> {
 
-        public Id(Table table, Object... values) {
+        public Id(GenericTable<Row> table, Object... values) {
             super(table, values);
         }
 

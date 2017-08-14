@@ -42,7 +42,7 @@ public class SchemaDao extends MetaDataDao<Schema.Id, Schema, Database.Id> {
     }
 
     @Override
-    public void update(Schema value) throws MappingSystemException {
+    public void update(Schema entity) throws MappingSystemException {
         throw new UnsupportedOperationException();
     }
 }

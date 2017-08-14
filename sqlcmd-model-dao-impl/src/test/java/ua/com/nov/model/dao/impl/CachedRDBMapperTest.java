@@ -19,7 +19,7 @@ public class CachedRDBMapperTest {
 
     @AfterClass
     public static void tearDownClass() throws SQLException, MappingSystemException {
-        AbstractRowDaoTest.setUpClass();
+        AbstractRowDaoTest.tearDownClass();
     }
 
     @Before

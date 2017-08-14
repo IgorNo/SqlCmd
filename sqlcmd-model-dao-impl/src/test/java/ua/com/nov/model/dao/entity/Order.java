@@ -1,6 +1,7 @@
 package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
+import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
 
@@ -10,14 +11,14 @@ import java.time.LocalDate;
 
 import static ua.com.nov.model.dao.impl.AbstractRowDaoTest.products;
 
-public class Order extends AbstractRow {
+public class Order extends AbstractRow<Order> {
     public Order(Builder builder) {
         super(builder);
         initId(new Id());
     }
 
     public int getOrderId() {
-        return (int) getValue("id");
+        return getValue("id");
     }
 
     public LocalDate getDate() {
@@ -25,18 +26,18 @@ public class Order extends AbstractRow {
     }
 
     public int qty() {
-        return (int) getValue("qty");
+        return getValue("qty");
     }
 
     public BigDecimal amount() {
-        return (BigDecimal) getValue("amount");
+        return getValue("amount");
     }
 
-    public Product getProduct() {
+    public Product getProduct() throws MappingSystemException {
         return (Product) getForeignKeyValue(products);
     }
 
-    public Customer getCustomer() {
+    public Customer getCustomer() throws MappingSystemException {
         return (Customer) getForeignKeyValue(AbstractRowDaoTest.customers);
     }
 

@@ -6,26 +6,26 @@ import ua.com.nov.model.entity.data.AbstractRow;
 
 import java.math.BigDecimal;
 
-public class Product extends AbstractRow {
+public class Product extends AbstractRow<Product> {
     public Product(Builder builder) {
         super(builder);
         initId(new Id());
     }
 
     public int getProductId() {
-        return (int) getValue("id");
+        return getValue("id");
     }
 
     public String getDescription() {
-        return (String) getValue("description");
+        return getValue("description");
     }
 
     public String getDetails() {
-        return (String) getValue("details");
+        return getValue("details");
     }
 
     public BigDecimal getPrice() {
-        return (BigDecimal) getValue("price");
+        return getValue("price");
     }
 
     public static class Builder extends AbstractRow.Builder<Product> {

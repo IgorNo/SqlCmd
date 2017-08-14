@@ -36,18 +36,18 @@ public enum DataTypes {
 
     OTHER(Types.OTHER, Object.class);
 
-    private final int jdbcDataType;
+    private final int sqlType;
     private final Class<?> clazz;
 
-    DataTypes(int jdbcDataType, Class<?> clazz) {
-        this.jdbcDataType = jdbcDataType;
+    DataTypes(int sqlType, Class<?> clazz) {
+        this.sqlType = sqlType;
         this.clazz = clazz;
     }
 
     public static List<Class<?>> getClazz(int jdbcDataType) {
         List<Class<?>> result = new ArrayList<>();
         for (DataTypes type : values()) {
-            if (type.jdbcDataType == jdbcDataType) result.add(type.clazz);
+            if (type.sqlType == jdbcDataType) result.add(type.clazz);
         }
         if (result.size() > 0)
             return result;
@@ -57,22 +57,29 @@ public enum DataTypes {
     public static List<String> getTypeName(int jdbcDataType) {
         List<String> result = new ArrayList<>();
         for (DataTypes type : values()) {
-            if (type.jdbcDataType == jdbcDataType) result.add(type.toString());
+            if (type.sqlType == jdbcDataType) result.add(type.toString());
         }
         if (result.size() > 0)
             return result;
         throw new IllegalArgumentException(String.format("Types %s dosn't exist.", jdbcDataType));
     }
 
-    public static int getJdbcDataType(Class<?> clazz) {
+    public static int getSqlType(Class<?> clazz) {
         for (DataTypes type : values()) {
-            if (type.clazz == clazz) return type.jdbcDataType;
+            if (type.clazz == clazz) return type.sqlType;
         }
-        throw new IllegalArgumentException(String.format("The class '%s' isn't SQL data type.", clazz));
+        throw new IllegalArgumentException(String.format("The class '%s' isn't mapping to SQL data type.", clazz));
     }
 
-    public int getJdbcDataType() {
-        return jdbcDataType;
+    public static DataTypes getDataType(int sqlType) {
+        for (DataTypes type : values()) {
+            if (type.sqlType == sqlType) return type;
+        }
+        throw new IllegalArgumentException(String.format("SQL type %s doesn't exist.", sqlType));
+    }
+
+    public int getSqlType() {
+        return sqlType;
     }
 }
 

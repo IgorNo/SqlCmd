@@ -1,25 +1,47 @@
 package ua.com.nov.model.dao.service;
 
+import ua.com.nov.model.dao.TableRowMapper;
 import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
-import ua.com.nov.model.entity.metadata.table.Table;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 import javax.sql.DataSource;
 import java.util.List;
 
-public class CachedRDBMapper implements Mapper {
-    private static final MemoryMapper cachedRows = new MemoryMapper();
+public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
+    private final MemoryMapper<R> cachedRows = new MemoryMapper<>();
 
-    private RDBMapper mapper = new RDBMapper();
+    private final RDBMapper<R> mapper = new RDBMapper();
+
+    public CachedRDBMapper() {
+    }
+
+    @Override
+    public GenericTable<R> getTable() {
+        return mapper.getTable();
+    }
+
+    public void setTable(GenericTable<R> table) {
+        mapper.setTable(table);
+        cachedRows.setTable(table);
+    }
 
     public void setDataSource(DataSource dataSource) {
         mapper.setDataSource(dataSource);
     }
 
+    public boolean isImmediateInitialization() {
+        return mapper.isImmediateInitialization();
+    }
+
+    public void setImmediateInitialization(boolean immediateInitialization) {
+        mapper.setImmediateInitialization(immediateInitialization);
+    }
+
     @Override
-    public <T extends AbstractRow> T get(AbstractRow.Id id) throws MappingSystemException {
-        T row = cachedRows.get(id);
+    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+        R row = (R) cachedRows.get(id);
         if (row == null) {
             row = mapper.get(id);
             cachedRows.add(row);
@@ -28,47 +50,47 @@ public class CachedRDBMapper implements Mapper {
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getAll(Table table) throws MappingSystemException {
-        if (cachedRows.size(table) == mapper.size(table)) {
-            return cachedRows.getAll(table);
+    public List<R> getAll() throws MappingSystemException {
+        if (cachedRows.size() == mapper.size()) {
+            return cachedRows.getAll();
         } else {
-            return mapper.getAll(table);
+            return mapper.getAll();
         }
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getN(Table table, int nStart, int number) throws MappingSystemException {
-        if (cachedRows.size(table) == mapper.size(table)) {
-            return cachedRows.getN(table, nStart, number);
+    public List<R> getN(int nStart, int number) throws MappingSystemException {
+        if (cachedRows.size() == mapper.size()) {
+            return cachedRows.getN(nStart, number);
         } else {
-            return mapper.getN(table, nStart, number);
+            return mapper.getN(nStart, number);
         }
     }
 
     @Override
-    public <R extends AbstractRow> List<R> getFetch(Table table, FetchParameter... parameters) throws MappingSystemException {
-        return mapper.getFetch(table, parameters);
+    public List<R> getFetch(FetchParameter... parameters) throws MappingSystemException {
+        return mapper.getFetch(parameters);
     }
 
     @Override
-    public <R extends AbstractRow> R add(R row) throws MappingSystemException {
+    public R add(R row) throws MappingSystemException {
         return cachedRows.add(mapper.add(row));
     }
 
     @Override
-    public <R extends AbstractRow> void change(R oldValue, R newValue) throws MappingSystemException {
+    public void change(R oldValue, R newValue) throws MappingSystemException {
         mapper.change(oldValue, newValue);
         cachedRows.change(oldValue, newValue);
     }
 
     @Override
-    public void delete(AbstractRow row) throws MappingSystemException {
+    public void delete(R row) throws MappingSystemException {
         mapper.delete(row);
         cachedRows.delete(row);
     }
 
     @Override
-    public int size(Table table) throws MappingSystemException {
-        return mapper.size(table);
+    public int size() throws MappingSystemException {
+        return mapper.size();
     }
 }
