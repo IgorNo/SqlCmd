@@ -43,7 +43,8 @@ public abstract class AbstractRow<R extends AbstractRow<R>> implements Unique<Ab
     }
 
     public <T extends AbstractRow<T>> T getForeignKeyValue(GenericTable<T> fk) throws MappingSystemException {
-        return (T) foreignKeys.get(fk.getId()).getRow(id);
+        ProxyRow row = foreignKeys.get(fk);
+        return (T) row.getRow(id);
     }
 
     public <T extends AbstractRow<T>> Id<T> getForeignKeyId(ForeignKey key, Class<T> rowClass)

@@ -28,7 +28,7 @@ public class HyperSqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @Override
     @Test
-    public void grantRevokePrivilege() throws MappingSystemException {
+    public void testGrantRevokePrivilege() throws MappingSystemException {
         PRIVILEGE_DAO.grant(tablePrivilege1);
         PRIVILEGE_DAO.revoke(tablePrivilege1, OnDeleteOptions.RESTRICT);
     }

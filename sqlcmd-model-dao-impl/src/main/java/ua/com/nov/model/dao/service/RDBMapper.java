@@ -7,6 +7,7 @@ import ua.com.nov.model.dao.exception.MappingSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.dao.impl.RowDao;
 import ua.com.nov.model.entity.data.AbstractRow;
+import ua.com.nov.model.entity.data.Row;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
 import ua.com.nov.model.entity.metadata.table.TableMapper;
 import ua.com.nov.model.entity.metadata.table.constraint.ForeignKey;
@@ -17,8 +18,8 @@ import java.util.List;
 
 public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     private DataSource dataSource;
-    private boolean checkConcurrentModification;
     private GenericTable<R> table;
+    private boolean checkConcurrentModification;
     private boolean immediateInitialization;
 
     public RDBMapper() {
@@ -26,6 +27,10 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
 
     public RDBMapper(GenericTable<R> table) {
         this.table = table;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
     }
 
     public void setDataSource(DataSource dataSource) {
@@ -109,7 +114,11 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
         AbstractRow.Builder<R> rowWithId = null;
         if (keyHolder != null) {
             try {
-                rowWithId = (AbstractRow.Builder<R>) Class.forName(row.getClass().getName() + "$Builder").newInstance();
+                if (row.getClass() == Row.class) {
+                    rowWithId = (AbstractRow.Builder<R>) new Row.Builder((GenericTable<Row>) table);
+                } else {
+                    rowWithId = (AbstractRow.Builder<R>) Class.forName(row.getClass().getName() + "$Builder").newInstance();
+                }
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new MappingBusinessLogicException("Create Builder Error.\n", e);
             }
@@ -126,7 +135,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
         new RowDao<R>(dataSource).update(newValue);
     }
 
-    protected void checkChanges(R oldValue) throws MappingSystemException {
+    private void checkChanges(R oldValue) throws MappingSystemException {
         R value = get(oldValue.getId());
         if (!oldValue.equals(value)) {
             throw new ConcurrentModificationException(String.format("Row '%s' has been already changed to '%s'.",
@@ -138,6 +147,11 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     public void delete(R row) throws MappingSystemException {
         if (isCheckConcurrentModification()) checkChanges(row);
         new RowDao<R>(dataSource).delete(row);
+    }
+
+    @Override
+    public void deleteAll() throws MappingSystemException {
+        new RowDao<R>(dataSource).deleteAll(table);
     }
 
     @Override

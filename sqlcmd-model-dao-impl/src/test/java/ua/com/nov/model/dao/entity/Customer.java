@@ -1,14 +1,20 @@
 package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
+import ua.com.nov.model.dao.impl.AbstractTableDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 public class Customer extends AbstractRow<Customer> {
+    private static final GenericTable<Customer> GENERIC_TABLE = new GenericTable<>(AbstractTableDaoTest.customers, Customer.class);
 
     private Customer(Builder builder) {
         super(builder);
         initId(new Id());
+    }
+
+    public static GenericTable<Customer> getGenericTable() {
+        return GENERIC_TABLE;
     }
 
     public int getCustomerId() {
@@ -34,7 +40,7 @@ public class Customer extends AbstractRow<Customer> {
     public static class Builder extends AbstractRow.Builder<Customer> {
 
         public Builder() {
-            super(AbstractRowDaoTest.customers);
+            super(GENERIC_TABLE);
         }
 
         public Builder(Customer customer) {
@@ -77,14 +83,14 @@ public class Customer extends AbstractRow<Customer> {
         }
     }
 
-    public static class Id extends AbstractRow.Id {
+    private static class Id extends AbstractRow.Id {
 
         public Id(int value) {
-            super(AbstractRowDaoTest.customers, value);
+            super(GENERIC_TABLE, value);
         }
 
         public Id() {
-            super(AbstractRowDaoTest.customers);
+            super(GENERIC_TABLE);
         }
 
     }

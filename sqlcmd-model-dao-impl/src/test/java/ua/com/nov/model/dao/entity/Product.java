@@ -1,15 +1,22 @@
 package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
+import ua.com.nov.model.dao.impl.AbstractTableDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 import java.math.BigDecimal;
 
 public class Product extends AbstractRow<Product> {
+    private static final GenericTable<Product> GENERIC_TABLE = new GenericTable<>(AbstractTableDaoTest.products, Product.class);
+
     public Product(Builder builder) {
         super(builder);
         initId(new Id());
+    }
+
+    public static GenericTable<Product> getGenericTable() {
+        return GENERIC_TABLE;
     }
 
     public int getProductId() {
@@ -30,7 +37,7 @@ public class Product extends AbstractRow<Product> {
 
     public static class Builder extends AbstractRow.Builder<Product> {
         public Builder() {
-            super(AbstractRowDaoTest.products);
+            super(GENERIC_TABLE);
         }
 
         public Builder(Product product) {
@@ -68,14 +75,14 @@ public class Product extends AbstractRow<Product> {
         }
     }
 
-    public static class Id extends AbstractRow.Id {
+    private static class Id extends AbstractRow.Id {
 
         public Id(int value) {
-            super(AbstractRowDaoTest.products, value);
+            super(GENERIC_TABLE, value);
         }
 
         public Id() {
-            super(AbstractRowDaoTest.products);
+            super(GENERIC_TABLE);
         }
 
     }

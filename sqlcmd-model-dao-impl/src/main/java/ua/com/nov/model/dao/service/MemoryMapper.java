@@ -7,13 +7,14 @@ import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
 
-    private static final Map<GenericTable<?>, Map<AbstractRow.Id<?>, AbstractRow<?>>> STORAGE = new ConcurrentHashMap<>();
+    private static Map<GenericTable<?>, Map<AbstractRow.Id<?>, AbstractRow<?>>> STORAGE = new ConcurrentHashMap<>();
 
     private GenericTable<R> table;
 
@@ -26,22 +27,8 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
         this.table = table;
     }
 
-    private AbstractRow addRowToCache(R row) {
-        if (!STORAGE.containsKey(row.getTable())) {
-            STORAGE.putIfAbsent(row.getTable(), new ConcurrentHashMap<>());
-        }
-        return STORAGE.get(row.getTable()).putIfAbsent(row.getId(), row);
-    }
-
-    private boolean removeRowFromCache(R row) {
-        if (!STORAGE.containsKey(row.getTable())) return false;
-        return STORAGE.get(row.getTable()).remove(row.getId(), row);
-    }
-
-    @Override
-    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
-        if (!STORAGE.containsKey(id.getTable())) return null;
-        return (R) STORAGE.get(id.getTable()).get(id);
+    static void clear() {
+        STORAGE = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -79,21 +66,35 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
+    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+        if (!STORAGE.containsKey(table)) return null;
+        return (R) STORAGE.get(id.getTable()).get(id);
+    }
+
+    @Override
     public R add(R row) throws MappingSystemException {
-        if (!STORAGE.containsKey(row.getTable())) {
-            STORAGE.putIfAbsent(row.getTable(), new ConcurrentHashMap<>());
+        STORAGE.putIfAbsent(table, new ConcurrentHashMap<>());
+        if (STORAGE.get(table).putIfAbsent(row.getId(), row) != null) {
+            throw new ConcurrentModificationException(String.format("Row with id '%s' has been already exist in table '%s'.",
+                    row.getId(), table.getName()));
         }
-        return (R) STORAGE.get(row.getTable()).putIfAbsent(row.getId(), row);
+        return row;
     }
 
     @Override
     public void change(R oldValue, R newValue) throws MappingSystemException {
-        STORAGE.get(newValue.getTable()).replace(oldValue.getId(), oldValue, newValue);
+        if (!STORAGE.get(table).replace(oldValue.getId(), oldValue, newValue)) {
+            throw new ConcurrentModificationException(String.format("Row '%s' has been already changed.", oldValue));
+        }
     }
 
     @Override
     public void delete(R row) throws MappingSystemException {
-        STORAGE.remove(row.getId(), row);
+        Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
+        if (!STORAGE.get(row.getTable()).remove(row.getId(), row)) {
+            throw new ConcurrentModificationException(String.format("Row with id '%s' has been already deleted.",
+                    row.getId()));
+        }
     }
 
     @Override
@@ -101,5 +102,10 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
         Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
         if (rowMap != null) return rowMap.size();
         return 0;
+    }
+
+    @Override
+    public void deleteAll() throws MappingSystemException {
+        STORAGE.remove(table);
     }
 }

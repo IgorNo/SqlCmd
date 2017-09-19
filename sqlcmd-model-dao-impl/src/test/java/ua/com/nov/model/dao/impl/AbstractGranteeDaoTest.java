@@ -53,7 +53,7 @@ public abstract class AbstractGranteeDaoTest {
     }
 
     @Test
-    public void grantRevokePrivilege() throws MappingSystemException {
+    public void testGrantRevokePrivilege() throws MappingSystemException {
         PRIVILEGE_DAO.grant(tablePrivilege1);
         PRIVILEGE_DAO.grant(columnPrivilege);
         PRIVILEGE_DAO.grant(tablePrivilege2);
@@ -68,27 +68,27 @@ public abstract class AbstractGranteeDaoTest {
     }
 
     @Test
-    public void readUser() throws MappingSystemException {
+    public void testReadUser() throws MappingSystemException {
         User result = USER_DAO.read(user1.getId());
         assertTrue(user1.equals(result));
         AbstractTableDaoTest.compareOptions(user1.getOptions(), result.getOptions());
     }
 
     @Test
-    public void readAllUsers() throws MappingSystemException {
+    public void testReadAllUsers() throws MappingSystemException {
         List<User> users = USER_DAO.readAll(user1.getId().getServer().getId());
         assertTrue(users.contains(user1));
     }
 
     @Test(expected = MappingBusinessLogicException.class)
-    public void deleteUser() throws MappingSystemException {
+    public void testDeleteUser() throws MappingSystemException {
         USER_DAO.delete(user1);
         USER_DAO.read(user1.getId());
         assertTrue(false);
     }
 
     @Test
-    public void updateUser() throws MappingSystemException {
+    public void testUpdateUser() throws MappingSystemException {
         User updatedUser = server.getUserBuilder(user1.getServer().getId(), user1.getName(), updatedUserOptions).build();
         USER_DAO.update(updatedUser);
         User result = USER_DAO.read(updatedUser.getId());

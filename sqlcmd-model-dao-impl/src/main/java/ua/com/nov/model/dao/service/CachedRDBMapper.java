@@ -7,14 +7,18 @@ import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 import javax.sql.DataSource;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     private final MemoryMapper<R> cachedRows = new MemoryMapper<>();
-
     private final RDBMapper<R> mapper = new RDBMapper();
 
     public CachedRDBMapper() {
+    }
+
+    public CachedRDBMapper(GenericTable<R> table) {
+        setTable(table);
     }
 
     @Override
@@ -27,6 +31,10 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
         cachedRows.setTable(table);
     }
 
+    public DataSource getDataSource() {
+        return mapper.getDataSource();
+    }
+
     public void setDataSource(DataSource dataSource) {
         mapper.setDataSource(dataSource);
     }
@@ -37,6 +45,10 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
 
     public void setImmediateInitialization(boolean immediateInitialization) {
         mapper.setImmediateInitialization(immediateInitialization);
+    }
+
+    public void clearCache() {
+        MemoryMapper.clear();
     }
 
     @Override
@@ -54,7 +66,13 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
         if (cachedRows.size() == mapper.size()) {
             return cachedRows.getAll();
         } else {
-            return mapper.getAll();
+            List<R> rows = mapper.getAll();
+            for (R row : rows) {
+                try {
+                    cachedRows.add(row);
+                } catch (ConcurrentModificationException e) { /*NOP*/}
+            }
+            return rows;
         }
     }
 
@@ -74,19 +92,30 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
 
     @Override
     public R add(R row) throws MappingSystemException {
-        return cachedRows.add(mapper.add(row));
+        R rowWithId = mapper.add(row);
+        cachedRows.add(rowWithId);
+        return rowWithId;
     }
 
     @Override
     public void change(R oldValue, R newValue) throws MappingSystemException {
         mapper.change(oldValue, newValue);
-        cachedRows.change(oldValue, newValue);
+        if (cachedRows.get(oldValue.getId()) != null)
+            cachedRows.change(oldValue, newValue);
+        else
+            cachedRows.add(newValue);
     }
 
     @Override
     public void delete(R row) throws MappingSystemException {
         mapper.delete(row);
-        cachedRows.delete(row);
+        if (cachedRows.get(row.getId()) != null) cachedRows.delete(row);
+    }
+
+    @Override
+    public void deleteAll() throws MappingSystemException {
+        mapper.deleteAll();
+        cachedRows.deleteAll();
     }
 
     @Override

@@ -39,7 +39,7 @@ public abstract class AbstractTableDaoTest {
     protected static final IndexDao INDEX_DAO = new IndexDao();
     protected static Database testDb;
     protected static DataSource dataSource;
-    protected static Table customers, products, orders, users, temp;
+    public static Table customers, products, orders, users, temp;
     protected static Schema testSchema;
 
     protected static MetaDataOptions<Table> tableOptions;

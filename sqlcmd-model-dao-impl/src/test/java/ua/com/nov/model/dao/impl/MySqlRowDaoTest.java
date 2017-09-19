@@ -22,8 +22,8 @@ public class MySqlRowDaoTest extends AbstractRowDaoTest {
 
     @Override
     @Test
-    public void updateRow() throws MappingSystemException {
-        super.updateRow();
+    public void testUpdateRow() throws MappingSystemException {
+        super.testUpdateRow();
         Row user = new Row.Builder(userList.get(0)).setValue("id", 1).setValue("login_", "update").build();
         ROW_DAO.update(user);
         AbstractRow result = ROW_DAO.read(user.getId());

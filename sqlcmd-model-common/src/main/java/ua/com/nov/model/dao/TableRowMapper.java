@@ -37,4 +37,9 @@ public interface TableRowMapper<R extends AbstractRow<R>> extends Mapper<Abstrac
     @Override
     void delete(R row) throws MappingSystemException;
 
+    @Override
+    void deleteAll() throws MappingSystemException;
+
+    @Override
+    int size() throws MappingSystemException;
 }

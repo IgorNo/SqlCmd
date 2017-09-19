@@ -2,19 +2,24 @@ package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.exception.MappingSystemException;
-import ua.com.nov.model.dao.impl.AbstractRowDaoTest;
+import ua.com.nov.model.dao.impl.AbstractTableDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
+import ua.com.nov.model.entity.metadata.table.GenericTable;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 
-import static ua.com.nov.model.dao.impl.AbstractRowDaoTest.products;
-
 public class Order extends AbstractRow<Order> {
+    private static final GenericTable<Order> GENERIC_TABLE = new GenericTable<>(AbstractTableDaoTest.orders, Order.class);
+
     public Order(Builder builder) {
         super(builder);
         initId(new Id());
+    }
+
+    public static GenericTable<Order> getGenericTable() {
+        return GENERIC_TABLE;
     }
 
     public int getOrderId() {
@@ -34,16 +39,16 @@ public class Order extends AbstractRow<Order> {
     }
 
     public Product getProduct() throws MappingSystemException {
-        return (Product) getForeignKeyValue(products);
+        return (Product) getForeignKeyValue(Product.getGenericTable());
     }
 
     public Customer getCustomer() throws MappingSystemException {
-        return (Customer) getForeignKeyValue(AbstractRowDaoTest.customers);
+        return (Customer) getForeignKeyValue(Customer.getGenericTable());
     }
 
     public static class Builder extends AbstractRow.Builder<Order> {
         public Builder() {
-            super(AbstractRowDaoTest.orders);
+            super(GENERIC_TABLE);
         }
 
         public Builder(Order order) {
@@ -94,11 +99,11 @@ public class Order extends AbstractRow<Order> {
     public static class Id extends AbstractRow.Id {
 
         public Id(int value) {
-            super(AbstractRowDaoTest.orders, value);
+            super(GENERIC_TABLE, value);
         }
 
         public Id() {
-            super(AbstractRowDaoTest.orders);
+            super(GENERIC_TABLE);
         }
 
     }

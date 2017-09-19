@@ -24,5 +24,7 @@ public interface Mapper<I, E extends Unique<I>, C> {
 
     void delete(E row) throws MappingSystemException;
 
+    void deleteAll() throws MappingSystemException;
+
     int size() throws MappingSystemException;
 }
