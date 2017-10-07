@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.DataManipulationDao;
-import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.BusinessLogicException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.dao.statement.AbstractDataStmtSource;
 import ua.com.nov.model.dao.statement.SqlStatement;
@@ -31,7 +31,7 @@ public class RowDao<R extends AbstractRow<R>>
     }
 
     @Override
-    public KeyHolder insert(R value) throws MappingSystemException {
+    public KeyHolder insert(R value) throws DAOSystemException {
         for (Column column : value.getTable().getColumns()) {
             if (column.isAutoIncrement()) {
                 SqlStatement createStmt = getSqlStmtSource(value.getTable().getServer()).getCreateStmt(value);
@@ -49,18 +49,18 @@ public class RowDao<R extends AbstractRow<R>>
     }
 
     @Override
-    public List<R> readFetch(GenericTable<R> table, FetchParameter... parameters) throws MappingSystemException {
+    public List<R> readFetch(GenericTable<R> table, FetchParameter... parameters) throws DAOSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadFetchStmt(parameters);
         return getExecutor().executeQueryStmt(sqlStmt, getRowMapper(table));
     }
 
     @Override
-    public void deleteAll(Table table) throws MappingSystemException {
+    public void deleteAll(Table table) throws DAOSystemException {
         getExecutor().executeUpdateStmt(getSqlStmtSource(table.getServer()).getDeleteAllStmt(table));
     }
 
     @Override
-    public int count(Table table) throws MappingSystemException {
+    public int count(Table table) throws DAOSystemException {
         return getExecutor()
                 .executeQueryForObjectStmt(getSqlStmtSource(table.getServer()).getCountStmt(table), Integer.class);
     }
@@ -76,7 +76,7 @@ public class RowDao<R extends AbstractRow<R>>
     }
 
     @Override
-    public List<R> readN(GenericTable<R> table, long nStart, int number) throws MappingSystemException {
+    public List<R> readN(GenericTable<R> table, long nStart, int number) throws DAOSystemException {
         SqlStatement sqlStmt = getSqlStmtSource(table.getServer()).getReadNStmt(table, nStart, number);
         return getExecutor().executeQueryStmt(sqlStmt, getRowMapper(table));
     }
@@ -93,7 +93,7 @@ public class RowDao<R extends AbstractRow<R>>
                     try {
                         row = (AbstractRow.Builder<R>) Class.forName(table.getRowClass().getName() + "$Builder").newInstance();
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                        throw new MappingBusinessLogicException("Create Builder Error.\n", e);
+                        throw new BusinessLogicException("Create Builder Error.\n", e);
                     }
                 }
                 setRowValues(rs, row, table);

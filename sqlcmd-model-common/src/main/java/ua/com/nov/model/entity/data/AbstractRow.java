@@ -2,8 +2,8 @@ package ua.com.nov.model.entity.data;
 
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.TableRowMapper;
-import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.BusinessLogicException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.entity.Buildable;
 import ua.com.nov.model.entity.Persistance;
 import ua.com.nov.model.entity.Unique;
@@ -42,13 +42,13 @@ public abstract class AbstractRow<R extends AbstractRow<R>> implements Unique<Ab
         return (T) values[ordinalPosition - 1];
     }
 
-    public <T extends AbstractRow<T>> T getForeignKeyValue(GenericTable<T> fk) throws MappingSystemException {
+    public <T extends AbstractRow<T>> T getForeignKeyValue(GenericTable<T> fk) throws DAOSystemException {
         ProxyRow row = foreignKeys.get(fk);
         return (T) row.getRow(id);
     }
 
     public <T extends AbstractRow<T>> Id<T> getForeignKeyId(ForeignKey key, Class<T> rowClass)
-            throws MappingSystemException {
+            throws DAOSystemException {
 
         int number = key.getNumberOfColumns();
         Object[] keys = new Object[number];
@@ -63,11 +63,11 @@ public abstract class AbstractRow<R extends AbstractRow<R>> implements Unique<Ab
             return (Id<T>) constructor.newInstance(table, keys);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
                 | InvocationTargetException e) {
-            throw new MappingBusinessLogicException("Create Id Error.\n", e);
+            throw new BusinessLogicException("Create Id Error.\n", e);
         }
     }
 
-    public AbstractRow getForeignKeyValue(String fk) throws MappingSystemException {
+    public AbstractRow getForeignKeyValue(String fk) throws DAOSystemException {
         for (Map.Entry<GenericTable<?>, ProxyRow> entry : foreignKeys.entrySet()) {
             if (entry.getKey().getName().equalsIgnoreCase(fk)) return entry.getValue().getRow(id);
         }

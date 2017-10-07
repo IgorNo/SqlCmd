@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
-import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
+import ua.com.nov.model.entity.metadata.server.HsqldbServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class HyperSqlColumnOptions extends ColumnOptions {
     public static class Builder extends ColumnOptions.Builder<HyperSqlColumnOptions> {
 
         public Builder() {
-            super(HyperSqlServer.class);
+            super(HsqldbServer.class);
         }
 
         @Override

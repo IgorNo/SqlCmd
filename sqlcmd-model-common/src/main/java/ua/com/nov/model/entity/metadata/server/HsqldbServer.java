@@ -23,9 +23,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HyperSqlServer extends Server {
+public class HsqldbServer extends Server {
 
-    public HyperSqlServer(String dbUrl) {
+    public HsqldbServer(String dbUrl) {
         super(dbUrl);
         getTypesMap().put(DataTypes.LONGVARCHAR, "LONGVARCHAR");
         List<DbDataType> dataTypeList = new ArrayList<>();
@@ -59,7 +59,7 @@ public class HyperSqlServer extends Server {
             }
 
             @Override
-            public SqlStatement getDeleteStmt(Database db) {
+            public SqlStatement getDeleteStmt(Database.Id db) {
                 throw new UnsupportedOperationException();
             }
 
@@ -76,7 +76,7 @@ public class HyperSqlServer extends Server {
             @Override
             public SqlStatement getRenameStmt(E entity, String newName) {
                 return new SqlStatement.Builder(String.format("ALTER %s %s RENAME TO %s",
-                       entity.getId().getMdName(), entity.getName(), newName)).build();
+                        entity.getMdName(), entity.getName(), newName)).build();
             }
         };
     }

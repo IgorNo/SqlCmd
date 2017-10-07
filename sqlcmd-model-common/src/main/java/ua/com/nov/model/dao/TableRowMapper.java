@@ -1,6 +1,6 @@
 package ua.com.nov.model.dao;
 
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
@@ -17,29 +17,29 @@ public interface TableRowMapper<R extends AbstractRow<R>> extends Mapper<Abstrac
     }
 
     @Override
-    R get(AbstractRow.Id<R> id) throws MappingSystemException;
+    R get(AbstractRow.Id<R> id) throws DAOSystemException;
 
     @Override
-    List<R> getAll() throws MappingSystemException;
+    List<R> getAll() throws DAOSystemException;
 
     @Override
-    List<R> getN(int nStart, int number) throws MappingSystemException;
+    List<R> getN(int nStart, int number) throws DAOSystemException;
 
     @Override
-    List<R> getFetch(FetchParameter... parameters) throws MappingSystemException;
+    List<R> getFetch(FetchParameter... parameters) throws DAOSystemException;
 
     @Override
-    R add(R row) throws MappingSystemException;
+    R add(R row) throws DAOSystemException;
 
     @Override
-    void change(R oldValue, R newValue) throws MappingSystemException;
+    void change(R oldValue, R newValue) throws DAOSystemException;
 
     @Override
-    void delete(R row) throws MappingSystemException;
+    void delete(R row) throws DAOSystemException;
 
     @Override
-    void deleteAll() throws MappingSystemException;
+    void deleteAll() throws DAOSystemException;
 
     @Override
-    int size() throws MappingSystemException;
+    int size() throws DAOSystemException;
 }

@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 
 import javax.sql.DataSource;
@@ -31,18 +31,18 @@ public class DMLSqlExecutor extends SqlExecutor {
     }
 
     @Override
-    public void executeUpdateStmt(SqlStatement sqlStmt) throws MappingSystemException {
+    public void executeUpdateStmt(SqlStatement sqlStmt) throws DAOSystemException {
         if (sqlStmt != null) {
             try {
                 jdbcTemplate.update(sqlStmt.getSql(), sqlStmt.getValues(), sqlStmt.getValueTypes());
             } catch (DataAccessException e) {
-                throw new MappingSystemException("DDL DAO update exception.\n", e);
+                throw new DAOSystemException("DDL DAO update exception.\n", e);
             }
         }
     }
 
     @Override
-    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws MappingSystemException {
+    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws DAOSystemException {
         try {
             PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlStmt.getSql(),
                     sqlStmt.getSqlParameters());
@@ -51,12 +51,12 @@ public class DMLSqlExecutor extends SqlExecutor {
             jdbcTemplate.update(pscf.newPreparedStatementCreator(sqlStmt.getValues()), keyHolder);
             return keyHolder;
         } catch (DataAccessException e) {
-            throw new MappingSystemException("DDL DAO update exception.\n", e);
+            throw new DAOSystemException("DDL DAO update exception.\n", e);
         }
     }
 
     @Override
-    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws MappingSystemException {
+    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DAOSystemException {
         return jdbcTemplate.query(sqlStmt.getSql(), sqlStmt.getValues(), sqlStmt.getValueTypes(), mapper);
     }
 }

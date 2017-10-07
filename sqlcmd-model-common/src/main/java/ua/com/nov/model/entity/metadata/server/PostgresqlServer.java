@@ -24,9 +24,9 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PostgreSqlServer extends Server {
+public class PostgresqlServer extends Server {
 
-    public PostgreSqlServer(String dbUrl) {
+    public PostgresqlServer(String dbUrl) {
         super(dbUrl);
         getTypesMap().put(DataTypes.LONGVARCHAR, "text");
     }

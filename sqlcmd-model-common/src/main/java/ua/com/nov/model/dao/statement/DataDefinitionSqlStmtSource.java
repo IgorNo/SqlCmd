@@ -4,7 +4,7 @@ public interface DataDefinitionSqlStmtSource<I,E,C> extends SqlStatementSource<I
 
     SqlStatement getCreateIfNotExistsStmt(E entity);
 
-    SqlStatement getDeleteIfExistStmt(E entity);
+    SqlStatement getDeleteIfExistStmt(I eId);
 
     SqlStatement getRenameStmt(E entity, String newName);
 

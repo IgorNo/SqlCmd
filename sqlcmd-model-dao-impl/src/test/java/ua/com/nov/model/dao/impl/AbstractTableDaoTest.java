@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.BusinessLogicException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.entity.MetaDataId;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
@@ -52,7 +52,7 @@ public abstract class AbstractTableDaoTest {
 
     protected static void createTestData(String catalog, String schema, String aiTypeName, String tableType,
                                          Optional<Schema> options)
-            throws MappingSystemException, MappingBusinessLogicException {
+            throws DAOSystemException, BusinessLogicException {
         testDb = new DatabaseDao(dataSource).read(testDb.getId());
         SCHEMA_DAO.setDataSource(dataSource);
         TABLE_DAO.setDataSource(dataSource);
@@ -125,7 +125,7 @@ public abstract class AbstractTableDaoTest {
                 .build();
     }
 
-    protected static void tearDownClass() throws SQLException, MappingSystemException {
+    protected static void tearDownClass() throws SQLException, DAOSystemException {
         dataSource.getConnection().close();
     }
 
@@ -139,7 +139,7 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Before
-    public void setUp() throws MappingSystemException, MappingBusinessLogicException {
+    public void setUp() throws DAOSystemException, BusinessLogicException {
         tearDown();
         SCHEMA_DAO.create(testSchema);
         TABLE_DAO.create(customers);
@@ -149,7 +149,7 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testReadTableMetaData() throws MappingSystemException {
+    public void testReadTableMetaData() throws DAOSystemException {
         Table table = TABLE_DAO.read(customers.getId());
         assertTrue(table.equals(customers));
         assertTrue(table.getPrimaryKey().equals(customers.getPrimaryKey()));
@@ -188,7 +188,7 @@ public abstract class AbstractTableDaoTest {
 
 
     @Test
-    public void testUpdateTable() throws MappingSystemException, MappingBusinessLogicException {
+    public void testUpdateTable() throws DAOSystemException, BusinessLogicException {
         Table table = new Table.Builder(users.getId()).viewName("New Comment").options(getUpdateTableOptions()).build();
         TABLE_DAO.update(table);
         Table result = TABLE_DAO.read(users.getId());
@@ -229,43 +229,43 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testReadSchema() throws MappingSystemException {
+    public void testReadSchema() throws DAOSystemException {
         Schema result = SCHEMA_DAO.read(testSchema.getId());
         assertTrue(result.equals(testSchema));
     }
 
     @Test
-    public void testReadAllSchemas() throws MappingSystemException {
+    public void testReadAllSchemas() throws DAOSystemException {
         List<Schema> schemas = SCHEMA_DAO.readAll(testDb.getId());
         assertTrue(schemas.size() > 1);
         assertTrue(schemas.contains(testSchema));
     }
 
-    @Test(expected = MappingBusinessLogicException.class)
-    public void testDeleteSchema() throws MappingSystemException {
-        SCHEMA_DAO.delete(testSchema);
+    @Test(expected = BusinessLogicException.class)
+    public void testDeleteSchema() throws DAOSystemException {
+        SCHEMA_DAO.delete(testSchema.getId());
         SCHEMA_DAO.read(testSchema.getId());
         assertTrue(false);
     }
 
     @Test
-    public void testRenameSchema() throws MappingSystemException {
+    public void testRenameSchema() throws DAOSystemException {
         Schema.Id updatedId = new Schema.Id(testDb.getId(), testSchema.getId().getCatalog(), "new_name");
         SCHEMA_DAO.rename(testSchema, updatedId.getName());
         Schema result = SCHEMA_DAO.read(updatedId);
         assertTrue(result.getName().equalsIgnoreCase(updatedId.getName()));
-        SCHEMA_DAO.delete(result);
+        SCHEMA_DAO.delete(result.getId());
     }
 
     @Test
-    public void testCreateTemporaryTable() throws MappingSystemException {
+    public void testCreateTemporaryTable() throws DAOSystemException {
         TABLE_DAO.create(temp);
         Table readTable = TABLE_DAO.read(temp.getId());
         assertTrue(readTable.equals(temp));
     }
 
     @Test
-    public void testReadAllTables() throws MappingSystemException {
+    public void testReadAllTables() throws DAOSystemException {
         List<Table> tables = TABLE_DAO.readAll(customers.getId().getContainerId());
         assertTrue(tables.contains(customers));
         assertTrue(tables.contains(products));
@@ -273,48 +273,48 @@ public abstract class AbstractTableDaoTest {
         assertTrue(tables.contains(users));
     }
 
-    @Test(expected = MappingBusinessLogicException.class)
-    public void testDeleteTable() throws MappingSystemException, MappingBusinessLogicException {
-        TABLE_DAO.delete(orders);
+    @Test(expected = BusinessLogicException.class)
+    public void testDeleteTable() throws DAOSystemException, BusinessLogicException {
+        TABLE_DAO.delete(orders.getId());
         TABLE_DAO.read(orders.getId());
         assertTrue(false);
     }
 
     @Test
-    public void testRenameTable() throws MappingSystemException {
+    public void testRenameTable() throws DAOSystemException {
         renameMetaData(TABLE_DAO, users, new Table.Id(users.getId().getContainerId(), "new_name"));
     }
 
     private <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     void renameMetaData(MetaDataDao<I, E, C> dao, E entity, I updatedId)
-            throws MappingSystemException {
+            throws DAOSystemException {
         dao.rename(entity, updatedId.getName());
         E result = dao.read(updatedId);
         assertTrue(result.getName().equalsIgnoreCase(updatedId.getName()));
     }
 
     @Test
-    public void testRenameColumn() throws MappingSystemException {
+    public void testRenameColumn() throws DAOSystemException {
         renameMetaData(COLUMN_DAO, customers.getColumn("name"), new Column.Id(customers.getId(), "new_name"));
     }
 
     @Test
-    public void testRenamePrimaryKey() throws MappingSystemException {
+    public void testRenamePrimaryKey() throws DAOSystemException {
         renameMetaData(PRIMARY_KEY_DAO, customers.getPrimaryKey(), new PrimaryKey.Id(customers.getId(), "new_name"));
     }
 
     @Test
-    public void testRenameForeignKey() throws MappingSystemException, MappingBusinessLogicException {
+    public void testRenameForeignKey() throws DAOSystemException, BusinessLogicException {
         renameMetaData(FOREIGN_KEY_DAO, orders.getForeignKeyList().get(0), new ForeignKey.Id(orders.getId(), "new_name"));
     }
 
     @Test
-    public void testRenameUniqueKey() throws MappingSystemException, MappingBusinessLogicException {
+    public void testRenameUniqueKey() throws DAOSystemException, BusinessLogicException {
         renameMetaData(UNIQUE_KEY_DAO, customers.getUniqueKeyList().get(0), new UniqueKey.Id(customers.getId(), "new_name"));
     }
 
     @Test
-    public void testAddColumn() throws MappingSystemException, MappingBusinessLogicException {
+    public void testAddColumn() throws DAOSystemException, BusinessLogicException {
         Column testCol = new Column.Builder(customers.getId(), "test", integer).build();
         COLUMN_DAO.create(testCol);
         Column readCol = COLUMN_DAO.read(testCol.getId());
@@ -322,14 +322,14 @@ public abstract class AbstractTableDaoTest {
     }
 
     @Test
-    public void testReadColumn() throws MappingSystemException {
+    public void testReadColumn() throws DAOSystemException {
         Column testCol = customers.getColumn("name");
         Column readCol = COLUMN_DAO.read(testCol.getId());
         assertTrue(testCol.equals(readCol));
     }
 
     @Test
-    public void testUpdateColumn() throws MappingSystemException, MappingBusinessLogicException {
+    public void testUpdateColumn() throws DAOSystemException, BusinessLogicException {
         Column col = new Column.Builder(users.getColumn("password").getId(), character).size(20)
                 .viewName("Changed column").notNull().options(getUpdateColumnOptions()).build();
         COLUMN_DAO.update(col);
@@ -339,65 +339,65 @@ public abstract class AbstractTableDaoTest {
 
     protected abstract ColumnOptions.Builder<? extends ColumnOptions> getUpdateColumnOptions();
 
-    @Test(expected = MappingBusinessLogicException.class)
-    public void testDeleteColumn() throws MappingSystemException {
-        COLUMN_DAO.delete(customers.getColumn("address"));
+    @Test(expected = BusinessLogicException.class)
+    public void testDeleteColumn() throws DAOSystemException {
+        COLUMN_DAO.delete(customers.getColumn("address").getId());
         COLUMN_DAO.read(customers.getColumn("address").getId());
         assertTrue(false);
     }
 
     @Test
-    public void testReadDeleteAddPrimaryKey() throws MappingSystemException, MappingBusinessLogicException {
+    public void testReadDeleteAddPrimaryKey() throws DAOSystemException, BusinessLogicException {
         Table testTable = TABLE_DAO.read(users.getId());
         readDeleteAddMetaData(PRIMARY_KEY_DAO, testTable.getPrimaryKey().getId(), users.getPrimaryKey());
     }
 
     protected <I extends AbstractMetaData.Id<C>, E extends AbstractMetaData<I>, C extends MetaDataId>
     void readDeleteAddMetaData(MetaDataDao<I, E, C> dao, I mdId, E newMd)
-            throws MappingSystemException {
+            throws DAOSystemException {
         E md = dao.read(mdId);
         assertTrue(md.getId().equals(mdId));
-        dao.delete(md);
+        dao.delete(md.getId());
         try {
             dao.read(mdId);
             assertTrue(false);
-        } catch (MappingBusinessLogicException e) {/*NOP*/}
+        } catch (BusinessLogicException e) {/*NOP*/}
         dao.create(newMd);
         E result = dao.read(newMd.getId());
         assertTrue(result.equals(md));
     }
 
     @Test
-    public void testReadDeleteAddForeignKey() throws MappingSystemException {
+    public void testReadDeleteAddForeignKey() throws DAOSystemException {
         Table testTable = TABLE_DAO.read(orders.getId());
         ForeignKey fk = orders.getForeignKeyList().get(0);
         readDeleteAddMetaData(FOREIGN_KEY_DAO, testTable.getForeignKey(fk.getName()).getId(), fk);
     }
 
     @Test
-    public void testReadDeleteAddUniqueKey() throws MappingSystemException {
+    public void testReadDeleteAddUniqueKey() throws DAOSystemException {
         Table testTable = TABLE_DAO.read(customers.getId());
         UniqueKey uk = customers.getUniqueKeyList().get(0);
         readDeleteAddMetaData(UNIQUE_KEY_DAO, testTable.getUniqueKey(uk.getName()).getId(), uk);
     }
 
     @Test
-    public void testDeleteAddReadIndex() throws MappingSystemException {
+    public void testDeleteAddReadIndex() throws DAOSystemException {
         Table testTable = TABLE_DAO.read(customers.getId());
         Index index = customers.getIndexList().get(0);
         readDeleteAddMetaData(INDEX_DAO, testTable.getIndex(index.getName()).getId(), index);
     }
 
     @After
-    public void tearDown() throws MappingSystemException, MappingBusinessLogicException {
-        SCHEMA_DAO.deleteIfExist(testSchema);
+    public void tearDown() throws DAOSystemException, BusinessLogicException {
+        SCHEMA_DAO.deleteIfExist(testSchema.getId());
         List<Table> tables = TABLE_DAO.readAll(customers.getId().getContainerId());
         if (tables.contains(orders)) {
-            TABLE_DAO.delete(orders);
+            TABLE_DAO.delete(orders.getId());
             tables.remove(orders);
         }
         for (Table table : tables) {
-            TABLE_DAO.delete(table);
+            TABLE_DAO.delete(table.getId());
         }
     }
 }

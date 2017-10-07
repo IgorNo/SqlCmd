@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.grantee.user;
 
-import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.entity.metadata.server.MysqlServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class MySqlUserOptions extends UserOptions {
         private String host = "%";
 
         public Builder() {
-            super(MySqlServer.class);
+            super(MysqlServer.class);
         }
 
         @Override

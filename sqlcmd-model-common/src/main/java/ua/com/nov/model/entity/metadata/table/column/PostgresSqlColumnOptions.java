@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.table.column;
 
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class PostgresSqlColumnOptions extends ColumnOptions {
     public static class Builder extends ColumnOptions.Builder<PostgresSqlColumnOptions> {
 
         public Builder() {
-            super(PostgreSqlServer.class);
+            super(PostgresqlServer.class);
         }
 
         @Override

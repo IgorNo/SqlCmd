@@ -34,9 +34,9 @@ import java.sql.SQLException;
 
 import static ua.com.nov.model.entity.metadata.grantee.user.MySqlUserOptions.ResourceOption.*;
 
-public final class MySqlServer extends Server {
+public final class MysqlServer extends Server {
 
-    public MySqlServer(String dbUrl) {
+    public MysqlServer(String dbUrl) {
         super(dbUrl);
         initTypesMap();
     }
@@ -109,12 +109,12 @@ public final class MySqlServer extends Server {
     AbstractDatabaseMdSqlStatements<I, E, C> getDatabaseMdSqlStmtSource() {
         return new AbstractDatabaseMdSqlStatements<I, E, C>() {
             @Override
-            public SqlStatement getDeleteStmt(E entity) {
-                if (entity.getClass() == Index.class)
+            public SqlStatement getDeleteStmt(I eId) {
+                if (eId.getClass() == Index.Id.class)
                     return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP INDEX %s",
-                            entity.getId().getContainerId().getFullName(), entity.getName())).build();
+                            eId.getContainerId().getFullName(), eId.getName())).build();
                 else
-                    return super.getDeleteStmt(entity);
+                    return super.getDeleteStmt(eId);
             }
 
         };
@@ -178,16 +178,16 @@ public final class MySqlServer extends Server {
     public <I extends TableMd.Id, E extends TableMd> AbstractTableMdSqlStatements<I, E> getTableMdSqlStmtSource() {
         return new AbstractTableMdSqlStatements<I, E>() {
             @Override
-            public SqlStatement getDeleteStmt(TableMd entity) {
-                if (entity.getClass() == UniqueKey.class)
+            public SqlStatement getDeleteStmt(I id) {
+                if (id.getClass().equals(UniqueKey.Id.class))
                     return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP KEY %s",
-                            entity.getTableId().getFullName(), entity.getName())).build();
-                if (entity.getClass() == ForeignKey.class)
+                            id.getTableId().getFullName(), id.getName())).build();
+                if (id.getClass().equals(ForeignKey.Id.class))
                     return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP FOREIGN KEY %s",
-                            entity.getTableId().getFullName(), entity.getName())).build();
-                if (entity.getClass() == PrimaryKey.class)
-                    return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP %s",
-                            entity.getTableId().getFullName(), entity.getType())).build();
+                            id.getTableId().getFullName(), id.getName())).build();
+                if (id.getClass().equals(PrimaryKey.Id.class))
+                    return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP PRIMARY KEY",
+                            id.getTableId().getFullName())).build();
                 throw new UnsupportedOperationException();
             }
 

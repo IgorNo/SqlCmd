@@ -29,6 +29,12 @@ public class UniqueKey extends Key {
     }
 
     private UniqueKey(Builder builder) {
-        super(builder);
+        super(new Id(builder.getTableId(), builder.getName()), builder);
+    }
+
+    public static class Id extends Constraint.Id {
+        public Id(Table.Id tableId, String name) {
+            super(tableId, name);
+        }
     }
 }

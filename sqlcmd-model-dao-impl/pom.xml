@@ -11,8 +11,8 @@
 
     <parent>
         <artifactId>SqlCmd-parent</artifactId>
-        <groupId>${myapp.groupid}</groupId>
-        <version>${myapp.version}</version>
+        <groupId>ua.com.nov</groupId>
+        <version>0.1</version>
     </parent>
 
     <dependencies>

@@ -4,7 +4,7 @@ import org.junit.*;
 import ua.com.nov.model.dao.entity.Customer;
 import ua.com.nov.model.dao.entity.Order;
 import ua.com.nov.model.dao.entity.Product;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.dao.service.CachedRDBMapper;
 import ua.com.nov.model.entity.data.AbstractRow;
@@ -35,7 +35,7 @@ public class CachedRDBMapperTest {
 
 
     @BeforeClass
-    public static void setUpClass() throws MappingSystemException, SQLException {
+    public static void setUpClass() throws DAOSystemException, SQLException {
         MySqlTableDaoTest.setUpClass();
         tableDaoTest.setUp();
 
@@ -54,13 +54,13 @@ public class CachedRDBMapperTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, MappingSystemException {
+    public static void tearDownClass() throws SQLException, DAOSystemException {
         tableDaoTest.tearDown();
         MySqlTableDaoTest.tearDownClass();
     }
 
     @Before
-    public void setUp() throws MappingSystemException {
+    public void setUp() throws DAOSystemException {
         tearDown();
         userList = new ArrayList<>();
         Row user = new Row.Builder(users).setValue("login", "User1")
@@ -124,7 +124,7 @@ public class CachedRDBMapperTest {
     }
 
     @After
-    public void tearDown() throws MappingSystemException {
+    public void tearDown() throws DAOSystemException {
         userMapper.deleteAll();
         orderMapper.deleteAll();
         productMapper.deleteAll();
@@ -132,7 +132,7 @@ public class CachedRDBMapperTest {
     }
 
     @Test
-    public void testGetRow() throws MappingSystemException {
+    public void testGetRow() throws DAOSystemException {
         for (Row row : userList) {
             // read from database
             AbstractRow result = userMapper.get(row.getId());
@@ -165,7 +165,7 @@ public class CachedRDBMapperTest {
     }
 
     @Test
-    public void testGetAllRow() throws MappingSystemException {
+    public void testGetAllRow() throws DAOSystemException {
         customerMapper.get(customerList.get(0).getId());
         List<Customer> allCustomers = customerMapper.getAll();
         for (Customer row : customerList) {
@@ -191,7 +191,7 @@ public class CachedRDBMapperTest {
     }
 
     @Test
-    public void testReadNRow() throws MappingSystemException {
+    public void testReadNRow() throws DAOSystemException {
         List<Product> products = productMapper.getN(1, 2);
         assertTrue(products.size() == 2);
         assertTrue(products.contains(productList.get(1)));
@@ -206,14 +206,14 @@ public class CachedRDBMapperTest {
     }
 
     @Test(expected = NoSuchEntityException.class)
-    public void testDeleteRow() throws MappingSystemException {
+    public void testDeleteRow() throws DAOSystemException {
         orderMapper.delete(orderList.get(0));
         orderMapper.get(orderList.get(0).getId());
         assertTrue(false);
     }
 
     @Test
-    public void testUpdateRow() throws MappingSystemException {
+    public void testUpdateRow() throws DAOSystemException {
         Customer customer = new Customer.Builder(customerList.get(0)).rating(2000).phone("888-48-48").build();
         customerMapper.change(customerList.get(0), customer);
         Customer result = customerMapper.get(customer.getId());
@@ -221,7 +221,7 @@ public class CachedRDBMapperTest {
     }
 
     @Test
-    public void testCountRow() throws MappingSystemException {
+    public void testCountRow() throws DAOSystemException {
         assertTrue(productMapper.size() == 5);
     }
 }

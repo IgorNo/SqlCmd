@@ -7,7 +7,7 @@ import org.junit.Test;
 import ua.com.nov.model.dao.entity.Customer;
 import ua.com.nov.model.dao.entity.Order;
 import ua.com.nov.model.dao.entity.Product;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.exception.NoSuchEntityException;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.data.Row;
@@ -37,7 +37,7 @@ public abstract class AbstractRowDaoTest {
     protected static List<Product> productList;
     protected static List<Order> orderList;
 
-    public static void setUpClass() throws MappingSystemException, SQLException {
+    public static void setUpClass() throws DAOSystemException, SQLException {
         tableDaoTest.setUp();
 
         ROW_DAO.setDataSource(tableDaoTest.dataSource);
@@ -49,13 +49,13 @@ public abstract class AbstractRowDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, MappingSystemException {
+    public static void tearDownClass() throws SQLException, DAOSystemException {
         tableDaoTest.tearDown();
         ORDER_DAO.getDataSource().getConnection().close();
     }
 
     @Before
-    public void setUp() throws MappingSystemException {
+    public void setUp() throws DAOSystemException {
 
         userList = new ArrayList<>();
         Row.Builder user = new Row.Builder(users).setValue("login", "User1")
@@ -114,7 +114,7 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void testReadRow() throws MappingSystemException {
+    public void testReadRow() throws DAOSystemException {
         for (Row row : userList) {
             AbstractRow result = ROW_DAO.read(row.getId());
             assertTrue(row.getValue("id").equals(result.getValue("id")));
@@ -137,7 +137,7 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void testReadAllRow() throws MappingSystemException {
+    public void testReadAllRow() throws DAOSystemException {
         List<Customer> allCustomers = CUSTOMER_DAO.readAll(customerList.get(0).getTable());
         for (Customer row : customerList) {
             assertTrue(allCustomers.contains(row));
@@ -153,7 +153,7 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void testReadNRow() throws MappingSystemException {
+    public void testReadNRow() throws DAOSystemException {
         List<Product> products = PRODUCT_DAO.readN(productList.get(0).getTable(), 1, 2);
         assertTrue(products.size() == 2);
         assertTrue(products.contains(AbstractRowDaoTest.productList.get(1)));
@@ -161,14 +161,14 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test(expected = NoSuchEntityException.class)
-    public void testDeleteRow() throws MappingSystemException {
-        ORDER_DAO.delete(orderList.get(0));
+    public void testDeleteRow() throws DAOSystemException {
+        ORDER_DAO.delete(orderList.get(0).getId());
         ORDER_DAO.read(orderList.get(0).getId());
         assertTrue(false);
     }
 
     @Test
-    public void testUpdateRow() throws MappingSystemException {
+    public void testUpdateRow() throws DAOSystemException {
         Customer customer = new Customer.Builder(customerList.get(0)).rating(2000).phone("888-48-48").build();
         CUSTOMER_DAO.update(customer);
         Customer result = CUSTOMER_DAO.read(customer.getId());
@@ -176,12 +176,12 @@ public abstract class AbstractRowDaoTest {
     }
 
     @Test
-    public void testCountRow() throws MappingSystemException {
+    public void testCountRow() throws DAOSystemException {
         assertTrue(PRODUCT_DAO.count(productList.get(0).getTable()) == 5);
     }
 
     @After
-    public void tearDown() throws MappingSystemException {
+    public void tearDown() throws DAOSystemException {
         ROW_DAO.deleteAll(AbstractTableDaoTest.users);
         ROW_DAO.deleteAll(orderList.get(0).getTable());
         ROW_DAO.deleteAll(productList.get(0).getTable());

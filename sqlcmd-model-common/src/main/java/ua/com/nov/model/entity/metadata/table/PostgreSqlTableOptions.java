@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -96,7 +96,7 @@ public class PostgreSqlTableOptions extends MetaDataOptions<Table> {
     public static class Builder extends MetaDataOptions.Builder<PostgreSqlTableOptions> {
 
         public Builder() {
-            super(PostgreSqlServer.class);
+            super(PostgresqlServer.class);
         }
 
         public Builder onCommit(String onCommit) {

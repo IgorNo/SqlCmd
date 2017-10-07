@@ -10,8 +10,8 @@ import java.util.*;
 public abstract class Key extends Constraint {
     private final Index index;
 
-    protected Key(Builder builder) {
-        super(builder);
+    protected Key(Id id, Builder builder) {
+        super(id, builder);
         Index.Builder indexBuilder = new Index.Builder(builder.getName(), builder.getTableId());
         Set<Map.Entry<Integer, KeyCol>> entry = builder.columnList.entrySet();
         for (Map.Entry<Integer, KeyCol> colEntry : entry) {

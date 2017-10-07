@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import ua.com.nov.model.dao.AbstractDao;
 import ua.com.nov.model.dao.DataDefinitionDao;
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.Database;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public final class DatabaseDao
-        extends AbstractDao<Database.Id, Database, Server.Id> implements DataDefinitionDao<Database, Server.Id> {
+        extends AbstractDao<Database.Id, Database, Server.Id> implements DataDefinitionDao<Database.Id, Database> {
 
     public DatabaseDao() {
     }
@@ -26,18 +26,18 @@ public final class DatabaseDao
     }
 
     @Override
-    public void createIfNotExist(Database entity) throws MappingSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getCreateIfNotExistsStmt(entity));
+    public void createIfNotExist(Database db) throws DAOSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(db.getServer()).getCreateIfNotExistsStmt(db));
     }
 
     @Override
-    public Database read(Id eId) throws MappingSystemException {
+    public Database read(Id eId) throws DAOSystemException {
         Database.Id dbId = new Database.Id(eId.getServer(), eId.getName());
         MetaDataOptions.Builder<?> builder = null;
         try {
             builder = new OptionsDao<Id, Database>(getDataSource()).read(dbId);
         } catch (SQLException e) {
-            throw new MappingSystemException(e.getMessage());
+            throw new DAOSystemException(e.getMessage());
         }
         if (builder != null)
             return new Database(eId.getServer(), dbId.getName(), builder.build());
@@ -46,13 +46,13 @@ public final class DatabaseDao
     }
 
     @Override
-    public List<Database> readAll(Server.Id cId) throws MappingSystemException {
+    public List<Database> readAll(Server.Id cId) throws DAOSystemException {
         return super.readAll(cId);
     }
 
     @Override
-    public void deleteIfExist(Database entity) throws MappingSystemException {
-        getExecutor().executeUpdateStmt(getSqlStmtSource(entity.getId().getServer()).getDeleteIfExistStmt(entity));
+    public void deleteIfExist(Database.Id eId) throws DAOSystemException {
+        getExecutor().executeUpdateStmt(getSqlStmtSource(eId.getServer()).getDeleteIfExistStmt(eId));
     }
 
     @Override

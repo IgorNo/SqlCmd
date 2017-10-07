@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.entity.metadata.grantee.privelege.MySqlPrivilege;
 import ua.com.nov.model.entity.metadata.grantee.user.MySqlUserOptions;
 
@@ -13,7 +13,7 @@ import static ua.com.nov.model.entity.metadata.grantee.privelege.MySqlPrivilege.
 public class MySqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @BeforeClass
-    public static void setUpClass() throws MappingSystemException, SQLException {
+    public static void setUpClass() throws DAOSystemException, SQLException {
         MySqlTableDaoTest.setUpClass();
         tableDaoTest = new MySqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();

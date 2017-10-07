@@ -87,15 +87,14 @@ public abstract class AbstractDataStmtSource<E extends AbstractRow> implements D
     }
 
     @Override
-    public SqlStatement getDeleteStmt(E row) {
-        StringBuilder sql = new StringBuilder("DELETE FROM ").append(row.getTable().getFullName());
+    public SqlStatement getDeleteStmt(AbstractRow.Id id) {
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(id.getTable().getFullName());
 
-        List<String> idColumns = row.getTable().getPrimaryKey().getColumnNamesList();
+        List<String> idColumns = id.getTable().getPrimaryKey().getColumnNamesList();
         sql.append(" WHERE ").append(whereIdExpression(idColumns));
 
         SqlStatement.Builder builder = new SqlStatement.Builder(sql.toString());
         for (int i = 1; i <= idColumns.size(); i++) {
-            AbstractRow.Id id = row.getId();
             builder.addParameter(new SqlParameterValue(id.getValueSqlType(i), id.getValue(i)));
         }
 

@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.data;
 
 import ua.com.nov.model.dao.TableRowMapper;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 
 public class ProxyRow<R extends AbstractRow<R>> {
     private R row;
@@ -15,7 +15,7 @@ public class ProxyRow<R extends AbstractRow<R>> {
         this.row = row;
     }
 
-    public R getRow(AbstractRow.Id<R> id) throws MappingSystemException {
+    public R getRow(AbstractRow.Id<R> id) throws DAOSystemException {
         if (row == null) row = mapper.get(id);
         return row;
     }

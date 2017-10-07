@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.service;
 
 import ua.com.nov.model.dao.TableRowMapper;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
@@ -52,7 +52,7 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
     }
 
     @Override
-    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+    public R get(AbstractRow.Id<R> id) throws DAOSystemException {
         R row = (R) cachedRows.get(id);
         if (row == null) {
             row = mapper.get(id);
@@ -62,7 +62,7 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
     }
 
     @Override
-    public List<R> getAll() throws MappingSystemException {
+    public List<R> getAll() throws DAOSystemException {
         if (cachedRows.size() == mapper.size()) {
             return cachedRows.getAll();
         } else {
@@ -77,7 +77,7 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
     }
 
     @Override
-    public List<R> getN(int nStart, int number) throws MappingSystemException {
+    public List<R> getN(int nStart, int number) throws DAOSystemException {
         if (cachedRows.size() == mapper.size()) {
             return cachedRows.getN(nStart, number);
         } else {
@@ -86,19 +86,19 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
     }
 
     @Override
-    public List<R> getFetch(FetchParameter... parameters) throws MappingSystemException {
+    public List<R> getFetch(FetchParameter... parameters) throws DAOSystemException {
         return mapper.getFetch(parameters);
     }
 
     @Override
-    public R add(R row) throws MappingSystemException {
+    public R add(R row) throws DAOSystemException {
         R rowWithId = mapper.add(row);
         cachedRows.add(rowWithId);
         return rowWithId;
     }
 
     @Override
-    public void change(R oldValue, R newValue) throws MappingSystemException {
+    public void change(R oldValue, R newValue) throws DAOSystemException {
         mapper.change(oldValue, newValue);
         if (cachedRows.get(oldValue.getId()) != null)
             cachedRows.change(oldValue, newValue);
@@ -107,19 +107,19 @@ public class CachedRDBMapper<R extends AbstractRow<R>> implements TableRowMapper
     }
 
     @Override
-    public void delete(R row) throws MappingSystemException {
+    public void delete(R row) throws DAOSystemException {
         mapper.delete(row);
         if (cachedRows.get(row.getId()) != null) cachedRows.delete(row);
     }
 
     @Override
-    public void deleteAll() throws MappingSystemException {
+    public void deleteAll() throws DAOSystemException {
         mapper.deleteAll();
         cachedRows.deleteAll();
     }
 
     @Override
-    public int size() throws MappingSystemException {
+    public int size() throws DAOSystemException {
         return mapper.size();
     }
 }

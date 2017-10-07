@@ -13,11 +13,17 @@ public class ForeignKey extends Key {
     private final Match match;
 
     private ForeignKey(Builder builder) {
-        super(builder);
+        super(new Id(builder.getTableId(), builder.getName()), builder);
         this.pkKey = builder.pkKey;
         this.updateRule = builder.updateRule;
         this.deleteRule = builder.deleteRule;
         this.match = builder.match;
+    }
+
+    public static class Id extends Constraint.Id {
+        public Id(Table.Id tableId, String name) {
+            super(tableId, name);
+        }
     }
 
     public String getFkColumn(int keySeq) {

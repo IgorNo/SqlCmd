@@ -1,17 +1,17 @@
 package ua.com.nov.model.dao;
 
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 
-public interface DataDefinitionDao<E, C> {
+public interface DataDefinitionDao<I, E> {
 
     // Create entity if not exist
-    void createIfNotExist(E entity) throws MappingSystemException;
+    void createIfNotExist(E entity) throws DAOSystemException;
 
     //Delete entity with identifier = 'eId'
-    void deleteIfExist(E entity) throws MappingSystemException;
+    void deleteIfExist(I eId) throws DAOSystemException;
 
     //Rename entity
-    default void rename(E entity, String newName) throws MappingSystemException {
+    default void rename(E entity, String newName) throws DAOSystemException {
         throw new UnsupportedOperationException();
     }
 }

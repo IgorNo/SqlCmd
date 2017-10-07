@@ -1,22 +1,16 @@
 package ua.com.nov.model.entity.metadata.database;
 
-import ua.com.nov.model.datasource.BaseDataSource;
 import ua.com.nov.model.entity.MetaData;
-import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.Unique;
 import ua.com.nov.model.entity.metadata.AbstractMetaData;
 import ua.com.nov.model.entity.metadata.server.Server;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-public class Database extends BaseDataSource implements Unique<Database.Id>, MetaData {
+public class Database implements Unique<Database.Id>, MetaData {
     private final Id id;
-    protected MetaDataOptions<Database> options;
+    private final Optional<Database> options;
 
-    public Database(Server server, String dbName, MetaDataOptions<Database> options) {
+    public Database(Server server, String dbName, Optional<Database> options) {
         this.id = new Id(server, dbName);
         this.options = options;
     }
@@ -37,13 +31,6 @@ public class Database extends BaseDataSource implements Unique<Database.Id>, Met
     @Override
     public Optional<? extends Database> getOptions() {
         return options;
-    }
-
-    @Override
-    public Connection getConnection(String userName, String password) throws SQLException {
-        Connection conn = DriverManager.getConnection(id.getServer().getName() + getName(), userName, password);
-        if (id.server.getTableTypes() == null) id.server.init(conn);
-        return conn;
     }
 
     @Override

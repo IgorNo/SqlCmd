@@ -1,6 +1,6 @@
 package ua.com.nov.model.entity.metadata.grantee.user;
 
-import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
+import ua.com.nov.model.entity.metadata.server.HsqldbServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class HyperSqlUserOptions extends UserOptions {
     public static class Builder extends UserOptions.Builder {
 
         public Builder() {
-            super(HyperSqlServer.class);
+            super(HsqldbServer.class);
         }
 
         @Override

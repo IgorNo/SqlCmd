@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.grantee.user;
 
 import ua.com.nov.model.entity.metadata.grantee.Grantee;
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.sql.Date;
@@ -44,7 +44,7 @@ public class PostgreSqlUserOptions extends UserOptions {
         private List<String> admins = new ArrayList<>();
 
         public Builder() {
-            super(PostgreSqlServer.class);
+            super(PostgresqlServer.class);
         }
 
         public Builder(PostgreSqlUserOptions that) {

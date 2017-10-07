@@ -30,13 +30,13 @@ public abstract class AbstractTableMdSqlStatements<I extends TableMd.Id, E exten
     }
 
     @Override
-    public SqlStatement getDeleteStmt(E entity) {
+    public SqlStatement getDeleteStmt(I eId) {
         return new SqlStatement.Builder(String.format("ALTER TABLE %s DROP %s %s",
-                entity.getTableId().getFullName(), entity.getId().getMdName(), entity.getName())).build();
+                eId.getTableId().getFullName(), eId.getMdName(), eId.getName())).build();
     }
 
     @Override
-    public SqlStatement getDeleteIfExistStmt(E entity) {
+    public SqlStatement getDeleteIfExistStmt(I eId) {
         throw new UnsupportedOperationException();
     }
 

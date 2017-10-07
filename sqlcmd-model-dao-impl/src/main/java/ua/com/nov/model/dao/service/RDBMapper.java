@@ -2,8 +2,8 @@ package ua.com.nov.model.dao.service;
 
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.TableRowMapper;
-import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.BusinessLogicException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.dao.impl.RowDao;
 import ua.com.nov.model.entity.data.AbstractRow;
@@ -63,13 +63,13 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+    public R get(AbstractRow.Id<R> id) throws DAOSystemException {
         R row = new RowDao<R>(dataSource).read(id);
         initForeignKey(row);
         return row;
     }
 
-    private void initForeignKey(R row) throws MappingSystemException {
+    private void initForeignKey(R row) throws DAOSystemException {
         List<ForeignKey> foreignKeys = row.getTable().getForeignKeyList();
         if (foreignKeys != null) {
             for (ForeignKey foreignKey : foreignKeys) {
@@ -81,7 +81,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public List<R> getAll() throws MappingSystemException {
+    public List<R> getAll() throws DAOSystemException {
         List<R> result = new RowDao<R>(dataSource).readAll(table);
         for (R row : result) {
             initForeignKey(row);
@@ -90,7 +90,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public List<R> getN(int nStart, int number) throws MappingSystemException {
+    public List<R> getN(int nStart, int number) throws DAOSystemException {
         List<R> result = new RowDao<R>(dataSource).readN(table, nStart, number);
         for (R row : result) {
             initForeignKey(row);
@@ -99,7 +99,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public List<R> getFetch(FetchParameter... parameters) throws MappingSystemException {
+    public List<R> getFetch(FetchParameter... parameters) throws DAOSystemException {
         List<R> result = new RowDao<R>(dataSource).readFetch(table, parameters);
         for (R row : result) {
             initForeignKey(row);
@@ -108,7 +108,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public R add(R row) throws MappingSystemException {
+    public R add(R row) throws DAOSystemException {
         RowDao<R> dao = new RowDao<>(dataSource);
         KeyHolder keyHolder = dao.insert(row);
         AbstractRow.Builder<R> rowWithId = null;
@@ -120,7 +120,7 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
                     rowWithId = (AbstractRow.Builder<R>) Class.forName(row.getClass().getName() + "$Builder").newInstance();
                 }
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                throw new MappingBusinessLogicException("Create Builder Error.\n", e);
+                throw new BusinessLogicException("Create Builder Error.\n", e);
             }
             rowWithId.assign(row);
             rowWithId.setId(keyHolder);
@@ -130,12 +130,12 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public void change(R oldValue, R newValue) throws MappingSystemException {
+    public void change(R oldValue, R newValue) throws DAOSystemException {
         if (isCheckConcurrentModification()) checkChanges(oldValue);
         new RowDao<R>(dataSource).update(newValue);
     }
 
-    private void checkChanges(R oldValue) throws MappingSystemException {
+    private void checkChanges(R oldValue) throws DAOSystemException {
         R value = get(oldValue.getId());
         if (!oldValue.equals(value)) {
             throw new ConcurrentModificationException(String.format("Row '%s' has been already changed to '%s'.",
@@ -144,18 +144,18 @@ public class RDBMapper<R extends AbstractRow<R>> implements TableRowMapper<R> {
     }
 
     @Override
-    public void delete(R row) throws MappingSystemException {
+    public void delete(R row) throws DAOSystemException {
         if (isCheckConcurrentModification()) checkChanges(row);
-        new RowDao<R>(dataSource).delete(row);
+        new RowDao<R>(dataSource).delete(row.getId());
     }
 
     @Override
-    public void deleteAll() throws MappingSystemException {
+    public void deleteAll() throws DAOSystemException {
         new RowDao<R>(dataSource).deleteAll(table);
     }
 
     @Override
-    public int size() throws MappingSystemException {
+    public int size() throws DAOSystemException {
         return new RowDao<>(dataSource).count(table);
     }
 }

@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.grantee;
 
 import ua.com.nov.model.entity.metadata.grantee.user.UserOptions;
-import ua.com.nov.model.entity.metadata.server.HyperSqlServer;
+import ua.com.nov.model.entity.metadata.server.HsqldbServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.LinkedList;
@@ -29,7 +29,7 @@ public class HyperSqlRoleOptions extends UserOptions {
 
     public abstract static class Builder extends UserOptions.Builder {
         public Builder() {
-            super(HyperSqlServer.class);
+            super(HsqldbServer.class);
         }
 
         public Builder withAdmin(Grantor grantor) {

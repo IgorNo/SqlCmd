@@ -3,7 +3,7 @@ package ua.com.nov.model.dao.impl;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 
 import javax.sql.DataSource;
@@ -19,7 +19,7 @@ public class DDLSqlExecutor extends SqlExecutor {
     }
 
     @Override
-    public void executeUpdateStmt(SqlStatement sqlStmt) throws MappingSystemException {
+    public void executeUpdateStmt(SqlStatement sqlStmt) throws DAOSystemException {
         String[] sqlArray = sqlStmt.getSql().split(";");
         try (Statement stmt = getDataSource().getConnection().createStatement()) {
             for (String sql : sqlArray) {
@@ -27,19 +27,19 @@ public class DDLSqlExecutor extends SqlExecutor {
                     stmt.executeUpdate(sql);
             }
         } catch (SQLException e) {
-            throw new MappingSystemException("DDL DAO update exception.\n", e);
+            throw new DAOSystemException("DDL DAO update exception.\n", e);
         }
     }
 
     @Override
-    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws MappingSystemException {
+    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DAOSystemException {
         List<T> result;
         try (Statement stmt = getDataSource().getConnection().createStatement();
              ResultSet rs = stmt.executeQuery(sqlStmt.getSql())) {
 
             result = new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
         } catch (SQLException e) {
-            throw new MappingSystemException("DDL DAO query exception.\n", e);
+            throw new DAOSystemException("DDL DAO query exception.\n", e);
         }
         return result;
     }

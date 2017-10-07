@@ -2,15 +2,21 @@ package ua.com.nov.model.datasource;
 
 import org.springframework.jdbc.datasource.SmartDataSource;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class SingleConnectionDataSource extends BaseDataSource implements SmartDataSource {
-    private final Connection conn;
+    private Connection conn;
+    private String url;
+    private String userName;
+    private String password;
 
-    public SingleConnectionDataSource(DataSource dataSource, String userName, String password) throws SQLException {
-        this.conn = dataSource.getConnection(userName, password);
+
+    public SingleConnectionDataSource(String url, String dbName, String userName, String password) {
+        this.url = url + dbName;
+        this.userName = userName;
+        this.password = password;
     }
 
     @Override
@@ -19,7 +25,11 @@ public class SingleConnectionDataSource extends BaseDataSource implements SmartD
     }
 
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (conn == null || conn.isClosed()) {
+            conn = DriverManager.getConnection(this.url, userName, password);
+        }
         return conn;
     }
+
 }

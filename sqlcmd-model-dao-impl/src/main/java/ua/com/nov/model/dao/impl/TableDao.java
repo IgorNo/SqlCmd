@@ -1,12 +1,12 @@
 package ua.com.nov.model.dao.impl;
 
 import ua.com.nov.model.dao.AbstractDao;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.statement.AbstractDatabaseMdSqlStatements;
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.schema.Schema;
-import ua.com.nov.model.entity.metadata.server.MySqlServer;
+import ua.com.nov.model.entity.metadata.server.MysqlServer;
 import ua.com.nov.model.entity.metadata.server.Server;
 import ua.com.nov.model.entity.metadata.table.Index;
 import ua.com.nov.model.entity.metadata.table.MySqlTableOptions;
@@ -32,7 +32,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
     }
 
     @Override
-    public void create(Table entity) throws MappingSystemException {
+    public void create(Table entity) throws DAOSystemException {
         super.create(entity);
         IndexDao dao = new IndexDao(getDataSource());
         for (Index index : entity.getIndexList()) {
@@ -60,7 +60,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                     if (optionsBuilder != null) {
                         Optional<Table> options = optionsBuilder.build();
                         builder.options(options);
-                        if (tableId.getServer().getClass() == MySqlServer.class) {
+                        if (tableId.getServer().getClass() == MysqlServer.class) {
                             builder.viewName(((MySqlTableOptions) options).getComment());
                         }
                     }
@@ -78,7 +78,7 @@ public class TableDao extends MetaDataDao<Table.Id, Table, Schema.Id> {
                     }
                     List<Index> indices = new IndexDao(getDataSource()).readAll(tableId);
                     builder.addIndexList(indices);
-                } catch (MappingSystemException e) {
+                } catch (DAOSystemException e) {
                     throw new SQLException("", e);
                 }
                 return builder.build();

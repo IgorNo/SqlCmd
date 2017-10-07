@@ -30,7 +30,7 @@ public class Check extends Constraint {
     }
 
     public Check(Builder builder) {
-        super(builder);
+        super(new Id(builder.getTableId(), builder.getName()), builder);
         this.expression = builder.expression;
     }
 
@@ -42,4 +42,12 @@ public class Check extends Constraint {
     public String getExpression() {
         return "(" + expression + ")";
     }
+
+    public static class Id extends Constraint.Id {
+        public Id(Table.Id tableId, String name) {
+            super(tableId, name);
+        }
+    }
+
+
 }

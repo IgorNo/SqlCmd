@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.service;
 
 import ua.com.nov.model.dao.TableRowMapper;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
@@ -32,7 +32,7 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
-    public List<R> getAll() throws MappingSystemException {
+    public List<R> getAll() throws DAOSystemException {
         List<R> result = new ArrayList<>();
         Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
         if (rowMap != null) {
@@ -44,7 +44,7 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
-    public List<R> getN(int nStart, int number) throws MappingSystemException {
+    public List<R> getN(int nStart, int number) throws DAOSystemException {
         List<R> result = new ArrayList<>();
         Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
         if (rowMap != null) {
@@ -61,18 +61,18 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
-    public List<R> getFetch(FetchParameter... parameters) throws MappingSystemException {
+    public List<R> getFetch(FetchParameter... parameters) throws DAOSystemException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public R get(AbstractRow.Id<R> id) throws MappingSystemException {
+    public R get(AbstractRow.Id<R> id) throws DAOSystemException {
         if (!STORAGE.containsKey(table)) return null;
         return (R) STORAGE.get(id.getTable()).get(id);
     }
 
     @Override
-    public R add(R row) throws MappingSystemException {
+    public R add(R row) throws DAOSystemException {
         STORAGE.putIfAbsent(table, new ConcurrentHashMap<>());
         if (STORAGE.get(table).putIfAbsent(row.getId(), row) != null) {
             throw new ConcurrentModificationException(String.format("Row with id '%s' has been already exist in table '%s'.",
@@ -82,14 +82,14 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
-    public void change(R oldValue, R newValue) throws MappingSystemException {
+    public void change(R oldValue, R newValue) throws DAOSystemException {
         if (!STORAGE.get(table).replace(oldValue.getId(), oldValue, newValue)) {
             throw new ConcurrentModificationException(String.format("Row '%s' has been already changed.", oldValue));
         }
     }
 
     @Override
-    public void delete(R row) throws MappingSystemException {
+    public void delete(R row) throws DAOSystemException {
         Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
         if (!STORAGE.get(row.getTable()).remove(row.getId(), row)) {
             throw new ConcurrentModificationException(String.format("Row with id '%s' has been already deleted.",
@@ -98,14 +98,14 @@ public class MemoryMapper<R extends AbstractRow<R>> implements TableRowMapper<R>
     }
 
     @Override
-    public int size() throws MappingSystemException {
+    public int size() throws DAOSystemException {
         Map<AbstractRow.Id<?>, AbstractRow<?>> rowMap = STORAGE.get(table);
         if (rowMap != null) return rowMap.size();
         return 0;
     }
 
     @Override
-    public void deleteAll() throws MappingSystemException {
+    public void deleteAll() throws DAOSystemException {
         STORAGE.remove(table);
     }
 }

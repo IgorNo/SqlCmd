@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import ua.com.nov.model.dao.SqlExecutor;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.statement.SqlStatement;
 import ua.com.nov.model.util.JdbcUtils;
 
@@ -37,19 +37,19 @@ public class DMLSqlExecutor extends SqlExecutor {
     }
 
     @Override
-    public void executeUpdateStmt(SqlStatement sqlStmt) throws MappingSystemException {
+    public void executeUpdateStmt(SqlStatement sqlStmt) throws DAOSystemException {
         if (sqlStmt != null) {
             try (PreparedStatement stmt = getDataSource().getConnection().prepareStatement(sqlStmt.getSql())) {
                 setParameters(sqlStmt, stmt);
                 stmt.executeUpdate();
             } catch (SQLException e) {
-                throw new MappingSystemException("DML DAO update exception.\n", e);
+                throw new DAOSystemException("DML DAO update exception.\n", e);
             }
         }
     }
 
     @Override
-    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws MappingSystemException {
+    public KeyHolder executeInsertStmt(SqlStatement sqlStmt) throws DAOSystemException {
         ResultSet keys = null;
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try (PreparedStatement stmt = getDataSource().getConnection()
@@ -67,7 +67,7 @@ public class DMLSqlExecutor extends SqlExecutor {
                 generatedKeys.addAll(rse.extractData(keys));
             }
         } catch (SQLException e) {
-            throw new MappingSystemException("DML DAO insert exception.\n", e);
+            throw new DAOSystemException("DML DAO insert exception.\n", e);
         } finally {
             JdbcUtils.closeQuietly(keys);
         }
@@ -75,14 +75,14 @@ public class DMLSqlExecutor extends SqlExecutor {
     }
 
     @Override
-    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws MappingSystemException {
+    public <T> List<T> executeQueryStmt(SqlStatement sqlStmt, RowMapper<T> mapper) throws DAOSystemException {
         ResultSet rs = null;
         try (PreparedStatement stmt = getDataSource().getConnection().prepareStatement(sqlStmt.getSql())) {
             setParameters(sqlStmt, stmt);
             rs = stmt.executeQuery();
             return new RowMapperResultSetExtractor<T>(mapper).extractData(rs);
         } catch (SQLException e) {
-            throw new MappingSystemException("DDL DAO query exception.\n", e);
+            throw new DAOSystemException("DDL DAO query exception.\n", e);
         } finally {
             JdbcUtils.closeQuietly(rs);
         }

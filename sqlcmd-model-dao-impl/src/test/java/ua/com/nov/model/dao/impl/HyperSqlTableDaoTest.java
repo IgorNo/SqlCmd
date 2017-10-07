@@ -3,8 +3,8 @@ package ua.com.nov.model.dao.impl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.MappingBusinessLogicException;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.BusinessLogicException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.Optional;
 import ua.com.nov.model.entity.metadata.table.Table;
@@ -18,11 +18,12 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     private static AbstractDatabaseDaoTest DATABASE_DAO_TEST = new HyperSqlDatabaseDaoTest();
 
     @BeforeClass
-    public static void setUpClass() throws MappingSystemException, SQLException, MappingBusinessLogicException {
+    public static void setUpClass() throws DAOSystemException, SQLException, BusinessLogicException {
         HyperSqlDatabaseDaoTest.setUpClass();
         DATABASE_DAO_TEST.setUp();
         testDb = DATABASE_DAO_TEST.getTestDatabase();
-        dataSource = new SingleConnectionDataSource(testDb, "root", "root");
+        dataSource = new SingleConnectionDataSource(testDb.getServer().getName(), testDb.getName(),
+                "root", "root");
         numberColumnOptions = new HyperSqlColumnOptions.Builder().autoIncrement();
         tableOptions = null;
         charColumnOptions = null;
@@ -31,7 +32,7 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws SQLException, MappingSystemException {
+    public static void tearDownClass() throws SQLException, DAOSystemException {
         AbstractTableDaoTest.tearDownClass();
         DATABASE_DAO_TEST.tearDown();
     }
@@ -47,16 +48,16 @@ public class HyperSqlTableDaoTest extends AbstractTableDaoTest {
     }
 
     @Override
-    @Test(expected = MappingSystemException.class)
-    public void testReadDeleteAddUniqueKey() throws MappingSystemException {
+    @Test(expected = DAOSystemException.class)
+    public void testReadDeleteAddUniqueKey() throws DAOSystemException {
         Table testTable = TABLE_DAO.read(customers.getId());
         UniqueKey uk = customers.getUniqueKeyList().get(0);
         readDeleteAddMetaData(UNIQUE_KEY_DAO, testTable.getUniqueKeyList().get(0).getId(), uk);
     }
 
     @Override
-    @Test(expected = MappingBusinessLogicException.class)
-    public void testRenameUniqueKey() throws MappingSystemException, MappingBusinessLogicException {
+    @Test(expected = BusinessLogicException.class)
+    public void testRenameUniqueKey() throws DAOSystemException, BusinessLogicException {
         super.testRenameUniqueKey();
     }
 }

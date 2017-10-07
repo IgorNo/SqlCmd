@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.entity;
 
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.impl.AbstractTableDaoTest;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
@@ -38,11 +38,11 @@ public class Order extends AbstractRow<Order> {
         return getValue("amount");
     }
 
-    public Product getProduct() throws MappingSystemException {
+    public Product getProduct() throws DAOSystemException {
         return (Product) getForeignKeyValue(Product.getGenericTable());
     }
 
-    public Customer getCustomer() throws MappingSystemException {
+    public Customer getCustomer() throws DAOSystemException {
         return (Customer) getForeignKeyValue(Customer.getGenericTable());
     }
 

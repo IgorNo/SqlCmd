@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.entity.metadata.grantee.privelege.PostgreSqlPrivilege;
 import ua.com.nov.model.entity.metadata.grantee.user.PostgreSqlUserOptions;
 
@@ -14,7 +14,7 @@ import static ua.com.nov.model.entity.metadata.grantee.privelege.PostgreSqlPrivi
 public class PostgreSqlGranteeDaoTest extends AbstractGranteeDaoTest {
 
     @BeforeClass
-    public static void setUpClass() throws MappingSystemException, SQLException {
+    public static void setUpClass() throws DAOSystemException, SQLException {
         PostgreSqlTableDaoTest.setUpClass();
         tableDaoTest = new HyperSqlTableDaoTest();
         AbstractGranteeDaoTest.setUpClass();

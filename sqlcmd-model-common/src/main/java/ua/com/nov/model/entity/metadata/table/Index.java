@@ -2,7 +2,7 @@ package ua.com.nov.model.entity.metadata.table;
 
 import ua.com.nov.model.entity.MetaDataOptions;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlIndexOptions;
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 import ua.com.nov.model.entity.metadata.table.column.KeyCol;
 import ua.com.nov.model.entity.metadata.table.constraint.Key;
 
@@ -65,7 +65,7 @@ public class Index extends TableMd<Index.Id> {
         final StringBuilder sb = new StringBuilder(" ON ");
         sb.append(getId().getTableId().getFullName());
 
-        if (getId().getTableId().getServer().getClass().equals(PostgreSqlServer.class)) {
+        if (getId().getTableId().getServer().getClass().equals(PostgresqlServer.class)) {
             if (getOptions() != null) {
                 PostgreSqlIndexOptions options = (PostgreSqlIndexOptions) getOptions();
                 if (options.getUsing() != null) sb.append(options.getUsing());

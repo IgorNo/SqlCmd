@@ -5,8 +5,8 @@ import ua.com.nov.model.entity.metadata.table.TableMd;
 
 public abstract class Constraint extends TableMd<TableMd.Id> {
 
-    protected Constraint(Builder builder) {
-        super(new Id(builder.getTableId(), builder.getName()), builder);
+    protected Constraint(Id id, Builder builder) {
+        super(id, builder);
     }
 
     @Override
@@ -20,7 +20,7 @@ public abstract class Constraint extends TableMd<TableMd.Id> {
         return sb.toString();
     }
 
-    public static class Id extends TableMd.Id {
+    public abstract static class Id extends TableMd.Id {
         public Id(Table.Id tableId, String name) {
             super(tableId, name);
         }

@@ -1,7 +1,7 @@
 package ua.com.nov.model.entity.metadata.database;
 
 import ua.com.nov.model.entity.MetaDataOptions;
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 import ua.com.nov.model.util.CollectionUtils;
 
 import java.util.LinkedList;
@@ -69,7 +69,7 @@ public class PostgreSqlDbOptions extends MetaDataOptions<Database> {
     public static class Builder extends MetaDataOptions.Builder<PostgreSqlDbOptions> {
 
         public Builder() {
-            super(PostgreSqlServer.class);
+            super(PostgresqlServer.class);
         }
 
         public Builder owner(String owner) {

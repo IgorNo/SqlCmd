@@ -10,9 +10,9 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>${myapp.groupid}</groupId>
+        <groupId>ua.com.nov</groupId>
         <artifactId>SqlCmd-parent</artifactId>
-        <version>${myapp.version}</version>
+        <version>0.1</version>
     </parent>
 
     <dependencies>

@@ -1,7 +1,7 @@
 package ua.com.nov.model.dao;
 
 import org.springframework.jdbc.support.KeyHolder;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.dao.fetch.FetchParameter;
 import ua.com.nov.model.entity.data.AbstractRow;
 import ua.com.nov.model.entity.metadata.table.GenericTable;
@@ -12,19 +12,19 @@ import java.util.List;
 public interface DataManipulationDao<R extends AbstractRow<R>> {
 
     // Insert row into table and get autoincrement key
-    KeyHolder insert(R row) throws MappingSystemException;
+    KeyHolder insert(R row) throws DAOSystemException;
 
     //Read N rows from container starting with nStart position
-    List<R> readN(GenericTable<R> table, long nStart, int number) throws MappingSystemException;
+    List<R> readN(GenericTable<R> table, long nStart, int number) throws DAOSystemException;
 
-    List<R> readAll(GenericTable<R> table) throws MappingSystemException;
+    List<R> readAll(GenericTable<R> table) throws DAOSystemException;
 
     // Read filtered entities
-    List<R> readFetch(GenericTable<R> table, FetchParameter... parameters) throws MappingSystemException;
+    List<R> readFetch(GenericTable<R> table, FetchParameter... parameters) throws DAOSystemException;
 
     //Delete values all from container
-    void deleteAll(Table table) throws MappingSystemException;
+    void deleteAll(Table table) throws DAOSystemException;
 
     //Count number of values in container
-    int count(Table table) throws MappingSystemException;
+    int count(Table table) throws DAOSystemException;
 }

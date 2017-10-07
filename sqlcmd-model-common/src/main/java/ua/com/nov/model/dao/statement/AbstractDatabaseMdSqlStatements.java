@@ -48,15 +48,14 @@ public abstract class AbstractDatabaseMdSqlStatements
     }
 
     @Override
-    public SqlStatement getDeleteStmt(E entity) {
-        return new SqlStatement.Builder(String.format("DROP %s %s",
-                entity.getId().getMdName(), entity.getId().getFullName())).build();
+    public SqlStatement getDeleteStmt(I eId) {
+        return new SqlStatement.Builder(String.format("DROP %s %s", eId.getMdName(), eId.getFullName())).build();
     }
 
     @Override
-    public SqlStatement getDeleteIfExistStmt(E entity) {
+    public SqlStatement getDeleteIfExistStmt(I eId) {
         return new SqlStatement.Builder(String.format("DROP %s IF EXISTS %s",
-                entity.getId().getMdName(), entity.getId().getFullName())).build();
+                eId.getMdName(), eId.getFullName())).build();
     }
 
     @Override

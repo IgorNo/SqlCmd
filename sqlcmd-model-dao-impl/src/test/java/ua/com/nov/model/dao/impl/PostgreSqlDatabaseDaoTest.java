@@ -2,13 +2,13 @@ package ua.com.nov.model.dao.impl;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import ua.com.nov.model.dao.exception.MappingSystemException;
+import ua.com.nov.model.dao.exception.DAOSystemException;
 import ua.com.nov.model.datasource.SingleConnectionDataSource;
 import ua.com.nov.model.entity.metadata.database.Database;
 import ua.com.nov.model.entity.metadata.database.PostgreSqlDbOptions;
-import ua.com.nov.model.entity.metadata.server.PostgreSqlServer;
+import ua.com.nov.model.entity.metadata.server.PostgresqlServer;
 import ua.com.nov.model.entity.metadata.server.Server;
-import ua.com.nov.model.util.DbUtils;
+import ua.com.nov.model.util.DbConstants;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
-    private static Server server = new PostgreSqlServer(DbUtils.POSTGRE_SQL_LOCAL_URL);
+    private static Server server = new PostgresqlServer(DbConstants.POSTGRE_SQL_LOCAL_URL);
 
     public static final PostgreSqlDbOptions OPTIONS = new PostgreSqlDbOptions.Builder()
             .owner("postgres").encoding("UTF8")
@@ -43,12 +43,14 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
     @BeforeClass
     public static void setUpClass() throws SQLException {
-        DataSource dataSource = new SingleConnectionDataSource(new Database(server, ""),"postgres", "postgres");
+        DataSource dataSource = new SingleConnectionDataSource(server.getName(),
+                "", "postgres", "postgres");
+        server.init(dataSource.getConnection());
         DAO.setDataSource(dataSource);
     }
 
     @Test
-    public void testRead() throws MappingSystemException {
+    public void testRead() throws DAOSystemException {
         Database db = DAO.read(TEST_DATABASE.getId());
         assertTrue(TEST_DATABASE.equals(db));
         PostgreSqlDbOptions options = (PostgreSqlDbOptions) db.getOptions();
@@ -68,13 +70,13 @@ public class PostgreSqlDatabaseDaoTest extends AbstractDatabaseDaoTest {
 
 
     @Test
-    public void testReadAll() throws MappingSystemException {
+    public void testReadAll() throws DAOSystemException {
         List<Database> databases = DAO.readAll(server.getId());
         assertTrue(databases.contains(TEST_DATABASE));
     }
 
     @Test
-    public void testUpdateDatabase() throws MappingSystemException {
+    public void testUpdateDatabase() throws DAOSystemException {
         PostgreSqlDbOptions uOptions = new PostgreSqlDbOptions.Builder()
                 .owner("postgres").connLimit(100).allowConn(true)
                 .tableSpace("pg_default").isTemplate(false)
